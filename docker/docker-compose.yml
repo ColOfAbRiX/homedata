@@ -1,0 +1,33 @@
+services:
+
+  influxdb:
+    image: influxdb:2.7.4
+    container_name: influxdb
+    restart: 'no'
+    ports:
+      - "8086:8086"
+    volumes:
+      # - ./influxdb:/etc/influxdb2:ro
+      - influxdb-storage:/var/lib/influxdb2
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=Passw0rd
+      - DOCKER_INFLUXDB_INIT_ORG=com.colofabrix
+      - DOCKER_INFLUXDB_INIT_BUCKET=mainbucket
+      - DOCKER_INFLUXDB_INIT_RETENTION=1w
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=VRB6CbkkF4CcAG8dKHu56D_t8kA4IumEMI5-QazdKz0ry3vArEe3tOCSw3YvgTnHinIEicUXpEC-5rI3Zu1rjQ==
+
+  grafana:
+    image: grafana/grafana-oss:10.2.3
+    container_name: grafana
+    restart: 'no'
+    ports:
+      - '3000:3000'
+    volumes:
+      # - $PWD/grafana:/etc/grafana:ro
+      - grafana-storage:/var/lib/grafana
+
+volumes:
+  influxdb-storage: {}
+  grafana-storage: {}

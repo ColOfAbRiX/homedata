@@ -21,3 +21,6 @@ final case class ElectricityReading(time: Instant, value: Double)
       println(value)
     }
     .toList
+    .unit
+
+extension [A](a: A) def unit: Unit = ()

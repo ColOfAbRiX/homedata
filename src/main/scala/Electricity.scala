@@ -6,7 +6,6 @@ import sttp.client4.*
 import org.json4s.*
 import org.json4s.native.JsonMethods.*
 import org.json4s.native.Serialization
-import org.json4s.native.Serialization.read
 
 object Electricity:
 
@@ -40,8 +39,9 @@ object Electricity:
         Chunk.empty
       }
 
+  private given formats: Formats = Serialization.formats(NoTypeHints)
+
   private def deserializeBody(body: String): List[ElectricityReading] =
-    given formats: Formats = Serialization.formats(NoTypeHints)
     for
       case JArray(results) <- parse(body) \ "results"
       case JObject(result) <- results
@@ -50,9 +50,3 @@ object Electricity:
       intervalStart = Instant.parse(time)
       result        = ElectricityReading(intervalStart, value)
     yield result
-
-  private def deserializeBody2(body: String): List[ElectricityReading] =
-    val json = parse(body)
-    val results = json \ "results"
-
-    ???
