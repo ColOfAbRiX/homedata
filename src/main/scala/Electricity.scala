@@ -12,10 +12,10 @@ object Electricity:
   case class ElectricityReading(time: Instant, value: Double)
 
   def readConsumption(
-      fromDate: Option[Instant],
-      toDate: Option[Instant],
-      page: Int,
-      pageSize: Int
+    fromDate: Option[Instant],
+    toDate: Option[Instant],
+    page: Int,
+    pageSize: Int,
   ): Chunk[ElectricityReading] =
     val endpointUrl =
       Octopus.ElectricityConsumptionUrl
@@ -39,7 +39,8 @@ object Electricity:
         Chunk.empty
       }
 
-  private given formats: Formats = Serialization.formats(NoTypeHints)
+  private given formats: Formats =
+    Serialization.formats(NoTypeHints)
 
   private def deserializeBody(body: String): List[ElectricityReading] =
     for

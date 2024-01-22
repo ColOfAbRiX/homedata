@@ -15,7 +15,7 @@ influxql-max-select-point: 0
 influxql-max-select-series: 0
 instance-id: ""
 key-name: ""
-log-level: info
+log-level: debug
 metrics-disabled: false
 nats-max-payload-bytes: 0
 nats-port: 4222
