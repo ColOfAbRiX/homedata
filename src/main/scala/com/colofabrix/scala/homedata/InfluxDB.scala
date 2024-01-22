@@ -1,17 +1,36 @@
 package com.colofabrix.scala.homedata
 
 import com.colofabrix.scala.timeflux.config.*
+import io.github.arainko.ducktape.*
 import org.http4s.Uri
+import pureconfig.*
+import pureconfig.generic.derivation.default.*
+
+final case class InfluxDbConfig(
+  serverUri: Uri,
+  organizationId: OrganizationId,
+  authToken: AuthToken,
+  octopusBucket: String,
+)
 
 object InfluxDB:
-  val serverUri: Uri =
-    Uri.unsafeFromString("http://127.0.0.1:8086")
 
-  val organizationId: OrganizationId =
-    OrganizationId("dd87acad77d7e016")
+  final private case class InfluxDbReaderConfig(
+    serverUri: String,
+    organizationId: String,
+    authToken: String,
+    octopusBucket: String,
+  ) derives ConfigReader
 
-  val authToken: AuthToken =
-    AuthToken("VRB6CbkkF4CcAG8dKHu56D_t8kA4IumEMI5-QazdKz0ry3vArEe3tOCSw3YvgTnHinIEicUXpEC-5rI3Zu1rjQ==")
-
-  val octopusBucket: String =
-    "octopus"
+  val config =
+    ConfigSource
+      .default
+      .withFallback(ConfigSource.resources("secrets.conf"))
+      .at("influxdb")
+      .loadOrThrow[InfluxDbReaderConfig]
+      .into[InfluxDbConfig]
+      .transform(
+        Field.computed(_.serverUri, c => Uri.unsafeFromString(c.serverUri)),
+        Field.computed(_.organizationId, c => OrganizationId(c.organizationId)),
+        Field.computed(_.authToken, c => AuthToken(c.authToken)),
+      )

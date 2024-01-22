@@ -31,7 +31,7 @@ object OctopusElectricity:
         basicRequest
           .get(endpointUrl)
           .auth
-          .basic(user = OctopusConfig.ApiKey, password = "")
+          .basic(user = OctopusConfig.config.apiKey, password = "")
           .send(Backend.backend)
 
       response.body.toOption

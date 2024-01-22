@@ -21,3 +21,6 @@ metals.sbt
 
 # Temporary files
 TODO*
+
+# Sensitive files
+secrets.*

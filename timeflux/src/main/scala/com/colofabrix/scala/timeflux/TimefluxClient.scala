@@ -1,6 +1,5 @@
 package com.colofabrix.scala.timeflux
 
-import cats.Applicative
 import cats.effect.Async
 import cats.implicits.given
 import com.colofabrix.scala.restbee.*
@@ -13,7 +12,6 @@ import fs2.{ text, Stream }
 import org.http4s.*
 import org.http4s.client.Client
 import org.http4s.client.dsl.Http4sClientDsl
-import org.http4s.headers.*
 import org.http4s.Method.*
 import org.http4s.Uri.Path
 
@@ -110,7 +108,7 @@ class TimefluxClient[F[_]: Async](httpClient: Client[F], config: TimefluxClientC
         "ms",
       )
 
-    val requestUri = bucketUri.withQueryParams(queryRequest.toQueryParams)
+    val requestUri = writeUri.withQueryParams(queryRequest.toQueryParams)
 
     val body =
       values

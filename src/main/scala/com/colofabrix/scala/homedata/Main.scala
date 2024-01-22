@@ -14,13 +14,14 @@ object Main extends IOApp.Simple:
 
   val run =
     Timeflux
-      .client[IO](InfluxDB.serverUri, InfluxDB.organizationId, InfluxDB.authToken)
+      .client[IO](InfluxDB.config.serverUri, InfluxDB.config.organizationId, InfluxDB.config.authToken)
       .use { timefluxClient =>
+        println(OctopusConfig.config)
         for
-          _                  <- timefluxClient.createBucketIfMissing(InfluxDB.octopusBucket)
+          _                  <- timefluxClient.createBucketIfMissing(InfluxDB.config.octopusBucket)
           electricityReadings = Tools.pullPaged(OctopusElectricity.pullPage(periodFrom))
           gasReadings         = Tools.pullPaged(OctopusGas.pullPage(periodFrom))
           allReadings         = (electricityReadings merge gasReadings).widen[Reading]
-          result             <- timefluxClient.write(InfluxDB.octopusBucket, allReadings)
+          result             <- timefluxClient.write(InfluxDB.config.octopusBucket, allReadings)
         yield result
       }
