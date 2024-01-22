@@ -2,7 +2,7 @@ package com.colofabrix.scala.timeflux.model
 
 import io.circe.*
 import io.circe.derivation.*
-import com.colofabrix.scala.beerest.GetEncoder
+import com.colofabrix.scala.restbee.GetEncoder
 
 transparent trait InfluxRequest
 

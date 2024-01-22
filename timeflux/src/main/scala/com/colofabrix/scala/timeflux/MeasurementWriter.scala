@@ -2,7 +2,7 @@ package com.colofabrix.scala.timeflux
 
 import com.colofabrix.scala.timeflux.model.*
 
-object MeasurementWriter:
+private[timeflux] object MeasurementWriter:
 
   def writeToLineProtocol(measurement: Measurement): String =
     val lineMeasurement = escapeName(measurement.name)

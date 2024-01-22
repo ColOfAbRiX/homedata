@@ -1,4 +1,4 @@
-package com.colofabrix.scala.beerest
+package com.colofabrix.scala.restbee
 
 import cats.effect.Async
 import fs2.{ text, Stream }
@@ -14,17 +14,20 @@ import org.http4s.Method.*
 
 private[colofabrix] class APIClient[F[_]: Async](httpClient: Client[F]) extends Http4sClientDsl[F]:
 
-  def postRequest[BI: Encoder, QI: GetEncoder, O: Decoder](uri: Uri, params: QI, body: BI): F[O] =
+  def post[BI: Encoder, QI: GetEncoder, O: Decoder](uri: Uri, params: QI, body: BI): F[O] =
     val jsonBody      = body.asJson.noSpacesSortKeys
     val mapParams     = GetEncoder[QI].toQueryParams(params)
     val uriWithParams = uri.withQueryParams(mapParams)
-    postRequest(uriWithParams, jsonBody)
+    post(uriWithParams, jsonBody)
 
-  def postRequest[BI: Encoder, O: Decoder](uri: Uri, body: BI): F[O] =
+  def post[BI: Encoder, O: Decoder](uri: Uri, body: BI): F[O] =
     val jsonBody = body.asJson.noSpacesSortKeys
-    postRequest(uri, jsonBody)
+    post(uri, jsonBody)
 
-  def postRequest[O: Decoder](uri: Uri, body: String): F[O] =
+  def post[BI: Encoder, O: Decoder](uri: Uri): F[O] =
+    post(uri, "")
+
+  private def post[O: Decoder](uri: Uri, body: String): F[O] =
     val headers =
       Headers(
         `Content-Type`(MediaType.application.json),
@@ -42,12 +45,12 @@ private[colofabrix] class APIClient[F[_]: Async](httpClient: Client[F]) extends 
       .compile
       .lastOrError
 
-  def getRequest[QI: GetEncoder, O: Decoder](uri: Uri, params: QI): F[O] =
+  def get[QI: GetEncoder, O: Decoder](uri: Uri, params: QI): F[O] =
     val mapParams     = GetEncoder[QI].toQueryParams(params)
     val uriWithParams = uri.withQueryParams(mapParams)
-    getRequest(uriWithParams)
+    get(uriWithParams)
 
-  def getRequest[O: Decoder](uri: Uri): F[O] =
+  def get[O: Decoder](uri: Uri): F[O] =
     val headers =
       Headers(
         `Content-Type`(MediaType.application.json),

@@ -3,7 +3,7 @@ package com.colofabrix.scala.timeflux
 import cats.Applicative
 import cats.effect.Async
 import cats.implicits.given
-import com.colofabrix.scala.beerest.*
+import com.colofabrix.scala.restbee.*
 import com.colofabrix.scala.timeflux.config.*
 import com.colofabrix.scala.timeflux.MeasurementWriter.*
 import com.colofabrix.scala.timeflux.model.*
@@ -67,7 +67,7 @@ class TimefluxClient[F[_]: Async](httpClient: Client[F], config: TimefluxClientC
    */
   def listBuckets(name: Option[String]): F[InfluxResponse.ListBuckets] =
     val request = InfluxRequest.ListBucket(name)
-    apiHttpClient.getRequest(bucketUri, request)
+    apiHttpClient.get(bucketUri, request)
 
   /**
    */
@@ -80,7 +80,7 @@ class TimefluxClient[F[_]: Async](httpClient: Client[F], config: TimefluxClientC
         retentionRules = List.empty,
       )
 
-    apiHttpClient.postRequest(bucketUri, request)
+    apiHttpClient.post(bucketUri, request)
 
   /**
    */

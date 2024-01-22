@@ -1,4 +1,4 @@
-package com.colofabrix.scala.beerest
+package com.colofabrix.scala.restbee
 
 import scala.deriving.Mirror
 import scala.compiletime.*
@@ -14,6 +14,8 @@ private[colofabrix] object GetEncoder:
     inline m match
       case s: Mirror.SumOf[A]     => deriveSumType(using s)
       case p: Mirror.ProductOf[A] => deriveProductType(using p)
+
+  //  ADT  //
 
   inline def deriveProductType[A](using m: Mirror.ProductOf[A]): GetEncoder[A] =
     new GetEncoder[A]:
