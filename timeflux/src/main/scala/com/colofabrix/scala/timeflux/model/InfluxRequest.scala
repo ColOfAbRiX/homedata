@@ -2,19 +2,23 @@ package com.colofabrix.scala.timeflux.model
 
 import io.circe.*
 import io.circe.derivation.*
-import com.colofabrix.scala.restbee.GetEncoder
+import com.colofabrix.scala.restbee.encoding.UrlParamsEncoder
 
 transparent trait InfluxRequest
 
-object InfluxRequest:
+final case class CreateBucketRequest(
+  name: String,
+  orgID: String,
+  description: Option[String],
+  retentionRules: List[RetentionRules],
+) extends InfluxRequest derives Codec.AsObject
 
-  final case class CreateBucket(
-    name: String,
-    orgID: String,
-    description: Option[String],
-    retentionRules: List[RetentionRules],
-  ) extends InfluxRequest derives Codec.AsObject
+final case class ListBucketRequest(
+  name: Option[String],
+) extends InfluxRequest derives UrlParamsEncoder
 
-  final case class ListBucket(
-    name: Option[String],
-  ) extends InfluxRequest derives GetEncoder
+final case class WriteRequest(
+  bucket: String,
+  orgID: String,
+  precision: String,
+) extends InfluxRequest derives UrlParamsEncoder
