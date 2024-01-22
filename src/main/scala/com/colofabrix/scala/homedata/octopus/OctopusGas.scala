@@ -1,0 +1,63 @@
+package com.colofabrix.scala.homedata.octopus
+
+import cats.effect.IO
+import com.colofabrix.scala.homedata.Backend
+import fs2.Chunk
+import java.time.*
+import org.json4s.*
+import org.json4s.native.JsonMethods.*
+import sttp.client4.*
+
+object OctopusGas:
+
+  def pullPage(fromDate: Instant)(pageNumber: Int): IO[(Chunk[GasReading], Boolean)] =
+    pull(Some(fromDate), None, pageNumber, OctopusConfig.PageSize)
+
+  def pull(
+    fromDate: Option[Instant],
+    toDate: Option[Instant],
+    pageNumber: Int,
+    pageSize: Int,
+  ): IO[(Chunk[GasReading], Boolean)] =
+    val endpointUrl =
+      OctopusConfig.GasConsumptionUrl
+        .addParam("period_from", fromDate.map(_.toString))
+        .addParam("period_to", toDate.map(_.toString))
+        .addParam("page", pageNumber.toString)
+        .addParam("page_size", pageSize.toString)
+
+    IO {
+      val response =
+        basicRequest
+          .get(endpointUrl)
+          .auth
+          .basic(user = OctopusConfig.ApiKey, password = "")
+          .send(Backend.backend)
+
+      response.body.toOption
+        .map(deserializeResponse)
+        .getOrElse {
+          println(s"ERROR: $response")
+          (Chunk.empty, false)
+        }
+    }
+
+  private def deserializeResponse(body: String): (Chunk[GasReading], Boolean) =
+    val json = parse(body)
+
+    val hasNext =
+      json \ "next" match
+        case JNull => false
+        case _     => true
+
+    val readings =
+      for
+        case JArray(results) <- json \ "results"
+        case JObject(result) <- results
+        case JField("consumption", JDouble(value)) <- result
+        case JField("interval_start", JString(time)) <- result
+        intervalStart = Instant.parse(time)
+        reading       = GasReading(intervalStart, value)
+      yield reading
+
+    (Chunk.from(readings), hasNext)

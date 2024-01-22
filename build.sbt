@@ -1,46 +1,99 @@
+import org.typelevel.scalacoptions.ScalacOptions
+
 val scala3Version = "3.3.1"
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
+// Global / tpolecatExcludeOptions += ScalacOptions.deprecation
+Test / tpolecatExcludeOptions ++= ScalacOptions.warnUnusedOptions + ScalacOptions.warnNonUnitStatement
+Compile / run / fork           := true
 
 lazy val root =
   project
     .in(file("."))
-    .dependsOn(reflux)
-    .aggregate(reflux)
+    .dependsOn(timeflux, tado4s)
+    .aggregate(timeflux, tado4s, beerest)
     .settings(
       name         := "homeData",
       version      := "0.1.0",
+      organization := "com.colofabrix.scala.homedata",
       scalaVersion := scala3Version,
       libraryDependencies ++= List(
         "co.fs2"                        %% "fs2-core"      % "3.9.3",
         "co.fs2"                        %% "fs2-io"        % "3.9.3",
+        "com.github.valskalla"          %% "odin-core"     % "0.13.0",
         "com.softwaremill.sttp.client4" %% "core"          % "4.0.0-M8",
         "io.github.arainko"             %% "ducktape"      % "0.1.11",
         "org.json4s"                    %% "json4s-native" % "4.1.0-M4",
         "org.scalameta"                 %% "munit"         % "0.7.29" % Test,
         "org.typelevel"                 %% "cats-core"     % "2.10.0",
         "org.typelevel"                 %% "cats-effect"   % "3.5.2",
-        // "com.lihaoyi"                   %% "upickle"       % "3.1.3",
       ),
     )
 
-lazy val reflux =
+lazy val beerest =
   project
-    .in(file("reflux"))
+    .in(file("beerest"))
     .settings(
-      name         := "reflux",
+      name         := "bee-rest",
       version      := "0.1.0",
+      organization := "com.colofabrix.scala.beerest",
       scalaVersion := scala3Version,
       libraryDependencies ++= List(
-        "org.typelevel" %% "cats-core"           % "2.10.0",
-        "org.typelevel" %% "cats-effect"         % "3.5.2",
-        "org.http4s"    %% "http4s-ember-client" % "0.23.24",
-        "org.http4s"    %% "http4s-circe"        % "0.23.24",
+        "co.fs2"        %% "fs2-core"      % "3.9.3",
+        "io.circe"      %% "circe-core"    % "0.14.6",
+        "io.circe"      %% "circe-fs2"     % "0.14.1",
+        "io.circe"      %% "circe-generic" % "0.14.6",
+        "io.circe"      %% "circe-parser"  % "0.14.6",
+        "org.http4s"    %% "http4s-client" % "0.23.24",
+        "org.http4s"    %% "http4s-circe"  % "0.23.24",
+        "org.scalatest" %% "scalatest"     % "3.2.17",
+        "org.typelevel" %% "cats-core"     % "2.10.0",
+        "org.typelevel" %% "cats-effect"   % "3.5.2",
+      ),
+    )
+
+lazy val timeflux =
+  project
+    .in(file("timeflux"))
+    .dependsOn(beerest)
+    .settings(
+      name         := "timeflux",
+      version      := "0.1.0",
+      organization := "com.colofabrix.scala.timeflux",
+      scalaVersion := scala3Version,
+      libraryDependencies ++= List(
         "co.fs2"        %% "fs2-core"            % "3.9.3",
-        "org.scalatest" %% "scalatest"           % "3.2.17",
         "io.circe"      %% "circe-core"          % "0.14.6",
+        "io.circe"      %% "circe-fs2"           % "0.14.1",
         "io.circe"      %% "circe-generic"       % "0.14.6",
         "io.circe"      %% "circe-parser"        % "0.14.6",
+        "org.http4s"    %% "http4s-circe"        % "0.23.24",
+        "org.http4s"    %% "http4s-ember-client" % "0.23.24",
+        "org.scalatest" %% "scalatest"           % "3.2.17",
+        "org.typelevel" %% "cats-core"           % "2.10.0",
+        "org.typelevel" %% "cats-effect"         % "3.5.2",
+      ),
+    )
+
+lazy val tado4s =
+  project
+    .in(file("tado4s"))
+    .dependsOn(beerest)
+    .settings(
+      name         := "tado4s",
+      version      := "0.1.0",
+      organization := "com.colofabrix.scala.tado4s",
+      scalaVersion := scala3Version,
+      libraryDependencies ++= List(
+        "co.fs2"        %% "fs2-core"            % "3.9.3",
+        "io.circe"      %% "circe-core"          % "0.14.6",
         "io.circe"      %% "circe-fs2"           % "0.14.1",
+        "io.circe"      %% "circe-generic"       % "0.14.6",
+        "io.circe"      %% "circe-parser"        % "0.14.6",
+        "org.http4s"    %% "http4s-circe"        % "0.23.24",
+        "org.http4s"    %% "http4s-ember-client" % "0.23.24",
+        "org.scalatest" %% "scalatest"           % "3.2.17",
+        "org.typelevel" %% "cats-core"           % "2.10.0",
+        "org.typelevel" %% "cats-effect"         % "3.5.2",
       ),
     )
