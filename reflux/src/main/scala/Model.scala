@@ -1,85 +1,86 @@
-package reflux
+package reflux.api
 
-import com.github.plokhotnyuk.jsoniter_scala.macros.*
-import com.github.plokhotnyuk.jsoniter_scala.core.*
+import io.circe.syntax.*
+import io.circe.*
+import io.circe.derivation.*
+import java.time.Instant
 
-object api:
+//  Requests  //
 
-  given influxRequestCodec: JsonValueCodec[InfluxRequest] =
-    JsonCodecMaker.make
+transparent trait InfluxRequest
 
-  given influxResponseCodec: JsonValueCodec[InfluxResponse] =
-    JsonCodecMaker.make
+object InfluxRequest:
 
-  //  Requests  //
-
-  enum InfluxRequest:
-
-    case CreateBucketRequest[R <: InfluxResponse](
-      description: Option[String],
-      name: String,
-      orgID: String,
-      retentionRules: Seq[RetentionRules],
-      rp: Option[String],
-      schemaType: Option[String],
-    ) extends InfluxRequest
-
-  //  Responses  //
-
-  enum InfluxResponse:
-
-    case CreateBucketResponse(
-      createdAt: String,
-      description: String,
-      id: String,
-      labels: Seq[Labels],
-      links: Links,
-      name: String,
-      orgID: String,
-      retentionRules: Seq[RetentionRules],
-      schemaType: String,
-      `type`: String,
-      updatedAt: String,
-    ) extends InfluxResponse
-
-  //  Others  //
-
-  final case class RetentionRules(
-    everySeconds: Int,
-    shardGroupDurationSeconds: Int,
-    `type`: String,
-  )
-
-  final case class Links(
-    labels: String,
-    members: String,
-    org: String,
-    owners: String,
-    self: String,
-    write: String,
-  )
-
-  final case class Labels(
-    id: String,
+  final case class CreateBucket(
     name: String,
     orgID: String,
-    properties: Map[String, String],
-  )
+    description: Option[String],
+    retentionRules: List[RetentionRules],
+  ) extends InfluxRequest derives Codec.AsObject
 
-  //  Newtypes  //
+  final case class ListBucket(
+    name: Option[String],
+  ) extends InfluxRequest
 
-  opaque type InfluxAuthToken =
-    String
+//  Responses  //
 
-  object InfluxAuthToken:
-    extension (self: InfluxAuthToken) def value: String = self
-    def apply(value: String): InfluxAuthToken =
-      value
+sealed trait InfluxResponse
 
-  opaque type OrganizationId =
-    String
+object InfluxResponse:
 
-  object OrganizationId:
-    extension (self: OrganizationId) def value: String = self
-    def apply(value: String): OrganizationId =
-      value
+  final case class CreateBucket(
+    name: String,
+    retentionRules: List[RetentionRules],
+    createdAt: Option[Instant],
+    description: Option[String],
+    id: Option[String],
+    labels: Option[List[Labels]],
+    links: Option[Links],
+    orgID: Option[String],
+    schemaType: Option[String],
+    `type`: Option[String],
+    updatedAt: Option[Instant],
+  ) extends InfluxResponse derives Codec.AsObject
+
+  final case class ListBuckets(
+    buckets: List[Buckets],
+    links: Option[Links],
+  ) extends InfluxResponse derives Codec.AsObject
+
+//  Others  //
+
+final case class Buckets(
+  name: String,
+  retentionRules: List[RetentionRules],
+  createdAt: Option[String],
+  description: Option[String],
+  id: Option[String],
+  labels: Option[List[Labels]],
+  links: Option[Links],
+  orgID: Option[String],
+  schemaType: Option[String],
+  `type`: Option[String],
+  updatedAt: Option[String],
+) derives Codec.AsObject
+
+final case class RetentionRules(
+  everySeconds: Int,
+  shardGroupDurationSeconds: Option[Int],
+  `type`: Option[String],
+) derives Codec.AsObject
+
+final case class Links(
+  labels: Option[String],
+  members: Option[String],
+  org: Option[String],
+  owners: Option[String],
+  self: Option[String],
+  write: Option[String],
+) derives Codec.AsObject
+
+final case class Labels(
+  id: Option[String],
+  name: Option[String],
+  orgID: Option[String],
+  properties: Map[String, String],
+) derives Codec.AsObject

@@ -1,24 +1,25 @@
 package reflux
 
-import reflux.api.*
 import cats.{ Applicative, Functor }
 import cats.effect.{ Async, Sync }
 import cats.syntax.functor.*
 import fs2.{ text, Stream }
+import io.circe.*
+import io.circe.fs2.*
+import io.circe.parser.decode
+import io.circe.syntax.*
 import org.http4s.*
+import org.http4s.circe.*
+import org.http4s.circe.given
 import org.http4s.client.Client
 import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.Credentials.Token
 import org.http4s.headers.{ Accept, Authorization }
 import org.http4s.headers.*
 import org.http4s.Method.*
-import com.github.plokhotnyuk.jsoniter_scala.core.{ readFromString, writeToString }
-
-final case class InfluxClientConfig(
-  serverUrl: Uri,
-  token: InfluxAuthToken,
-  organizationId: OrganizationId,
-)
+import reflux.api.*
+import reflux.api.given
+import reflux.config.*
 
 class InfluxClient[F[_]: Async](httpClient: Client[F], config: InfluxClientConfig)
   extends Http4sClientDsl[F]:
@@ -117,42 +118,51 @@ class InfluxClient[F[_]: Async](httpClient: Client[F], config: InfluxClientConfi
   //     .compile
   //     .toVector
 
-  private def handleError[A](response: Response[F]): Stream[F, A] =
-    response.body
-      .through(text.utf8.decode)
-      .take(4096)
-      .flatMap { s =>
-        Stream.raiseError(InfluxException(response.status, s))
-      }
+  private def postRequest[T: Encoder, U <: InfluxResponse: Decoder](uri: Uri, influxRequest: T): F[U] =
+    val jsonBody = influxRequest.asJson.noSpacesSortKeys
+    val headers  = Headers(`Content-Type`(MediaType.application.json))
+    val request  = POST(jsonBody, uri, headers)
 
-  def rawInfluxRequest[R <: InfluxResponse: Manifest](influxRequest: InfluxRequest): F[R] =
-    val body    = writeToString(influxRequest)
-    val headers = Headers(`Content-Type`(MediaType.application.json))
-    val request = POST(body, bucketUri, headers)
-
-    println(request)
-    println(body)
     authHttpClient
       .stream(request)
       .flatMap { response =>
-        println(response)
-        println(response.body.compile.toString())
-        if (response.status.isSuccess)
-          decodeAsResponse[R](response.body)
+        if (response.status.isSuccess) then
+          decodeJsonResponse(response)
         else
           handleError(response)
       }
       .compile
       .lastOrError
 
-  private def decodeAsResponse[R <: InfluxResponse: Manifest](body: EntityBody[F]): Stream[F, R] =
-    body
-      .through(text.utf8.decode)
-      .through(text.lines)
-      .filter(_.nonEmpty)
-      .map { stringBody =>
-        // readFromString[R]()
-        ???
+  private def getRequest[U <: InfluxResponse: Decoder](uri: Uri, requestParams: Map[String, String]): F[U] =
+    val uriWithParams = uri.withQueryParams(requestParams)
+    val headers = Headers(`Content-Type`(MediaType.application.json))
+    val request = GET(uriWithParams, headers)
+
+    authHttpClient
+      .stream(request)
+      .flatMap { response =>
+        if (response.status.isSuccess) then
+          decodeJsonResponse(response)
+        else
+          handleError(response)
+      }
+      .compile
+      .lastOrError
+
+  private def decodeJsonResponse[A: Decoder](response: Response[F]): Stream[F, A] =
+    response
+      .body
+      .through(byteStreamParser)
+      .through(decoder[F, A])
+
+  private def handleError[A](response: Response[F]): Stream[F, A] =
+    response
+      .body
+      .through(byteStreamParser)
+      .through(decoder[F, ErrorResponse])
+      .flatMap { error =>
+        Stream.raiseError(InfluxRestError(response.status, error))
       }
 
   //  Builders  //
@@ -162,19 +172,19 @@ class InfluxClient[F[_]: Async](httpClient: Client[F], config: InfluxClientConfi
 
   //  Utils  //
 
-  def createDatabase(name: String): F[Unit] =
+  def listBuckets(name: Option[String]): F[InfluxResponse.ListBuckets] =
+    val params = name.map("name" -> _).toMap
+    getRequest(bucketUri, params)
+
+  def createBucket(name: String): F[InfluxResponse.CreateBucket] =
     val request =
-      InfluxRequest.CreateBucketRequest(
+      InfluxRequest.CreateBucket(
         description = None,
         name = name,
         orgID = config.organizationId.value,
         retentionRules = List.empty,
-        rp = None,
-        schemaType = None,
       )
-
-    rawInfluxRequest[InfluxResponse.CreateBucketResponse](request)
-      .void
+    postRequest(bucketUri, request)
 
 object Authenticator:
   import org.typelevel.ci.*

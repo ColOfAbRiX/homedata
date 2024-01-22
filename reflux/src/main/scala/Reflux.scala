@@ -5,7 +5,7 @@ import org.http4s.Uri
 import org.http4s.Uri.{ Authority, Path }
 import org.http4s.client.Client
 import org.http4s.ember.client.EmberClientBuilder
-import reflux.api.*
+import reflux.config.*
 
 object Reflux:
 

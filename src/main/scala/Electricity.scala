@@ -6,6 +6,7 @@ import sttp.client4.*
 import org.json4s.*
 import org.json4s.native.JsonMethods.*
 import org.json4s.native.Serialization
+import cats.effect.IO
 
 object Electricity:
 
@@ -16,7 +17,7 @@ object Electricity:
     toDate: Option[Instant],
     page: Int,
     pageSize: Int,
-  ): Chunk[ElectricityReading] =
+  ): IO[Chunk[ElectricityReading]] =
     val endpointUrl =
       Octopus.ElectricityConsumptionUrl
         .addParam("period_from", fromDate.map(_.toString))
@@ -24,25 +25,27 @@ object Electricity:
         .addParam("page", page.toString)
         .addParam("page_size", pageSize.toString)
 
-    val response =
-      basicRequest
-        .get(endpointUrl)
-        .auth
-        .basic(user = Octopus.ApiKey, password = "")
-        .send(Backend.backend)
+    IO {
+      val response =
+        basicRequest
+          .get(endpointUrl)
+          .auth
+          .basic(user = Octopus.ApiKey, password = "")
+          .send(Backend.backend)
 
-    response.body.toOption
-      .map(deserializeBody)
-      .map(Chunk.from)
-      .getOrElse {
-        println(s"ERROR: $response")
-        Chunk.empty
-      }
+      response.body.toOption
+        .map(deserializeResults)
+        .map(Chunk.from)
+        .getOrElse {
+          println(s"ERROR: $response")
+          Chunk.empty
+        }
+    }
 
   private given formats: Formats =
     Serialization.formats(NoTypeHints)
 
-  private def deserializeBody(body: String): List[ElectricityReading] =
+  private def deserializeResults(body: String): List[ElectricityReading] =
     for
       case JArray(results) <- parse(body) \ "results"
       case JObject(result) <- results
