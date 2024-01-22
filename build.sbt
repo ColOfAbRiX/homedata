@@ -39,17 +39,10 @@ lazy val restbee =
       organization := "com.colofabrix.scala.restbee",
       scalaVersion := scala3Version,
       libraryDependencies ++= List(
-        "co.fs2"               %% "fs2-core"      % "3.9.3",
-        // "com.github.valskalla" %% "odin-core"     % "0.13.0",
-        "io.circe"             %% "circe-core"    % "0.14.6",
-        "io.circe"             %% "circe-fs2"     % "0.14.1",
-        "io.circe"             %% "circe-generic" % "0.14.6",
-        "io.circe"             %% "circe-parser"  % "0.14.6",
-        "org.http4s"           %% "http4s-circe"  % "0.23.24",
-        "org.http4s"           %% "http4s-client" % "0.23.24",
-        // "org.scalatest"        %% "scalatest"     % "3.2.17" % Test,
-        "org.typelevel"        %% "cats-core"     % "2.10.0",
-        "org.typelevel"        %% "cats-effect"   % "3.5.2",
+        "co.fs2"        %% "fs2-core"      % "3.9.3",
+        "org.http4s"    %% "http4s-client" % "0.23.24",
+        "org.typelevel" %% "cats-core"     % "2.10.0",
+        "org.typelevel" %% "cats-effect"   % "3.5.2",
       ),
     )
 

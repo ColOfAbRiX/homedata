@@ -1,8 +1,8 @@
 package com.colofabrix.scala.homedata.octopus
 
 import java.time.Instant
-import com.colofabrix.scala.timeflux.model.*
 import com.colofabrix.scala.timeflux.InfluxSerializable
+import com.colofabrix.scala.timeflux.measurements.{MeasurementField, FieldValue, Measurement}
 
 transparent trait Reading
 

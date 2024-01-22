@@ -1,7 +1,8 @@
-package com.colofabrix.scala.timeflux
+package com.colofabrix.scala.timeflux.measurements
 
-import com.colofabrix.scala.timeflux.model.*
-
+/**
+  * Serializes a Measurement into a Line Protocol value
+  */
 private[timeflux] object MeasurementWriter:
 
   def writeToLineProtocol(measurement: Measurement): String =
@@ -33,8 +34,8 @@ private[timeflux] object MeasurementWriter:
 
     s"${lineMeasurement} ${lineTags}${lineFields}${lineTime}\n"
 
-  extension (measurement: Measurement)
-    def toLineProtocol: String = writeToLineProtocol(measurement)
+  extension [A](xs: Vector[A])
+    private def emptyAsNone: Option[Vector[A]] = if xs.isEmpty then None else Some(xs)
 
   private def escapeName(string: String): String =
     string
@@ -55,16 +56,14 @@ private[timeflux] object MeasurementWriter:
       .trim()
 
   private def escapeStringValue(string: String): String =
-    string.replaceAll("\"", "\\\"")
+    string
+      .replaceAll("\"", "\\\"")
       .trim()
-
-  extension [A](xs: Vector[A])
-    private def emptyAsNone: Option[Vector[A]] = if xs.isEmpty then None else Some(xs)
 
   private def writeFieldValue(fieldValue: FieldValue): String =
     fieldValue match
-      case FieldValue.MString(value)   => s"\"$escapeStringValue(value)\""
-      case FieldValue.MFloat(value)    => value.toString
-      case FieldValue.MInteger(value)  => value.toString
-      case FieldValue.MUInteger(value) => value.toString
-      case FieldValue.MBoolean(value)  => value.toString
+      case FieldValue.StringValue(value)   => s"\"$escapeStringValue(value)\""
+      case FieldValue.FloatValue(value)    => value.toString
+      case FieldValue.IntegerValue(value)  => value.toString
+      case FieldValue.UIntegerValue(value) => value.toString
+      case FieldValue.BooleanValue(value)  => value.toString

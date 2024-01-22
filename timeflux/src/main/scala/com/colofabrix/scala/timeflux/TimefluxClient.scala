@@ -3,10 +3,10 @@ package com.colofabrix.scala.timeflux
 import cats.effect.Async
 import cats.implicits.given
 import com.colofabrix.scala.restbee.*
-import com.colofabrix.scala.restbee.encoding.CirceJsonCodecs.given
-import com.colofabrix.scala.restbee.errors.*
+import com.colofabrix.scala.restbee.response.*
+import com.colofabrix.scala.timeflux.circe.CirceJsonCodecs.given
 import com.colofabrix.scala.timeflux.config.*
-import com.colofabrix.scala.timeflux.MeasurementWriter.*
+import com.colofabrix.scala.timeflux.measurements.*
 import com.colofabrix.scala.timeflux.model.*
 import fs2.{ text, Stream }
 import org.http4s.*
@@ -15,6 +15,9 @@ import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.Method.*
 import org.http4s.Uri.Path
 
+/**
+ * The client to interact with InfluxDB
+ */
 class TimefluxClient[F[_]: Async](httpClient: Client[F], config: TimefluxClientConfig)
   extends Http4sClientDsl[F]:
 
@@ -31,11 +34,13 @@ class TimefluxClient[F[_]: Async](httpClient: Client[F], config: TimefluxClientC
     (config.serverUrl / "api" / "v2" / "write")
 
   /**
+   * Sets configuration parameters
    */
   def withConfig(f: TimefluxClientConfig => TimefluxClientConfig): TimefluxClient[F] =
     new TimefluxClient(httpClient, f(config))
 
   /**
+   * Writes a stream of InfluxSerializable values in a bucket
    */
   def write[A: InfluxSerializable](bucket: String, values: Stream[F, A]): F[Unit] =
     writeStream(
@@ -44,6 +49,7 @@ class TimefluxClient[F[_]: Async](httpClient: Client[F], config: TimefluxClientC
     )
 
   /**
+   * Writes a stream of Measurements in a bucket
    */
   def write(bucket: String, values: Stream[F, Measurement]): F[Unit] =
     writeStream(
@@ -52,6 +58,7 @@ class TimefluxClient[F[_]: Async](httpClient: Client[F], config: TimefluxClientC
     )
 
   /**
+   * Writes a list of Measurements in a bucket
    */
   def write(bucket: String, values: Measurement*): F[Unit] =
     writeStream(
@@ -60,15 +67,15 @@ class TimefluxClient[F[_]: Async](httpClient: Client[F], config: TimefluxClientC
     )
 
   /**
+   * List one or all the buckets
    */
   def listBuckets(name: Option[String]): F[ListBucketsResponse] =
     val request = ListBucketRequest(name)
     val url     = bucketUri.withQueryParams(request.toQueryParams)
-    apiHttpClient
-      .get[ListBucketsResponse](url)
-      .flatMap(raiseErrorResponse)
+    apiHttpClient.get[ListBucketsResponse](url)
 
   /**
+   * Creates a bucket
    */
   def createBucket(name: String): F[CreateBucketResponse] =
     val request =
@@ -79,11 +86,10 @@ class TimefluxClient[F[_]: Async](httpClient: Client[F], config: TimefluxClientC
         retentionRules = List.empty,
       )
 
-    apiHttpClient
-      .post[CreateBucketRequest, CreateBucketResponse](bucketUri, request)
-      .flatMap(raiseErrorResponse)
+    apiHttpClient.post[CreateBucketRequest, CreateBucketResponse](bucketUri, request)
 
   /**
+   * Checks if a bucket exists and, if it doesn't, it creates it
    */
   def createBucketIfMissing(bucket: String): F[Unit] =
     for
@@ -103,9 +109,9 @@ class TimefluxClient[F[_]: Async](httpClient: Client[F], config: TimefluxClientC
 
     val queryRequest =
       WriteRequest(
-        bucket,
-        config.organizationId.value,
-        "ms",
+        bucket = bucket,
+        orgID = config.organizationId.value,
+        precision = "ms",
       )
 
     val requestUri = writeUri.withQueryParams(queryRequest.toQueryParams)
@@ -120,24 +126,13 @@ class TimefluxClient[F[_]: Async](httpClient: Client[F], config: TimefluxClientC
     internalHttpClient
       .run(request)
       .use { response =>
-        if (response.status.isSuccess)
+        if response.status.isSuccess then
           Async[F].unit
         else
-          handleError(response)
-            .as(())
+          response
+            .decodeError[Unit, ErrorResponse]
             .compile
             .lastOrError
-      }
-
-  private def handleError[A](response: Response[F]): Stream[F, A] =
-    import io.circe.*
-    import io.circe.fs2.*
-    response
-      .body
-      .through(byteStreamParser)
-      .through(decoder[F, ErrorResponse])
-      .flatMap { error =>
-        Stream.raiseError(InfluxRestError(response.status, error))
       }
 
   private def applyAuth(token: AuthToken, httpClient: Client[F]): Client[F] =

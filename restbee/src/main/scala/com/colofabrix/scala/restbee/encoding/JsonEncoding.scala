@@ -1,7 +1,8 @@
 package com.colofabrix.scala.restbee.encoding
 
-import cats.MonadThrow
 import cats.effect.Sync
+import cats.MonadThrow
+import com.colofabrix.scala.restbee.errors.CodecError
 import fs2.Pipe
 
 /**

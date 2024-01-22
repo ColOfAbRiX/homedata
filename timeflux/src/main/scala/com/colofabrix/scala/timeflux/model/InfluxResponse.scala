@@ -6,6 +6,9 @@ import java.time.Instant
 
 transparent trait InfluxResponse
 
+/**
+ * Create Bucket Response
+ */
 final case class CreateBucketResponse(
   name: String,
   retentionRules: List[RetentionRules],
@@ -20,7 +23,20 @@ final case class CreateBucketResponse(
   updatedAt: Option[Instant],
 ) extends InfluxResponse derives Codec.AsObject
 
+/**
+ * List Buckets Response
+ */
 final case class ListBucketsResponse(
   buckets: List[Buckets],
   links: Option[Links],
 ) extends InfluxResponse derives Codec.AsObject
+
+/**
+ * Influx Error Response
+ */
+final case class ErrorResponse(
+  code: String,
+  err: Option[String],
+  message: Option[String],
+  op: Option[String],
+) derives Codec.AsObject
