@@ -2,13 +2,8 @@ import org.typelevel.scalacoptions.ScalacOptions
 
 val scala3Version = "3.3.1"
 
-Global / onChangedBuildSource  := ReloadOnSourceChanges
-Compile / run / fork           := true
-
-Test / tpolecatExcludeOptions ++= ScalacOptions.warnUnusedOptions + ScalacOptions.warnNonUnitStatement
-tpolecatDevModeOptions ~= { opts =>
-  opts.filterNot(Set(ScalacOptions.warnUnusedOptions))
-}
+Global / onChangedBuildSource := ReloadOnSourceChanges
+Compile / run / fork          := true
 
 lazy val root =
   project
@@ -23,11 +18,12 @@ lazy val root =
       libraryDependencies ++= List(
         "co.fs2"                        %% "fs2-core"        % "3.9.3",
         "co.fs2"                        %% "fs2-io"          % "3.9.3",
+        "com.github.pureconfig"         %% "pureconfig-cats" % "0.17.4",
         "com.github.valskalla"          %% "odin-core"       % "0.13.0",
         "com.softwaremill.sttp.client4" %% "core"            % "4.0.0-M8",
         "io.github.arainko"             %% "ducktape"        % "0.1.11",
+        "org.http4s"                    %% "http4s-client"   % "0.23.24",
         "org.json4s"                    %% "json4s-native"   % "4.1.0-M4",
-        "com.github.pureconfig"         %% "pureconfig-cats" % "0.17.4",
         "org.scalameta"                 %% "munit"           % "0.7.29" % Test,
         "org.typelevel"                 %% "cats-core"       % "2.10.0",
         "org.typelevel"                 %% "cats-effect"     % "3.5.2",
@@ -83,12 +79,13 @@ lazy val tado4s =
       organization := "com.colofabrix.scala.tado4s",
       scalaVersion := scala3Version,
       libraryDependencies ++= List(
-        "com.github.valskalla"  %% "odin-core"           % "0.13.0",
         "com.github.pureconfig" %% "pureconfig-cats"     % "0.17.4",
-        "io.github.arainko"     %% "ducktape"            % "0.1.11",
+        "com.github.valskalla"  %% "odin-core"           % "0.13.0",
         "io.circe"              %% "circe-core"          % "0.14.6",
         "io.circe"              %% "circe-generic"       % "0.14.6",
+        "io.github.arainko"     %% "ducktape"            % "0.1.11",
         "org.http4s"            %% "http4s-circe"        % "0.23.24",
+        "org.http4s"            %% "http4s-client"       % "0.23.24",
         "org.http4s"            %% "http4s-dsl"          % "0.23.24",
         "org.http4s"            %% "http4s-ember-client" % "0.23.24",
         "org.typelevel"         %% "cats-core"           % "2.10.0",
