@@ -1,0 +1,300 @@
+[
+  {
+    "id": 2,
+    "name": "Living Room",
+    "type": "HEATING",
+    "dateCreated": "2023-11-23T13:13:24.079Z",
+    "deviceTypes": [
+      "SU02",
+      "VA02",
+      "VA02",
+      "VA02"
+    ],
+    "devices": [
+      {
+        "deviceType": "SU02",
+        "serialNo": "SU2785637236",
+        "shortSerialNo": "SU2785637236",
+        "currentFwVersion": "90.1",
+        "connectionState": {
+          "value": true,
+          "timestamp": "2024-01-24T22:29:05.770Z"
+        },
+        "characteristics": {
+          "capabilities": [
+            "INSIDE_TEMPERATURE_MEASUREMENT",
+            "IDENTIFY"
+          ]
+        },
+        "batteryState": "NORMAL",
+        "duties": [
+          "ZONE_UI",
+          "ZONE_LEADER"
+        ]
+      },
+      {
+        "deviceType": "VA02",
+        "serialNo": "VA1661557836",
+        "shortSerialNo": "VA1661557836",
+        "currentFwVersion": "95.1",
+        "connectionState": {
+          "value": true,
+          "timestamp": "2024-01-24T22:30:04.509Z"
+        },
+        "characteristics": {
+          "capabilities": [
+            "INSIDE_TEMPERATURE_MEASUREMENT",
+            "IDENTIFY"
+          ]
+        },
+        "mountingState": {
+          "value": "CALIBRATED",
+          "timestamp": "2024-01-18T05:58:21.649Z"
+        },
+        "mountingStateWithError": "CALIBRATED",
+        "batteryState": "NORMAL",
+        "orientation": "VERTICAL",
+        "childLockEnabled": false,
+        "duties": [
+          "ZONE_UI",
+          "ZONE_DRIVER"
+        ]
+      },
+      {
+        "deviceType": "VA02",
+        "serialNo": "VA1791647436",
+        "shortSerialNo": "VA1791647436",
+        "currentFwVersion": "95.1",
+        "connectionState": {
+          "value": true,
+          "timestamp": "2024-01-24T22:33:09.487Z"
+        },
+        "characteristics": {
+          "capabilities": [
+            "INSIDE_TEMPERATURE_MEASUREMENT",
+            "IDENTIFY"
+          ]
+        },
+        "mountingState": {
+          "value": "CALIBRATED",
+          "timestamp": "2024-01-24T13:33:57.536Z"
+        },
+        "mountingStateWithError": "CALIBRATED",
+        "batteryState": "NORMAL",
+        "orientation": "VERTICAL",
+        "childLockEnabled": false,
+        "duties": [
+          "ZONE_UI",
+          "ZONE_DRIVER"
+        ]
+      },
+      {
+        "deviceType": "VA02",
+        "serialNo": "VA2147637036",
+        "shortSerialNo": "VA2147637036",
+        "currentFwVersion": "95.1",
+        "connectionState": {
+          "value": true,
+          "timestamp": "2024-01-24T22:36:04.909Z"
+        },
+        "characteristics": {
+          "capabilities": [
+            "INSIDE_TEMPERATURE_MEASUREMENT",
+            "IDENTIFY"
+          ]
+        },
+        "mountingState": {
+          "value": "CALIBRATED",
+          "timestamp": "2024-01-18T06:01:55.192Z"
+        },
+        "mountingStateWithError": "CALIBRATED",
+        "batteryState": "NORMAL",
+        "orientation": "VERTICAL",
+        "childLockEnabled": false,
+        "duties": [
+          "ZONE_UI",
+          "ZONE_DRIVER"
+        ]
+      }
+    ],
+    "reportAvailable": false,
+    "showScheduleSetup": false,
+    "supportsDazzle": true,
+    "dazzleEnabled": true,
+    "dazzleMode": {
+      "supported": true,
+      "enabled": true
+    },
+    "openWindowDetection": {
+      "supported": true,
+      "enabled": true,
+      "timeoutInSeconds": 900
+    }
+  },
+  {
+    "id": 3,
+    "name": "Office",
+    "type": "HEATING",
+    "dateCreated": "2023-11-23T13:44:27.688Z",
+    "deviceTypes": [
+      "VA02"
+    ],
+    "devices": [
+      {
+        "deviceType": "VA02",
+        "serialNo": "VA3104337836",
+        "shortSerialNo": "VA3104337836",
+        "currentFwVersion": "95.1",
+        "connectionState": {
+          "value": true,
+          "timestamp": "2024-01-24T22:30:51.555Z"
+        },
+        "characteristics": {
+          "capabilities": [
+            "INSIDE_TEMPERATURE_MEASUREMENT",
+            "IDENTIFY"
+          ]
+        },
+        "mountingState": {
+          "value": "CALIBRATED",
+          "timestamp": "2024-01-17T16:17:21.590Z"
+        },
+        "mountingStateWithError": "CALIBRATED",
+        "batteryState": "NORMAL",
+        "orientation": "HORIZONTAL",
+        "childLockEnabled": false,
+        "duties": [
+          "ZONE_UI",
+          "ZONE_DRIVER",
+          "ZONE_LEADER"
+        ]
+      }
+    ],
+    "reportAvailable": false,
+    "showScheduleSetup": false,
+    "supportsDazzle": true,
+    "dazzleEnabled": true,
+    "dazzleMode": {
+      "supported": true,
+      "enabled": true
+    },
+    "openWindowDetection": {
+      "supported": true,
+      "enabled": true,
+      "timeoutInSeconds": 900
+    }
+  },
+  {
+    "id": 6,
+    "name": "Bedroom",
+    "type": "HEATING",
+    "dateCreated": "2023-11-23T23:14:54.283Z",
+    "deviceTypes": [
+      "VA02"
+    ],
+    "devices": [
+      {
+        "deviceType": "VA02",
+        "serialNo": "VA2902947736",
+        "shortSerialNo": "VA2902947736",
+        "currentFwVersion": "95.1",
+        "connectionState": {
+          "value": true,
+          "timestamp": "2024-01-24T22:31:42.366Z"
+        },
+        "characteristics": {
+          "capabilities": [
+            "INSIDE_TEMPERATURE_MEASUREMENT",
+            "IDENTIFY"
+          ]
+        },
+        "mountingState": {
+          "value": "CALIBRATED",
+          "timestamp": "2023-11-23T23:15:40.149Z"
+        },
+        "mountingStateWithError": "CALIBRATED",
+        "batteryState": "NORMAL",
+        "orientation": "VERTICAL",
+        "childLockEnabled": false,
+        "duties": [
+          "ZONE_UI",
+          "ZONE_DRIVER",
+          "ZONE_LEADER"
+        ]
+      }
+    ],
+    "reportAvailable": false,
+    "showScheduleSetup": false,
+    "supportsDazzle": true,
+    "dazzleEnabled": true,
+    "dazzleMode": {
+      "supported": true,
+      "enabled": true
+    },
+    "openWindowDetection": {
+      "supported": true,
+      "enabled": true,
+      "timeoutInSeconds": 900
+    }
+  },
+  {
+    "id": 0,
+    "name": "Hot Water",
+    "type": "HOT_WATER",
+    "dateCreated": "2023-11-27T14:03:20.236Z",
+    "deviceTypes": [
+      "BP02",
+      "SU02"
+    ],
+    "devices": [
+      {
+        "deviceType": "BP02",
+        "serialNo": "BP0642277436",
+        "shortSerialNo": "BP0642277436",
+        "currentFwVersion": "94.1",
+        "connectionState": {
+          "value": true,
+          "timestamp": "2024-01-24T22:34:12.821Z"
+        },
+        "characteristics": {
+          "capabilities": []
+        },
+        "isDriverConfigured": true,
+        "duties": [
+          "ZONE_DRIVER"
+        ]
+      },
+      {
+        "deviceType": "SU02",
+        "serialNo": "SU2785637236",
+        "shortSerialNo": "SU2785637236",
+        "currentFwVersion": "90.1",
+        "connectionState": {
+          "value": true,
+          "timestamp": "2024-01-24T22:29:05.770Z"
+        },
+        "characteristics": {
+          "capabilities": [
+            "INSIDE_TEMPERATURE_MEASUREMENT",
+            "IDENTIFY"
+          ]
+        },
+        "batteryState": "NORMAL",
+        "duties": [
+          "ZONE_UI",
+          "ZONE_LEADER"
+        ]
+      }
+    ],
+    "reportAvailable": false,
+    "showScheduleSetup": false,
+    "supportsDazzle": false,
+    "dazzleEnabled": false,
+    "dazzleMode": {
+      "supported": false
+    },
+    "openWindowDetection": {
+      "supported": false
+    }
+  }
+]

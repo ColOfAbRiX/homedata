@@ -1,0 +1,58 @@
+{
+  "id": 1000002,
+  "name": "Example House",
+  "dateTimeZone": "Europe/London",
+  "dateCreated": "2023-11-22T19:29:28.426Z",
+  "temperatureUnit": "CELSIUS",
+  "partner": null,
+  "simpleSmartScheduleEnabled": true,
+  "awayRadiusInMeters": 702.43,
+  "installationCompleted": true,
+  "incidentDetection": {
+    "supported": true,
+    "enabled": true
+  },
+  "generation": "PRE_LINE_X",
+  "zonesCount": 4,
+  "skills": [
+    "AUTO_ASSIST"
+  ],
+  "christmasModeEnabled": true,
+  "showAutoAssistReminders": true,
+  "contactDetails": {
+    "name": "John Smith",
+    "email": "johnsmith@gmail.com",
+    "phone": "+00000000"
+  },
+  "address": {
+    "addressLine1": "123 Example Street",
+    "addressLine2": null,
+    "zipCode": "AB12 3CD",
+    "city": "London",
+    "state": null,
+    "country": "GBR"
+  },
+  "geolocation": {
+    "latitude": 51.5074,
+    "longitude": -0.1278
+  },
+  "consentGrantSkippable": true,
+  "enabledFeatures": [
+    "ADD_SCHEDULE_BLOCK_WEBAPP_CALCULATION",
+    "CLIMATE_REPORT_AS_WEBVIEW",
+    "EIQ_SETTINGS_AS_WEBVIEW",
+    "ENERGY_IQ_V2",
+    "ENERGY_IQ_V2_ONBOARDING",
+    "HEATING_ROOM_DETAILS_AS_WEBVIEW",
+    "HIDE_BOILER_REPAIR_SERVICE",
+    "HOME_SCREEN_AS_WEBVIEW_PROD",
+    "HOME_SCREEN_AS_WEBVIEW_PROD_ANDROID",
+    "KEEP_WEBAPP_UPDATED",
+    "OWD_SETTINGS_AS_WEBVIEW"
+  ],
+  "isAirComfortEligible": true,
+  "isBalanceAcEligible": false,
+  "isBalanceHpEligible": false,
+  "isEnergyIqEligible": true,
+  "isHeatSourceInstalled": false
+}

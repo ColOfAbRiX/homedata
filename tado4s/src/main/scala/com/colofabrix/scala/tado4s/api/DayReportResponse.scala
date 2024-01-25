@@ -1,5 +1,6 @@
 package com.colofabrix.scala.tado4s.api
 
+import com.colofabrix.scala.tado4s.api.DayReportResponse.*
 import io.circe.Decoder
 import java.time.*
 
@@ -8,41 +9,70 @@ import java.time.*
  */
 final case class DayReportResponse(
   zoneType: String,
-  interval: DayReportResponse.Interval,
+  interval: Interval,
   hoursInDay: Int,
-  measuredData: DayReportResponse.MeasuredData,
-  stripes: DayReportResponse.Stripes,
-  settings: DayReportResponse.ReportSettings,
-  callForHeat: DayReportResponse.CallForHeat,
-  hotWaterProduction: DayReportResponse.HotWaterProduction,
-  weather: DayReportResponse.Weather,
+  measuredData: MeasuredData,
+  stripes: MeasureType.DataIntervalsMeasure[StripeValue],
+  settings: MeasureType.DataIntervalsMeasure[SettingClass],
+  callForHeat: MeasureType.DataIntervalsMeasure[String],
+  hotWaterProduction: MeasureType.DataIntervalsMeasure[Boolean],
+  weather: Weather,
 ) derives Decoder
 
 object DayReportResponse:
 
-  final case class CallForHeat(
-    timeSeriesType: String,
-    valueType: String,
-    dataIntervals: Vector[CallForHeatDataInterval],
-  ) derives Decoder
+  transparent trait MeasureType
 
-  final case class CallForHeatDataInterval(
-    from: String,
-    to: String,
-    value: String,
-  ) derives Decoder
+  object MeasureType:
 
-  final case class HotWaterProduction(
-    timeSeriesType: String,
-    valueType: String,
-    dataIntervals: Vector[HotWaterProductionDataInterval],
-  ) derives Decoder
+    final case class DataIntervalsMeasure[A](
+      timeSeriesType: String, // Always "dataIntervals"
+      valueType: String,
+      dataIntervals: Vector[TimeSeriesType.DataIntervals[A]],
+    ) extends MeasureType derives Decoder
 
-  final case class HotWaterProductionDataInterval(
-    from: String,
-    to: String,
-    value: Boolean,
-  ) derives Decoder
+    final case class HumidityMeasure(
+      timeSeriesType: String, // Always "dataPoints"
+      valueType: String,
+      min: Double,
+      max: Double,
+      percentageUnit: String,
+      dataPoints: Vector[TimeSeriesType.DataPoint[Double]],
+    ) extends MeasureType derives Decoder
+
+    final case class TemperatureMeasure(
+      timeSeriesType: String, // Always "dataPoints"
+      valueType: String,
+      min: Temperature,
+      max: Temperature,
+      dataPoints: Vector[TimeSeriesType.DataPoint[Temperature]],
+    ) extends MeasureType derives Decoder
+
+    final case class SlotsMeasure(
+      timeSeriesType: String, // Always "slots"
+      valueType: String,      // Always "slot"
+      slots: Map[String, TimeSeriesType.Slot],
+    ) extends MeasureType derives Decoder
+
+  transparent trait TimeSeriesType
+
+  object TimeSeriesType:
+
+    final case class DataIntervals[A](
+      from: String,
+      to: String,
+      value: A,
+    ) extends TimeSeriesType derives Decoder
+
+    final case class DataPoint[A](
+      timestamp: Instant,
+      value: A,
+    ) extends TimeSeriesType derives Decoder
+
+    final case class Slot(
+      state: String,
+      temperature: Temperature,
+    ) extends TimeSeriesType derives Decoder
 
   final case class Interval(
     from: String,
@@ -50,103 +80,29 @@ object DayReportResponse:
   ) derives Decoder
 
   final case class MeasuredData(
-    measuringDeviceConnected: HotWaterProduction,
-    insideTemperature: InsideTemperature,
-    humidity: Humidity,
+    measuringDeviceConnected: MeasureType.DataIntervalsMeasure[Boolean],
+    insideTemperature: MeasureType.TemperatureMeasure,
+    humidity: MeasureType.HumidityMeasure,
   ) derives Decoder
 
-  final case class Humidity(
-    timeSeriesType: String,
-    valueType: String,
-    percentageUnit: String,
-    min: Double,
-    max: Double,
-    dataPoints: Vector[HumidityDataPoint],
-  ) derives Decoder
-
-  final case class HumidityDataPoint(
-    timestamp: Instant,
-    value: Double,
-  ) derives Decoder
-
-  final case class InsideTemperature(
-    timeSeriesType: String,
-    valueType: String,
-    min: Max,
-    max: Max,
-    dataPoints: Vector[InsideTemperatureDataPoint],
-  ) derives Decoder
-
-  final case class InsideTemperatureDataPoint(
-    timestamp: Instant,
-    value: Max,
-  ) derives Decoder
-
-  final case class Max(
+  final case class Temperature(
     celsius: Double,
     fahrenheit: Double,
-  ) derives Decoder
-
-  final case class ReportSettings(
-    timeSeriesType: String,
-    valueType: String,
-    dataIntervals: Vector[SettingsDataInterval],
-  ) derives Decoder
-
-  final case class SettingsDataInterval(
-    from: String,
-    to: String,
-    value: SettingClass,
   ) derives Decoder
 
   final case class SettingClass(
     `type`: String,
     power: String,
-    temperature: Max,
+    temperature: Temperature,
   ) derives Decoder
 
-  final case class Stripes(
-    timeSeriesType: String,
-    valueType: String,
-    dataIntervals: Vector[StripesDataInterval],
-  ) derives Decoder
-
-  final case class StripesDataInterval(
-    from: String,
-    to: String,
-    value: PurpleValue,
-  ) derives Decoder
-
-  final case class PurpleValue(
+  final case class StripeValue(
     stripeType: String,
     setting: SettingClass,
   ) derives Decoder
 
   final case class Weather(
-    condition: Condition,
-    sunny: HotWaterProduction,
-    slots: Slots,
-  ) derives Decoder
-
-  final case class Condition(
-    timeSeriesType: String,
-    valueType: String,
-    dataIntervals: Vector[ConditionDataInterval],
-  ) derives Decoder
-
-  final case class ConditionDataInterval(
-    from: String,
-    to: String,
-    value: Slot,
-  ) derives Decoder
-
-  final case class Slot(
-    state: String,
-    temperature: Max,
-  ) derives Decoder
-
-  final case class Slots(
-    timeSeriesType: String,
-    valueType: String,
-    slots: Map[String, Slot],
+    condition: MeasureType.DataIntervalsMeasure[TimeSeriesType.Slot],
+    sunny: MeasureType.DataIntervalsMeasure[Boolean],
+    slots: MeasureType.SlotsMeasure,
   ) derives Decoder

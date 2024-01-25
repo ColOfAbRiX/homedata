@@ -36,7 +36,7 @@ final class Tado4sClient[F[_]: Async](
    * Logs into the Tado service
    */
   def login(username: String, password: String): F[Unit] =
-    setCredentials(username, password) >> login()
+    setCredentials(username, password) >> loginRequest()
 
   /**
    * Logs out the Tado service
@@ -95,15 +95,15 @@ final class Tado4sClient[F[_]: Async](
       client.expect[WeatherResponse](request)
 
   /**
-   * The weather reported at the house
+   * The a daily reportfor a specific house and zone
    */
-  def getDayReport(homeId: Int, zoneId: Int, date: LocalDate): F[DayReportResponse] =
+  def getZoneDayReport(homeId: Int, zoneId: Int, date: LocalDate): F[DayReportResponse] =
     useAuthClient: client =>
       val url      = config.apiBase / "homes" / homeId / "zones" / zoneId / "dayReport"
       val queryUrl = url.withQueryParam("date", date.toString())
       client.expect[DayReportResponse](GET(queryUrl))
 
-  private def login(): F[Unit] =
+  private def loginRequest(): F[Unit] =
     getCredentials().flatMap: credentials =>
       val requestBody =
         UrlForm(
@@ -128,7 +128,7 @@ final class Tado4sClient[F[_]: Async](
           logger.error("Error while logging in", error)
         }
 
-  private def refreshToken(): F[Unit] =
+  private def refreshTokenRequest(): F[Unit] =
     val requestBody =
       UrlForm(
         "grant_type"    -> "refresh_token",
@@ -150,7 +150,7 @@ final class Tado4sClient[F[_]: Async](
       .handleErrorWith { error =>
         logger.debug("Refresh token failed with error", error) >>
         logger.warn("Unauthenticated, trying to login...") >>
-        login()
+        loginRequest()
       }
       .onError { error =>
         logger.error("Error while logging in", error)
@@ -164,7 +164,7 @@ final class Tado4sClient[F[_]: Async](
         case None =>
           Async[F].raiseError(Tado4sError("Tado4s is not logged in"))
         case Some(authToken) if isTokenExpired(authToken) =>
-          refreshToken() >> retrieve(false)
+          refreshTokenRequest() >> retrieve(false)
         case Some(authToken) =>
           getAuthenticatedClient().flatMap:
             case None =>
@@ -226,8 +226,6 @@ final class Tado4sClient[F[_]: Async](
     atomicState.update:
       _.copy(credentials = None)
 
-end Tado4sClient
-
 object Tado4sClient:
 
   final case class TadoClientState[F[_]](
@@ -260,5 +258,3 @@ object Tado4sClient:
       .flatMap {
         case (httpClient, _) => Tado4sClient(httpClient)
       }
-
-end Tado4sClient

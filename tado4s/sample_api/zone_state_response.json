@@ -1,0 +1,58 @@
+{
+  "tadoMode": "HOME",
+  "geolocationOverride": false,
+  "geolocationOverrideDisableTime": null,
+  "preparation": null,
+  "setting": {
+    "type": "HEATING",
+    "power": "ON",
+    "temperature": {
+      "celsius": 18.00,
+      "fahrenheit": 64.40
+    }
+  },
+  "overlayType": null,
+  "overlay": null,
+  "openWindow": null,
+  "nextScheduleChange": {
+    "start": "2024-01-25T00:00:00Z",
+    "setting": {
+      "type": "HEATING",
+      "power": "ON",
+      "temperature": {
+        "celsius": 17.50,
+        "fahrenheit": 63.50
+      }
+    }
+  },
+  "nextTimeBlock": {
+    "start": "2024-01-25T00:00:00.000Z"
+  },
+  "link": {
+    "state": "ONLINE"
+  },
+  "activityDataPoints": {
+    "heatingPower": {
+      "type": "PERCENTAGE",
+      "percentage": 0.00,
+      "timestamp": "2024-01-24T22:30:16.645Z"
+    }
+  },
+  "sensorDataPoints": {
+    "insideTemperature": {
+      "celsius": 19.55,
+      "fahrenheit": 67.19,
+      "timestamp": "2024-01-24T22:29:05.770Z",
+      "type": "TEMPERATURE",
+      "precision": {
+        "celsius": 0.1,
+        "fahrenheit": 0.1
+      }
+    },
+    "humidity": {
+      "type": "PERCENTAGE",
+      "percentage": 54.20,
+      "timestamp": "2024-01-24T22:29:05.770Z"
+    }
+  }
+}

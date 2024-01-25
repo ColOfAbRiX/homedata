@@ -1,0 +1,48 @@
+{
+  "name": "John Smith",
+  "email": "johnsmith@gmail.com",
+  "username": "johnsmith@gmail.com",
+  "id": "6361c921-47ab-40c8-8b9f-de8e81922ab4",
+  "homes": [
+    {
+      "id": 1000002,
+      "name": "Example House"
+    }
+  ],
+  "locale": "en",
+  "mobileDevices": [
+    {
+      "name": "John Smith's Phone",
+      "id": 1000003,
+      "settings": {
+        "geoTrackingEnabled": true,
+        "specialOffersEnabled": false,
+        "onDemandLogRetrievalEnabled": false,
+        "pushNotifications": {
+          "lowBatteryReminder": true,
+          "awayModeReminder": false,
+          "homeModeReminder": false,
+          "openWindowReminder": true,
+          "energySavingsReportReminder": true,
+          "incidentDetection": true,
+          "energyIqReminder": false
+        }
+      },
+      "location": {
+        "stale": false,
+        "atHome": true,
+        "bearingFromHome": {
+          "degrees": 255.5822604820668,
+          "radians": 4.4607519551018555
+        },
+        "relativeDistanceFromHomeFence": 0.0
+      },
+      "deviceMetadata": {
+        "platform": "Android",
+        "osVersion": "11",
+        "model": "Galaxy",
+        "locale": "en"
+      }
+    }
+  ]
+}
