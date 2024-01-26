@@ -3,19 +3,9 @@ package com.colofabrix.scala.homedata.octopus
 import java.time.Instant
 import com.colofabrix.scala.timeflux.measurements.*
 
-transparent trait OctopusReading
+final case class ElectricityReading(time: Instant, consumption: Double)
 
-final case class ElectricityReading(time: Instant, consumption: Double) extends OctopusReading
-
-final case class GasReading(time: Instant, consumption: Double) extends OctopusReading
-
-object OctopusReading:
-
-  given InfluxSerializable[OctopusReading] with
-    override def toMeasurement(reading: OctopusReading): Measurement =
-      reading match
-        case er: ElectricityReading => er.toMeasurement
-        case gr: GasReading         => gr.toMeasurement
+object ElectricityReading:
 
   given InfluxSerializable[ElectricityReading] with
     override def toMeasurement(reading: ElectricityReading): Measurement =
@@ -25,6 +15,11 @@ object OctopusReading:
         tags = Vector.empty,
         time = reading.time,
       )
+
+
+final case class GasReading(time: Instant, consumption: Double)
+
+object GasReading:
 
   given InfluxSerializable[GasReading] with
     override def toMeasurement(reading: GasReading): Measurement =

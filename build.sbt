@@ -5,6 +5,17 @@ val scala3Version = "3.3.1"
 Global / onChangedBuildSource := ReloadOnSourceChanges
 Compile / run / fork          := true
 
+tpolecatExcludeOptions ++= Set(
+ScalacOptions.    warnUnusedNoWarn,
+    // ScalacOptions.warnUnusedImplicits,
+    ScalacOptions.warnUnusedExplicits,
+    ScalacOptions.warnUnusedImports,
+    ScalacOptions.warnUnusedLocals,
+    // ScalacOptions.warnUnusedParams,
+    ScalacOptions.warnUnusedPatVars,
+    ScalacOptions.warnUnusedPrivates
+)
+
 lazy val root =
   project
     .in(file("."))
