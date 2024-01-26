@@ -33,11 +33,11 @@ object HomeZonesResponse:
     serialNo: String,
     shortSerialNo: String,
     currentFwVersion: String,
-    connectionState: ConnectionState,
+    connectionState: State[Boolean],
     characteristics: Characteristics,
     batteryState: Option[String],
     duties: Vector[String],
-    mountingState: Option[MountingState],
+    mountingState: Option[State[String]],
     mountingStateWithError: Option[String],
     orientation: Option[String],
     childLockEnabled: Option[Boolean],
@@ -48,13 +48,8 @@ object HomeZonesResponse:
     capabilities: Vector[String],
   ) derives Decoder
 
-  final case class ConnectionState(
-    value: Boolean,
-    timestamp: Instant,
-  ) derives Decoder
-
-  final case class MountingState(
-    value: String,
+  final case class State[A](
+    value: A,
     timestamp: Instant,
   ) derives Decoder
 
