@@ -12,29 +12,52 @@ final case class DayReportResponse(
   interval: Interval,
   hoursInDay: Int,
   measuredData: MeasuredData,
-  stripes: TimeSeriesType.DataIntervals[ValueType.Stripes[ValueType.Temperature]],
-  settings: TimeSeriesType.DataIntervals[ValueType.HeatingSetting],
-  callForHeat: TimeSeriesType.DataIntervals[ValueType.CallForHeat],
-  hotWaterProduction: TimeSeriesType.DataIntervals[ValueType.CallForHeat],
+  stripes: Measure.DataIntervals[ValueType.Stripes],
+  settings: Measure.DataIntervals[ValueType.HeatingSetting],
+  callForHeat: Measure.DataIntervals[ValueType.CallForHeat],
+  hotWaterProduction: Measure.DataIntervals[ValueType.Bool],
   weather: Weather,
 ) derives Decoder
 
 object DayReportResponse:
 
+  transparent trait Measure
+
+  object Measure:
+
+    final case class DataPoints[A](
+      timeSeriesType: String,
+      valueType: String,
+      min: Option[A],
+      max: Option[A],
+      percentageUnit: Option[String],
+      dataPoints: Vector[TimeSeriesType.DataPoints[A]]
+    ) extends Measure derives Decoder
+
+    final case class DataIntervals[A](
+      timeSeriesType: String,
+      valueType: String,
+      dataIntervals: Vector[TimeSeriesType.DataIntervals[A]],
+    ) extends Measure derives Decoder
+
+    final case class Slots[A](
+      timeSeriesType: String,
+      valueType: String,
+      slots: Map[String, A],
+    ) extends Measure derives Decoder
+
   transparent trait TimeSeriesType
 
   object TimeSeriesType:
 
-    type Slots[A <: ValueType] = Map[String, A] with TimeSeriesType
-
-    final case class DataIntervals[A <: ValueType](
-      from: String,
-      to: String,
+    final case class DataIntervals[A](
+      from: OffsetDateTime,
+      to: OffsetDateTime,
       value: A,
     ) extends TimeSeriesType derives Decoder
 
-    final case class DataPoints[A <: ValueType](
-      timestamp: Instant,
+    final case class DataPoints[A](
+      timestamp: OffsetDateTime,
       value: A,
     ) extends TimeSeriesType derives Decoder
 
@@ -42,11 +65,11 @@ object DayReportResponse:
 
   object ValueType:
 
-    type CallForHeat = String with ValueType
+    type CallForHeat = String
 
-    type Percentage = Double with ValueType
+    type Percentage = Double
 
-    type Bool = Boolean with ValueType
+    type Bool = Boolean
 
     final case class HeatingSetting(
       `type`: String,
@@ -54,9 +77,9 @@ object DayReportResponse:
       temperature: Option[Temperature],
     ) extends ValueType derives Decoder
 
-    final case class Stripes[A](
+    final case class Stripes(
       stripeType: String,
-      setting: A,
+      setting: Option[HeatingSetting],
     ) extends ValueType derives Decoder
 
     final case class Temperature(
@@ -69,30 +92,19 @@ object DayReportResponse:
       temperature: Temperature,
     ) extends ValueType derives Decoder
 
-  final case class Measure[A <: ValueType](
-    timeSeriesType: String,
-    valueType: String,
-    min: Option[A],
-    max: Option[A],
-    percentageUnit: Option[String],
-    dataPoints: Option[TimeSeriesType.DataPoints[A]],
-    dataIntervals: Option[TimeSeriesType.DataIntervals[A]],
-    // slots: Option[TimeSeriesType.Slots[A]],
-  ) derives Decoder
-
   final case class Interval(
-    from: String,
-    to: String,
+    from: OffsetDateTime,
+    to: OffsetDateTime,
   ) derives Decoder
 
   final case class MeasuredData(
-    // measuringDeviceConnected: TimeSeriesType.DataIntervals[ValueType.Bool],
-    insideTemperature: TimeSeriesType.DataPoints[ValueType.Temperature],
-    // humidity: TimeSeriesType.DataPoints[ValueType.Percentage],
+    measuringDeviceConnected: Measure.DataIntervals[ValueType.Bool],
+    insideTemperature: Measure.DataPoints[ValueType.Temperature],
+    humidity: Measure.DataPoints[ValueType.Percentage],
   ) derives Decoder
 
   final case class Weather(
-    condition: TimeSeriesType.DataIntervals[ValueType.WeatherCondition],
-    // sunny: TimeSeriesType.DataIntervals[ValueType.Bool],
-    // slots: TimeSeriesType.Slots[ValueType.WeatherCondition],
+    condition: Measure.DataIntervals[ValueType.WeatherCondition],
+    sunny: Measure.DataIntervals[ValueType.Bool],
+    slots: Measure.Slots[ValueType.WeatherCondition],
   ) derives Decoder

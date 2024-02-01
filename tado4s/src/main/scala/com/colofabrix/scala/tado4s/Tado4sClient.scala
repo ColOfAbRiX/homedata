@@ -8,7 +8,7 @@ import com.colofabrix.scala.tado4s.Tado4sClient.*
 import fs2.io.net.Network
 import io.odin.*
 import io.odin.formatter.Formatter
-import java.time.Instant
+import java.time.OffsetDateTime
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import org.http4s.*
@@ -120,7 +120,7 @@ final class Tado4sClient[F[_]: Async](
       httpClient
         .expect[AuthResponse](postRequest)
         .flatMap { authResponse =>
-          val expiry    = Instant.now().plus(authResponse.expires_in.toLong, ChronoUnit.SECONDS)
+          val expiry    = OffsetDateTime.now().plus(authResponse.expires_in.toLong, ChronoUnit.SECONDS)
           val authToken = TadoAuthToken(authResponse.access_token, expiry)
           setAuthToken(authToken)
         }
@@ -143,7 +143,7 @@ final class Tado4sClient[F[_]: Async](
     httpClient
       .expect[AuthResponse](postRequest)
       .flatMap { authResponse =>
-        val expiry    = Instant.now().plus(authResponse.expires_in.toLong, ChronoUnit.SECONDS)
+        val expiry    = OffsetDateTime.now().plus(authResponse.expires_in.toLong, ChronoUnit.SECONDS)
         val authToken = TadoAuthToken(authResponse.access_token, expiry)
         setAuthToken(authToken)
       }
@@ -184,7 +184,7 @@ final class Tado4sClient[F[_]: Async](
     }
 
   private def isTokenExpired(authToken: TadoAuthToken): Boolean =
-    authToken.expiry.minus(5, ChronoUnit.SECONDS) isBefore Instant.now()
+    authToken.expiry.minus(5, ChronoUnit.SECONDS) isBefore OffsetDateTime.now()
 
   //  State management  //
 
@@ -241,7 +241,7 @@ object Tado4sClient:
 
   final case class TadoAuthToken(
     bearerToken: String,
-    expiry: Instant,
+    expiry: OffsetDateTime,
   )
 
   def apply[F[_]: Async](httpClient: Client[F]): F[Tado4sClient[F]] =

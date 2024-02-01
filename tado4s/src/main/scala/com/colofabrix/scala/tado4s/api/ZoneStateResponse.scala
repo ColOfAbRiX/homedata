@@ -25,7 +25,7 @@ object ZoneStateResponse:
   final case class HeatingPower(
     `type`: String,
     percentage: Double,
-    timestamp: Instant,
+    timestamp: OffsetDateTime,
   ) derives Decoder
 
   final case class Link(
@@ -56,7 +56,7 @@ object ZoneStateResponse:
   final case class InsideTemperature(
     celsius: Double,
     fahrenheit: Double,
-    timestamp: Instant,
+    timestamp: OffsetDateTime,
     `type`: String,
     precision: Temperature,
   ) derives Decoder

@@ -10,7 +10,7 @@ final case class HomeZonesResponse(
   id: Int,
   name: String,
   `type`: String,
-  dateCreated: Instant,
+  dateCreated: OffsetDateTime,
   deviceTypes: Vector[String],
   devices: Vector[HomeZonesResponse.Device],
   reportAvailable: Boolean,
@@ -50,7 +50,7 @@ object HomeZonesResponse:
 
   final case class State[A](
     value: A,
-    timestamp: Instant,
+    timestamp: OffsetDateTime,
   ) derives Decoder
 
   final case class OpenWindowDetection(

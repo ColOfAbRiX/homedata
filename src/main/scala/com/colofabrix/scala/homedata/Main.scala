@@ -9,7 +9,7 @@ import java.time.*
 
 object Main extends IOApp.Simple:
   // val periodFrom = Instant.parse("2023-07-07T00:00:00.00Z")
-  val periodFrom = Instant.parse("2024-01-01T00:00:00.00Z")
+  val periodFrom = Instant.parse("2024-01-25T00:00:00.00Z")
 
   val run =
     Timeflux

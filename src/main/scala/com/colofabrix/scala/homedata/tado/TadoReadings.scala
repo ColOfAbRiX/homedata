@@ -2,6 +2,7 @@ package com.colofabrix.scala.homedata.tado
 
 import java.time.Instant
 import com.colofabrix.scala.timeflux.measurements.*
+import cats.Semigroup
 
 final case class TadoReading(
   time: Instant,

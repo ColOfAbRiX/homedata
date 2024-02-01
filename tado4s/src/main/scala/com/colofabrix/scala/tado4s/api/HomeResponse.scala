@@ -10,7 +10,7 @@ final case class HomeResponse(
   id: Int,
   name: String,
   dateTimeZone: String, // Could be ZoneId
-  dateCreated: Instant,
+  dateCreated: OffsetDateTime,
   temperatureUnit: String,
   partner: Option[String],
   simpleSmartScheduleEnabled: Boolean,

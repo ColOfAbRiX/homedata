@@ -21,10 +21,7 @@ class Tado private (tadoClient: Tado4sClient[IO], state: Tado.TadoState):
   private def pullRoom(date: LocalDate, roomId: Int): IO[Vector[TadoReading]] =
     tadoClient
       .getZoneDayReport(state.homeId, roomId, date)
-      .flatMap { report =>
-        println(report)
-        IO(Vector.empty[TadoReading])
-      }
+      .map(ReportConverter.convert)
 
 object Tado:
 

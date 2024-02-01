@@ -17,7 +17,7 @@ object WeatherResponse:
   final case class OutsideTemperature(
     celsius: Double,
     fahrenheit: Double,
-    timestamp: Instant,
+    timestamp: OffsetDateTime,
     `type`: String,
     precision: Temperature,
   ) derives Decoder
@@ -30,11 +30,11 @@ object WeatherResponse:
   final case class SolarIntensity(
     `type`: String,
     percentage: Double,
-    timestamp: Instant,
+    timestamp: OffsetDateTime,
   ) derives Decoder
 
   final case class WeatherState(
     `type`: String,
     value: String,
-    timestamp: Instant,
+    timestamp: OffsetDateTime,
   ) derives Decoder
