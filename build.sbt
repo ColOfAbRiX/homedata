@@ -6,14 +6,14 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 Compile / run / fork          := true
 
 tpolecatExcludeOptions ++= Set(
-ScalacOptions.    warnUnusedNoWarn,
-    // ScalacOptions.warnUnusedImplicits,
-    ScalacOptions.warnUnusedExplicits,
-    ScalacOptions.warnUnusedImports,
-    ScalacOptions.warnUnusedLocals,
-    // ScalacOptions.warnUnusedParams,
-    ScalacOptions.warnUnusedPatVars,
-    ScalacOptions.warnUnusedPrivates
+  ScalacOptions.warnUnusedNoWarn,
+  // ScalacOptions.warnUnusedImplicits,
+  ScalacOptions.warnUnusedExplicits,
+  ScalacOptions.warnUnusedImports,
+  ScalacOptions.warnUnusedLocals,
+  // ScalacOptions.warnUnusedParams,
+  ScalacOptions.warnUnusedPatVars,
+  ScalacOptions.warnUnusedPrivates,
 )
 
 lazy val root =
@@ -35,7 +35,7 @@ lazy val root =
         "io.github.arainko"             %% "ducktape"        % "0.1.11",
         "org.http4s"                    %% "http4s-client"   % "0.23.24",
         "org.json4s"                    %% "json4s-native"   % "4.1.0-M4",
-        "org.scalameta"                 %% "munit"           % "0.7.29" % Test,
+        "org.scalatest"                 %% "scalatest"       % "3.2.17" % Test,
         "org.typelevel"                 %% "cats-core"       % "2.10.0",
         "org.typelevel"                 %% "cats-effect"     % "3.5.2",
       ),

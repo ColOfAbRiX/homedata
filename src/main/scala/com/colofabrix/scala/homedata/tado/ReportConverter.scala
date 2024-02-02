@@ -5,7 +5,7 @@ import cats.data.Ior
 import cats.Functor
 import cats.implicits.given
 import cats.kernel.Monoid
-import com.colofabrix.scala.homedata.tado.TimeSlots
+import com.colofabrix.scala.homedata.tado.TimeSlotsM
 import com.colofabrix.scala.tado4s.api.DayReportResponse
 import com.colofabrix.scala.tado4s.api.DayReportResponse.*
 import java.time.*
@@ -15,14 +15,6 @@ import scala.concurrent.duration.*
 object ReportConverter:
 
   private def TimeResolution = 5.minutes
-
-  private given [A]: Monoid[TimeSlots[A]] =
-    new Monoid[TimeSlots[A]] {
-      override def empty: TimeSlots[A] =
-        TimeSlots(TimeResolution)
-      override def combine(x: TimeSlots[A], y: TimeSlots[A]): TimeSlots[A] =
-        x ++ y
-    }
 
   def convert(report: DayReportResponse): Vector[TadoReading] =
     ???
@@ -58,7 +50,7 @@ object ReportConverter:
   //       .dataIntervals
   //       .foldMap {
   //         case DataIntervals(from, to, WeatherCondition(state, ValueType.Temperature(temperature, _))) =>
-  //           TimeSlots(TimeResolution, from, to, temperature)
+  //           TimeSlotsM(TimeResolution, from, to, temperature)
   //       }
   //       .toMap(dayStart, dayEnd)
 
