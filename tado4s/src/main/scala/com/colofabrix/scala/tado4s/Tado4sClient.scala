@@ -8,8 +8,8 @@ import com.colofabrix.scala.tado4s.Tado4sClient.*
 import fs2.io.net.Network
 import io.odin.*
 import io.odin.formatter.Formatter
-import java.time.OffsetDateTime
 import java.time.LocalDate
+import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
 import org.http4s.*
 import org.http4s.circe.CirceEntityDecoder.*
@@ -18,8 +18,6 @@ import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.headers.Authorization
 import org.http4s.Method.*
-import api.AuthResponse
-import api.WeatherResponse
 
 /**
  * Tado Client for Scala
@@ -226,6 +224,9 @@ final class Tado4sClient[F[_]: Async](
     atomicState.update:
       _.copy(credentials = None)
 
+/**
+ * Tado Client for Scala
+ */
 object Tado4sClient:
 
   final case class TadoClientState[F[_]](
@@ -244,12 +245,18 @@ object Tado4sClient:
     expiry: OffsetDateTime,
   )
 
+  /**
+   * Creates a new instance of Tado4s client using the given client
+   */
   def apply[F[_]: Async](httpClient: Client[F]): F[Tado4sClient[F]] =
     for
       initialState <- AtomicCell[F].of(TadoClientState[F](None, None, None))
       client        = new Tado4sClient[F](httpClient, TadoConfig.config, initialState)
     yield client
 
+  /**
+   * Creates a new instance of Tado4s client using http4s Ember Client
+   */
   def clientF[F[_]: Async: Network](): F[Tado4sClient[F]] =
     EmberClientBuilder
       .default[F]

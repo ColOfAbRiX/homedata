@@ -8,75 +8,60 @@ import cats.Monoid
 import com.colofabrix.scala.homedata.tado.TimeSlotsM.*
 import java.time.*
 import java.time.temporal.*
+import java.util.concurrent.TimeUnit
 import scala.collection.immutable.TreeMap
 import scala.collection.SortedMap
 import scala.concurrent.duration.FiniteDuration
 import scala.jdk.DurationConverters.*
-import java.util.concurrent.TimeUnit
 
-final class TimeSlotsM[A] private (val resolution: FiniteDuration, private val store: InnerStore[A]):
+final class TimeSlotsM[A] private (val resolution: FiniteDuration, val store: InnerStore[A]):
+
+  private lazy val javaResolution: Duration =
+    resolution.toJava
 
   def add(time: OffsetDateTime, value: A)(using Semigroup[A]): TimeSlotsM[A] =
     val slotTime = roundToTimeSlot(time)
     val newStore = addToStore(store, slotTime, value)
-    new TimeSlotsM[A](resolution, newStore)
+    copy(store = newStore)
 
-  def combine(other: TimeSlotsM[A])(using Semigroup[A]): TimeSlotsM[A] =
-    if store.isEmpty then
-      other
-    else if other.store.isEmpty then
-      this
-    else
-      val newStore =
-        other
-          .store
-          .foldLeft(store) {
-            case (current, (timeSlot, value)) => addToStore(current, timeSlot, value)
-          }
-
-      new TimeSlotsM[A](resolution, newStore)
-
-  def addToSlotsRange(from: OffsetDateTime, to: OffsetDateTime, value: A)(using Semigroup[A]): TimeSlotsM[A] =
+  def addToRange(from: OffsetDateTime, to: OffsetDateTime, value: A)(using Semigroup[A]): TimeSlotsM[A] =
     val fromTimeSlot = roundToTimeSlot(from)
     val toTimeSlot   = roundToTimeSlot(to)
+    val newStore     = addRangeToStore(store, fromTimeSlot, toTimeSlot, value)
+    copy(store = newStore)
 
-    val newStore =
-      Iterator
-        .iterate(fromTimeSlot)(_.plusSeconds(resolution.toSeconds))
-        .takeWhile { t =>
-          t.isBefore(toTimeSlot) || t.isEqual(toTimeSlot)
-        }
-        .toVector
-        .foldLeft(store) {
-          case (current, time) => addToStore(current, time, value)
-        }
-
-    new TimeSlotsM[A](resolution, store)
+  def combine(other: TimeSlotsM[A])(using Semigroup[A]): TimeSlotsM[A] =
+    if store.isEmpty then other
+    else if other.store.isEmpty then this
+    else
+      val newStore = incorporate(store, other.store, other.resolution.toJava)
+      copy(store = newStore)
 
   def changeResolution(newResolution: FiniteDuration)(using Monoid[A]): TimeSlotsM[A] =
-    if (newResolution === resolution)
-      this
+    if newResolution === resolution then this
     else
-      val initial = new TimeSlotsM[A](newResolution, InnerStore.empty[A])
-      store.foldLeft(initial) {
-        case (current, (from, value)) =>
-          val to = from.plus(resolution.toJava)
-          current.addToSlotsRange(from, to, value)
-      }
+      val newStore = incorporate(InnerStore.empty[A], store, newResolution.toJava)
+      copy(store = newStore)
 
   def toSortedMap(from: OffsetDateTime, to: OffsetDateTime)(using A: Monoid[A]): SortedMap[OffsetDateTime, A] =
     if from isEqual to then
       store
     else
-      new TimeSlotsM[A](resolution, InnerStore.empty)
-        .addToSlotsRange(from, to, A.empty)
+      TimeSlotsM[A](resolution)
+        .addToRange(from, to, A.empty)
         .combine(this)
         .store
 
-  def toSortedMap()(using A: Monoid[A]): SortedMap[OffsetDateTime, A] =
+  def toSortedMap(using A: Monoid[A]): SortedMap[OffsetDateTime, A] =
     (minDateTime, maxDateTime)
       .mapN(toSortedMap)
       .getOrElse(SortedMap.empty)
+
+  def toSlottedSortedMap(from: OffsetDateTime, to: OffsetDateTime): SortedMap[OffsetDateTime, A] =
+    store.filter { case (t, _) => t >= from && t < to }
+
+  val toSlottedSortedMap: SortedMap[OffsetDateTime, A] =
+    store
 
   lazy val minDateTime: Option[OffsetDateTime] =
     store.keySet.minOption
@@ -90,9 +75,10 @@ final class TimeSlotsM[A] private (val resolution: FiniteDuration, private val s
   override def equals(x: Any): Boolean =
     store.equals(x)
 
-  private def addToStore(store: InnerStore[A], slotTime: OffsetDateTime, value: A)(using A: Semigroup[A]): InnerStore[A] =
-    val newValue = store.get(slotTime).fold(value)(_ combine value)
-    store + (slotTime -> newValue)
+  //  Internals  //
+
+  private def copy(resolution: FiniteDuration = resolution, store: InnerStore[A] = store): TimeSlotsM[A] =
+    new TimeSlotsM[A](resolution, store)
 
   private def roundToTimeSlot(value: OffsetDateTime): OffsetDateTime =
     val resUnit = resolution.unit.toChronoUnit()
@@ -100,15 +86,46 @@ final class TimeSlotsM[A] private (val resolution: FiniteDuration, private val s
       .truncatedTo(resUnit)
       .minus(getDateTimeLength(value, resolution.unit) % resolution.length, resUnit)
 
+  private def addToStore(store: InnerStore[A], slotTime: OffsetDateTime, value: A)(using A: Semigroup[A]): InnerStore[A] =
+    val newValue = store.get(slotTime).fold(value)(_ combine value)
+    store + (slotTime -> newValue)
+
+  private def addRangeToStore(
+    store: InnerStore[A],
+    from: OffsetDateTime,
+    to: OffsetDateTime,
+    value: A,
+  )(using Semigroup[A],
+  ): InnerStore[A] =
+    Iterator
+      .iterate(from)(_.plus(javaResolution))
+      .takeWhile { t =>
+        t < to || t ==== to && from ==== to
+      }
+      .foldLeft(store) {
+        case (current, time) => addToStore(current, time, value)
+      }
+
+  private def incorporate(
+    target: InnerStore[A],
+    other: InnerStore[A],
+    otherRes: Duration,
+  )(using Semigroup[A],
+  ): InnerStore[A] =
+    other.foldLeft(target) {
+      case (current, (from, value)) =>
+        addRangeToStore(current, roundToTimeSlot(from), from.plus(otherRes), value)
+    }
+
   private def getDateTimeLength(value: OffsetDateTime, unit: TimeUnit): Long =
     unit match {
-      case TimeUnit.DAYS         => value.getDayOfYear()
+      case TimeUnit.DAYS         => value.getDayOfYear
       case TimeUnit.HOURS        => value.getHour
       case TimeUnit.MINUTES      => value.getMinute
       case TimeUnit.SECONDS      => value.getSecond
-      case TimeUnit.MILLISECONDS => value.getNano.toLong / 1000000
-      case TimeUnit.MICROSECONDS => value.getNano.toLong / 1000
-      case TimeUnit.NANOSECONDS  => value.getNano.toLong
+      case TimeUnit.MILLISECONDS => value.getNano / 1000000
+      case TimeUnit.MICROSECONDS => value.getNano / 1000
+      case TimeUnit.NANOSECONDS  => value.getNano
     }
 
 object TimeSlotsM:
@@ -120,9 +137,6 @@ object TimeSlotsM:
     def empty[A]: TreeMap[OffsetDateTime, A] =
       TreeMap.empty[OffsetDateTime, A]
 
-  private given Ordering[OffsetDateTime] =
-    Ordering.by(_.toEpochSecond())
-
   //  Factory Methods  //
 
   def apply[A: Monoid](resolution: FiniteDuration): TimeSlotsM[A] =
@@ -132,7 +146,7 @@ object TimeSlotsM:
     new TimeSlotsM(resolution, InnerStore.empty[A]) add (time, value)
 
   def apply[A: Monoid](resolution: FiniteDuration, from: OffsetDateTime, to: OffsetDateTime, value: A): TimeSlotsM[A] =
-    new TimeSlotsM(resolution, InnerStore.empty[A]).addToSlotsRange(from, to, value)
+    new TimeSlotsM(resolution, InnerStore.empty[A]).addToRange(from, to, value)
 
   //  Givens  //
 
@@ -158,8 +172,14 @@ object TimeSlotsM:
       else
         x.changeResolution(y.resolution) combine y
 
-  given Align[TimeSlotsM] with
-    def functor: Functor[TimeSlotsM] =
-      summon[Functor[TimeSlotsM]]
-    def align[A, B](fa: TimeSlotsM[A], fb: TimeSlotsM[B]): TimeSlotsM[Ior[A, B]] =
-      ???
+  //  OffsetDateTime  //
+
+  private given Ordering[OffsetDateTime] =
+    Ordering.by(_.toEpochSecond())
+
+  extension (self: OffsetDateTime)
+    def <(other: OffsetDateTime): Boolean    = self.isBefore(other)
+    def <=(other: OffsetDateTime): Boolean   = self.isBefore(other) || self.isEqual(other)
+    def ====(other: OffsetDateTime): Boolean = self.isEqual(other)
+    def >=(other: OffsetDateTime): Boolean   = self.isAfter(other) || self.isEqual(other)
+    def >(other: OffsetDateTime): Boolean    = self.isAfter(other)

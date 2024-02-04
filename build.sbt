@@ -2,27 +2,37 @@ import org.typelevel.scalacoptions.ScalacOptions
 
 val scala3Version = "3.3.1"
 
-Global / onChangedBuildSource := ReloadOnSourceChanges
 Compile / run / fork          := true
-
-tpolecatExcludeOptions ++= Set(
-  ScalacOptions.warnUnusedNoWarn,
-  // ScalacOptions.warnUnusedImplicits,
-  ScalacOptions.warnUnusedExplicits,
-  ScalacOptions.warnUnusedImports,
-  ScalacOptions.warnUnusedLocals,
-  // ScalacOptions.warnUnusedParams,
-  ScalacOptions.warnUnusedPatVars,
-  ScalacOptions.warnUnusedPrivates,
-)
+Global / onChangedBuildSource := ReloadOnSourceChanges
+Global / tpolecatExcludeOptions ++=
+  Set(
+    ScalacOptions.warnUnusedNoWarn,
+    // ScalacOptions.warnUnusedImplicits,
+    ScalacOptions.warnUnusedExplicits,
+    ScalacOptions.warnUnusedImports,
+    ScalacOptions.warnUnusedLocals,
+    // ScalacOptions.warnUnusedParams,
+    ScalacOptions.warnUnusedPatVars,
+    ScalacOptions.warnUnusedPrivates,
+  )
 
 lazy val root =
   project
     .in(file("."))
-    .dependsOn(timeflux, tado4s)
-    .aggregate(timeflux, tado4s, restbee)
+    .aggregate(homedata, timeflux, tado4s, restbee)
     .settings(
-      name         := "homeData",
+      name         := "root",
+      version      := "0.1.0",
+      organization := "com.colofabrix.scala",
+      scalaVersion := scala3Version,
+    )
+
+lazy val homedata =
+  project
+    .in(file("homedata"))
+    .dependsOn(timeflux, tado4s)
+    .settings(
+      name         := "homedata",
       version      := "0.1.0",
       organization := "com.colofabrix.scala.homedata",
       scalaVersion := scala3Version,

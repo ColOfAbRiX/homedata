@@ -5,12 +5,15 @@ import org.http4s.Uri
 import pureconfig.*
 import pureconfig.generic.derivation.default.*
 
-private[tado4s] final case class TadoConfig(
+final private[tado4s] case class TadoConfig(
   apiBase: Uri,
   apiAuth: Uri,
   clientSecret: String,
 )
 
+/**
+ * Tado4s configuration
+ */
 object TadoConfig:
 
   private[this] case class TadoReaderConfig(
