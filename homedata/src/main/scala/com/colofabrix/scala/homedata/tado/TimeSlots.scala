@@ -19,12 +19,12 @@ final class TimeSlots[A] private (val resolution: FiniteDuration, private val st
    * Add a value at a specific point in time into its time slot
    */
   def add(time: OffsetDateTime, value: A): TimeSlots[A] =
-    add(time, Vector(value))
+    add(time, Set(value))
 
   /**
    * Add a collection of values at a specific point in time into its time slot
    */
-  def add(time: OffsetDateTime, values: Vector[A]): TimeSlots[A] =
+  def add(time: OffsetDateTime, values: Set[A]): TimeSlots[A] =
     val slotTime    = roundToTimeSlot(time)
     val timedValues = values.map(TimeValue.InstantValue(time, _))
     val newStore    = addToStore(store, slotTime, timedValues)
@@ -34,12 +34,12 @@ final class TimeSlots[A] private (val resolution: FiniteDuration, private val st
    * Adds a value at a specific interval in time into its time slots
    */
   def add(from: OffsetDateTime, to: OffsetDateTime, value: A): TimeSlots[A] =
-    add(from, to, Vector(value))
+    add(from, to, Set(value))
 
   /**
    * Adds a collection of values at a specific interval in time into its time slots
    */
-  def add(from: OffsetDateTime, to: OffsetDateTime, values: Vector[A]): TimeSlots[A] =
+  def add(from: OffsetDateTime, to: OffsetDateTime, values: Set[A]): TimeSlots[A] =
     if from === to then
       add(from, values)
     else
@@ -74,19 +74,19 @@ final class TimeSlots[A] private (val resolution: FiniteDuration, private val st
   /**
    * Returns a SortedMap of each time slot (even empty ones) for a specific interval of time.
    */
-  def toMap(from: OffsetDateTime, to: OffsetDateTime): SortedMap[OffsetDateTime, Vector[TimeValue[A]]] =
+  def toMap(from: OffsetDateTime, to: OffsetDateTime): SortedMap[OffsetDateTime, Set[TimeValue[A]]] =
     if from === to then
       store
     else
       TimeSlots[A](resolution)
-        .add(from, to, Vector.empty[A])
+        .add(from, to, Set.empty[A])
         .combine(this)
         .store
 
   /**
    * Returns a SortedMap of all time slot (even empty ones)
    */
-  def toMap: SortedMap[OffsetDateTime, Vector[TimeValue[A]]] =
+  def toMap: SortedMap[OffsetDateTime, Set[TimeValue[A]]] =
     (minDateTime, maxDateTime)
       .mapN(toMap)
       .getOrElse(SortedMap.empty)
@@ -94,13 +94,13 @@ final class TimeSlots[A] private (val resolution: FiniteDuration, private val st
   /**
    * Returns a SortedMap of the stored time slots for a specific interval of time.
    */
-  def toRawMap(from: OffsetDateTime, to: OffsetDateTime): SortedMap[OffsetDateTime, Vector[TimeValue[A]]] =
+  def toRawMap(from: OffsetDateTime, to: OffsetDateTime): SortedMap[OffsetDateTime, Set[TimeValue[A]]] =
     store.filter { case (t, _) => t >= from && t < to }
 
   /**
    * Returns a SortedMap of all the stored time slots
    */
-  val toRawMap: SortedMap[OffsetDateTime, Vector[TimeValue[A]]] =
+  val toRawMap: SortedMap[OffsetDateTime, Set[TimeValue[A]]] =
     store
 
   /**
@@ -158,7 +158,7 @@ final class TimeSlots[A] private (val resolution: FiniteDuration, private val st
       .truncatedTo(resUnit)
       .minus(getDateTimeLength(value, resolution.unit) % resolution.length, resUnit)
 
-  private def addToStore(store: InnerStore[A], slotTime: OffsetDateTime, values: Vector[TimeValue[A]]): InnerStore[A] =
+  private def addToStore(store: InnerStore[A], slotTime: OffsetDateTime, values: Set[TimeValue[A]]): InnerStore[A] =
     val newValue = store.get(slotTime).fold(values)(_ ++ values)
     store + (slotTime -> newValue)
 
@@ -167,30 +167,28 @@ final class TimeSlots[A] private (val resolution: FiniteDuration, private val st
     storeResolution: FiniteDuration,
     from: OffsetDateTime,
     to: OffsetDateTime,
-    values: Vector[TimeValue[A]],
+    values: Set[TimeValue[A]],
   ): InnerStore[A] =
     val javaResolution = storeResolution.toJava
     Iterator
       .iterate(from)(_.plus(javaResolution))
-      .takeWhile { time =>
-        time < to || time === to && from === to
-      }
+      .takeWhile(_ <= to)
       .foldLeft(store) {
         case (current, time) => addToStore(current, time, values)
       }
 
   private def combine(target: InnerStore[A], other: InnerStore[A], otherRes: FiniteDuration): InnerStore[A] =
     val roundToOtherTimeSlot = roundToTimeSlot(otherRes, _)
-
-    other.foldLeft(target) {
-      case (store1, (_, values)) =>
-        values.foldLeft(store1) {
-          case (store2, iv @ TimeValue.InstantValue(time, _)) =>
-            addToStore(store2, roundToOtherTimeSlot(time), Vector(iv))
-          case (store2, tsv @ TimeValue.TimeSpanValue(from, to, _)) =>
-            addRangeToStore(store2, otherRes, roundToOtherTimeSlot(from), roundToOtherTimeSlot(to), Vector(tsv))
-        }
-    }
+    other
+      .values
+      .toSet
+      .flatten
+      .foldLeft(target) {
+        case (current, iv @ TimeValue.InstantValue(time, _)) =>
+          addToStore(current, roundToOtherTimeSlot(time), Set(iv))
+        case (current, tsv @ TimeValue.TimeSpanValue(from, to, _)) =>
+          addRangeToStore(current, otherRes, roundToOtherTimeSlot(from), roundToOtherTimeSlot(to), Set(tsv))
+      }
 
   private def getDateTimeLength(value: OffsetDateTime, unit: TimeUnit): Long =
     unit match {
@@ -235,11 +233,11 @@ object TimeSlots:
   //  InnerStore  //
 
   private type InnerStore[A] =
-    TreeMap[OffsetDateTime, Vector[TimeValue[A]]]
+    TreeMap[OffsetDateTime, Set[TimeValue[A]]]
 
   private object InnerStore:
-    def empty[A]: TreeMap[OffsetDateTime, Vector[TimeValue[A]]] =
-      TreeMap.empty[OffsetDateTime, Vector[TimeValue[A]]]
+    def empty[A]: TreeMap[OffsetDateTime, Set[TimeValue[A]]] =
+      TreeMap.empty[OffsetDateTime, Set[TimeValue[A]]]
 
   //  Factory Methods  //
 

@@ -28,7 +28,7 @@ class TimeSlotsSpecs extends AnyFlatSpecLike with Matchers:
     actual shouldBe expected
   }
 
-  it should "add different elements in different Time Slots in the correct order" in {
+  it should "add different instantaneous values in different Time Slots in the correct order" in {
     val value1 = (odt"2024-02-02T11:28:20.0377206Z", 3)
     val value2 = (odt"2024-02-02T11:17:20.8356079Z", 9)
 
@@ -47,7 +47,7 @@ class TimeSlotsSpecs extends AnyFlatSpecLike with Matchers:
     actual shouldBe expected
   }
 
-  it should "add combine elements that fall in the same Time Slot" in {
+  it should "add place together instantaneous values that fall in the same Time Slot" in {
     val value1 = (odt"2024-02-02T11:28:20.0377206Z", 3)
     val value2 = (odt"2024-02-02T11:28:20.0377206Z", 5)
     val value3 = (odt"2024-02-02T11:17:20.8356079Z", 1)
@@ -80,7 +80,7 @@ class TimeSlotsSpecs extends AnyFlatSpecLike with Matchers:
         .add.tupled(value1)
         .toRawMap
 
-    val expected = TreeMap(odt"2024-02-02T11:15:00Z" -> instantValues((value1._1, value1._3)))
+    val expected = TreeMap(odt"2024-02-02T11:15:00Z" -> instantValues(value1.drop(1)))
 
     actual shouldBe expected
   }
@@ -111,7 +111,7 @@ class TimeSlotsSpecs extends AnyFlatSpecLike with Matchers:
     actual shouldBe expected
   }
 
-  it should "add a ime Span value to multiple Time Slots, not including the from-time" in {
+  it should "add a ime Span value to multiple Time Slots, including the from-time" in {
     val value1 = (odt"2024-02-02T11:16:21Z", odt"2024-02-02T11:30:00Z", 3)
 
     val actual =
@@ -124,6 +124,7 @@ class TimeSlotsSpecs extends AnyFlatSpecLike with Matchers:
         odt"2024-02-02T11:15:00Z" -> timeSpanValues(value1),
         odt"2024-02-02T11:20:00Z" -> timeSpanValues(value1),
         odt"2024-02-02T11:25:00Z" -> timeSpanValues(value1),
+        odt"2024-02-02T11:30:00Z" -> timeSpanValues(value1),
       )
 
     actual shouldBe expected
@@ -363,8 +364,8 @@ class TimeSlotsSpecs extends AnyFlatSpecLike with Matchers:
 
   it should "move an Time Span value in the correct Time Slot when upscaling" in {
     val value1 = (odt"2024-02-02T11:17:00Z", odt"2024-02-02T11:18:00Z", 1)
-    val value2 = (odt"2024-02-02T11:13:00Z", odt"2024-02-02T11:23:00Z", 2)
-    val value3 = (odt"2024-02-02T11:28:00Z", odt"2024-02-02T11:28:00Z", 3)
+    val value2 = (odt"2024-02-02T11:13:00Z", odt"2024-02-02T11:18:00Z", 2)
+    val value3 = (odt"2024-02-02T11:13:00Z", odt"2024-02-02T11:28:00Z", 3)
     val value4 = (odt"2024-02-02T11:29:00Z", odt"2024-02-02T11:29:00Z", 4)
 
     val ts =
@@ -378,9 +379,10 @@ class TimeSlotsSpecs extends AnyFlatSpecLike with Matchers:
 
     val expected =
       TreeMap(
-        odt"2024-02-02T11:10:00Z" -> timeSpanValues(value2),
-        odt"2024-02-02T11:15:00Z" -> timeSpanValues(value1),
-        odt"2024-02-02T11:25:00Z" -> timeSpanValues(value3, value4),
+        odt"2024-02-02T11:10:00Z" -> timeSpanValues(value2, value3),
+        odt"2024-02-02T11:15:00Z" -> timeSpanValues(value1, value2, value3),
+        odt"2024-02-02T11:20:00Z" -> timeSpanValues(value3),
+        odt"2024-02-02T11:25:00Z" -> (timeSpanValues(value3) ++ instantValues(value4.drop(1))),
       )
 
     actual.resolution shouldBe 5.minutes
@@ -388,17 +390,38 @@ class TimeSlotsSpecs extends AnyFlatSpecLike with Matchers:
   }
 
   it should "move an Time Span value in the correct Time Slot when downscaling" in {
-    pending
+    val value1 = (odt"2024-02-02T11:17:00Z", odt"2024-02-02T11:18:00Z", 1)
+    val value2 = (odt"2024-02-02T11:13:00Z", odt"2024-02-02T11:18:00Z", 2)
+    val value3 = (odt"2024-02-02T11:13:00Z", odt"2024-02-02T11:28:00Z", 3)
+    val value4 = (odt"2024-02-02T11:29:00Z", odt"2024-02-02T11:29:00Z", 4)
+
+    val ts =
+      TimeSlots[Int](5.minutes)
+        .add.tupled(value1)
+        .add.tupled(value2)
+        .add.tupled(value3)
+        .add.tupled(value4)
+
+    val actual = ts.setResolution(10.minutes)
+
+    val expected =
+      TreeMap(
+        odt"2024-02-02T11:10:00Z" -> timeSpanValues(value1, value2, value3),
+        odt"2024-02-02T11:20:00Z" -> (timeSpanValues(value3) ++ instantValues(value4.drop(1))),
+      )
+
+    actual.resolution shouldBe 10.minutes
+    actual.toRawMap shouldBe expected
   }
 
-  private def instantValues(values: (OffsetDateTime, Int)*): Vector[TimeValue[Int]] =
+  private def instantValues(values: (OffsetDateTime, Int)*): Set[TimeValue[Int]] =
     values
-      .toVector
+      .toSet
       .map { case (time, value) => TimeValue.InstantValue(time, value) }
 
-  private def timeSpanValues(values: (OffsetDateTime, OffsetDateTime, Int)*): Vector[TimeValue[Int]] =
+  private def timeSpanValues(values: (OffsetDateTime, OffsetDateTime, Int)*): Set[TimeValue[Int]] =
     values
-      .toVector
+      .toSet
       .map { case (from, to, value) => TimeValue.TimeSpanValue(from, to, value) }
 
   extension (sc: StringContext)
