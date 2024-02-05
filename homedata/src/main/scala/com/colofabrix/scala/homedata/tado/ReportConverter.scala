@@ -5,7 +5,7 @@ import cats.data.Ior
 import cats.Functor
 import cats.implicits.given
 import cats.kernel.Monoid
-import com.colofabrix.scala.homedata.tado.TimeSlotsM
+import com.colofabrix.scala.homedata.tado.*
 import com.colofabrix.scala.tado4s.api.DayReportResponse
 import com.colofabrix.scala.tado4s.api.DayReportResponse.*
 import java.time.*
