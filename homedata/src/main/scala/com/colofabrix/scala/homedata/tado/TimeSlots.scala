@@ -104,6 +104,12 @@ final class TimeSlots[A] private (val resolution: FiniteDuration, private val st
     store
 
   /**
+   * Returns a SortedMap where the collected values are combined together using Monoid[A]
+   */
+  def toRawMapM(using Monoid[A]): SortedMap[OffsetDateTime, A] =
+    store.map { case (t, vs) => t -> vs.toList.map(_.get).combineAll }
+
+  /**
    * Time time of the earliest stored time slot
    */
   lazy val minDateTime: Option[OffsetDateTime] =
