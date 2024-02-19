@@ -22,7 +22,7 @@ import org.http4s.Method.*
 /**
  * Tado Client for Scala
  */
-final class Tado4sClient[F[_]: Async](
+final class Tado4sClient[F[_]: Async] private (
   httpClient: Client[F],
   config: TadoConfig,
   atomicState: AtomicCell[F, TadoClientState[F]],
@@ -229,18 +229,18 @@ final class Tado4sClient[F[_]: Async](
  */
 object Tado4sClient:
 
-  final case class TadoClientState[F[_]](
+  private final case class TadoClientState[F[_]](
     credentials: Option[TadoCredentials] = None,
     authToken: Option[TadoAuthToken] = None,
     useAuthClient: Option[Client[F]] = None,
   )
 
-  final case class TadoCredentials(
+  private final case class TadoCredentials(
     username: String,
     password: String,
   )
 
-  final case class TadoAuthToken(
+  private final case class TadoAuthToken(
     bearerToken: String,
     expiry: OffsetDateTime,
   )

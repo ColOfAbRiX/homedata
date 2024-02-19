@@ -1,116 +1,79 @@
 package com.colofabrix.scala.homedata.tado
 
 import cats.*
+import cats.effect.*
+import cats.effect.implicits.given
+import cats.effect.unsafe.implicits.given
 import cats.implicits.given
 import com.colofabrix.scala.homedata.tado.*
+import com.colofabrix.scala.homedata.tado.TadoDataStore.given
 import com.colofabrix.scala.tado4s.api.DayReportResponse
 import com.colofabrix.scala.tado4s.api.DayReportResponse.*
 import com.colofabrix.scala.tado4s.api.DayReportResponse.ValueType.*
-import java.time.*
-import java.time.temporal.ChronoUnit
-import scala.concurrent.duration.*
+import io.github.arainko.ducktape.*
+import java.time.OffsetDateTime
 
 object ReportConverter:
 
-  private def TimeResolution =
-    5.minutes
-
-  def convert(report: DayReportResponse): Vector[TadoReading] =
-    val temperatures       = getInsideTemperatures(report)
-    val humidities         = getHumidity(report)
-    val weatherTemperature = getWeatherCondition(report.weather)
-    val allData            = List(temperatures, humidities, weatherTemperature).combineAll
-    allData.toRawMapM.foreach(println)
-    Vector.empty
-
-  private def getInsideTemperatures(report: DayReportResponse): DataStore =
-    report
-      .measuredData
-      .insideTemperature
-      .dataPoints
-      .foldMap {
-        case TimeSeriesType.DataPoints(time, Temperature(temperature, _)) =>
-          DataStore(time, TadoRunningReading(temperature = Some(temperature)))
+  def convert(room: String, report: DayReportResponse): IO[Vector[TadoReading]] =
+    List(getInsideTemperatures(report), getHumidity(report), getWeatherCondition(report.weather))
+      .parSequence
+      .map { disjointReadings =>
+        disjointReadings
+          .combineAll
+          .toRawMapM
+          .toVector
+          .map { (time, reading) => adaptRunningReading(time, room, reading) }
       }
 
-  private def getHumidity(report: DayReportResponse): DataStore =
-    report
-      .measuredData
-      .humidity
-      .dataPoints
-      .foldMap {
-        case TimeSeriesType.DataPoints(time, humidity) =>
-          DataStore(time, TadoRunningReading(humidity = Some(humidity)))
-      }
+  private def adaptRunningReading(time: OffsetDateTime, room: String, reading: TadoRunningReading): TadoReading =
+    reading
+      .into[TadoReading]
+      .transform(
+        Field.const(_.time, time),
+        Field.const(_.room, room),
+        Field.computed(_.atHome, _.atHome.getOrElse(false)),
+        Field.computed(_.windowOpen, _.windowOpen.getOrElse(false)),
+        Field.computed(_.temperature, _.temperature.getOrElse(0.0)),
+        Field.computed(_.humidity, _.humidity.getOrElse(0.0)),
+        Field.computed(_.outsideTemperature, _.outsideTemperature.getOrElse(0.0)),
+        Field.computed(_.outsideSun, _.outsideSun.getOrElse(false)),
+        Field.computed(_.setTemperature, _.setTemperature.getOrElse(0.0)),
+        Field.computed(_.heatingModulation, _.heatingModulation.getOrElse(0.0)),
+      )
 
-  private def getWeatherCondition(weather: Weather): DataStore =
-    weather
-      .condition
-      .dataIntervals
-      .foldMap {
-        case TimeSeriesType.DataIntervals(from, to, WeatherCondition(state, Temperature(temperature, _))) =>
-          val reading = TadoRunningReading(outsideTemperature = Some(temperature), outsideState = Some(state))
-          DataStore(from, to, reading)
-      }
+  private def getInsideTemperatures(report: DayReportResponse): IO[TadoDataStore] =
+    IO {
+      report
+        .measuredData
+        .insideTemperature
+        .dataPoints
+        .foldMap {
+          case TimeSeriesType.DataPoints(time, Temperature(temperature, _)) =>
+            TadoDataStore(time, TadoRunningReading(temperature = Some(temperature)))
+        }
+    }
 
-  //  Data Store  //
+  private def getHumidity(report: DayReportResponse): IO[TadoDataStore] =
+    IO {
+      report
+        .measuredData
+        .humidity
+        .dataPoints
+        .foldMap {
+          case TimeSeriesType.DataPoints(time, humidity) =>
+            TadoDataStore(time, TadoRunningReading(humidity = Some(humidity)))
+        }
+    }
 
-  private type DataStore =
-    TimeSlots[TadoRunningReading]
-
-  private object DataStore:
-    def apply(): DataStore =
-      TimeSlots[TadoRunningReading](TimeResolution)
-
-    def apply(time: OffsetDateTime, reading: TadoRunningReading): DataStore =
-      TimeSlots[TadoRunningReading](TimeResolution, time, reading)
-
-    def apply(from: OffsetDateTime, to: OffsetDateTime, reading: TadoRunningReading): DataStore =
-      TimeSlots[TadoRunningReading](TimeResolution, from, to, reading)
-
-  private given Monoid[DataStore] with
-    def empty: DataStore =
-      DataStore()
-    def combine(x: DataStore, y: DataStore): DataStore =
-      TimeSlots.given_Semigroup_TimeSlots.combine(x, y)
-
-  //  TadoRunningReading  //
-
-  final private[tado] case class TadoRunningReading(
-    atHome: Option[Boolean] = None,
-    windowOpen: Option[Boolean] = None,
-    temperature: Option[Double] = None,
-    humidity: Option[Double] = None,
-    outsideTemperature: Option[Double] = None,
-    outsideState: Option[String] = None,
-    outsideSunny: Option[Boolean] = None,
-    setTemperature: Option[Double] = None,
-    heatingModulation: Option[Double] = None,
-  )
-
-  private[tado] object TadoRunningReading:
-    given Show[TadoRunningReading] with
-      def show(t: TadoRunningReading): String = t.toString()
-
-    given Monoid[TadoRunningReading] with
-      def empty: TadoRunningReading =
-        TadoRunningReading()
-      def combine(x: TadoRunningReading, y: TadoRunningReading): TadoRunningReading =
-        TadoRunningReading(
-          atHome = (x.atHome, y.atHome).last,
-          windowOpen = (x.windowOpen, y.windowOpen).last,
-          temperature = (x.temperature, y.temperature).avg,
-          humidity = (x.humidity, y.humidity).avg,
-          outsideTemperature = (x.outsideTemperature, y.outsideTemperature).avg,
-          outsideState = (x.outsideState, y.outsideState).last,
-          outsideSunny = (x.outsideSunny, y.outsideSunny).last,
-          setTemperature = (x.setTemperature, y.setTemperature).avg,
-          heatingModulation = (x.heatingModulation, y.heatingModulation).avg,
-        )
-
-    extension [A](self: (Option[A], Option[A]))
-      def last: Option[A] =
-        self._2
-      def avg(using A: Fractional[A]): Option[A] =
-        val list = self.toList.flatMap(_.toList)
-        list.reduceOption(A.plus).map(A.div(_, A.fromInt(list.length)))
+  private def getWeatherCondition(weather: Weather): IO[TadoDataStore] =
+    IO {
+      weather
+        .condition
+        .dataIntervals
+        .foldMap {
+          case TimeSeriesType.DataIntervals(from, to, WeatherCondition(state, Temperature(temperature, _))) =>
+            val reading = TadoRunningReading(outsideTemperature = Some(temperature), outsideState = Some(state))
+            TadoDataStore(from, to, reading)
+        }
+    }

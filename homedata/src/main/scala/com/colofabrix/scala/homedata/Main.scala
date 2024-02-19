@@ -6,25 +6,27 @@ import com.colofabrix.scala.homedata.tado.*
 import com.colofabrix.scala.timeflux.*
 import com.colofabrix.scala.timeflux.measurements.Measurement
 import java.time.*
+import java.time.temporal.ChronoUnit
 
 object Main extends IOApp.Simple:
-  // val periodFrom = Instant.parse("2023-07-07T00:00:00.00Z")
-  val periodFrom = Instant.parse("2024-01-25T00:00:00.00Z")
+  // val periodFrom = OffsetDateTime.parse("2024-01-25T00:00:00.00Z")
+  val periodFrom = OffsetDateTime.now().minus(1, ChronoUnit.DAYS)
 
   val run =
     Timeflux
       .client[IO](InfluxDB.config.serverUri, InfluxDB.config.organizationId, InfluxDB.config.authToken)
       .use { timefluxClient =>
         for
-          // _ <- timefluxClient.createBucketIfMissing(InfluxDB.config.octopusBucket)
+          _ <- timefluxClient.createBucketIfMissing(InfluxDB.config.octopusBucket)
           // readings  = octpusReadings(periodFrom) merge tadoReadings(periodFrom)
-          // result  <- timefluxClient.write(InfluxDB.config.octopusBucket, readings)
-          readings <- tadoReadings(periodFrom).compile.toVector
-          _         = readings.foreach(println)
+          readings = tadoReadings(periodFrom)
+          result  <- timefluxClient.write(InfluxDB.config.octopusBucket, readings)
+        // readings <- tadoReadings(periodFrom).compile.toVector
+        // _         = readings.foreach(println)
         yield ()
       }
 
-  private def octpusReadings(from: Instant): fs2.Stream[IO, Measurement] =
+  private def octpusReadings(from: OffsetDateTime): fs2.Stream[IO, Measurement] =
     val electricityReadings =
       Tools
         .pullPaged(OctopusElectricity.pullPage(from))
@@ -37,12 +39,12 @@ object Main extends IOApp.Simple:
 
     (electricityReadings merge gasReadings)
 
-  private def tadoReadings(from: Instant): fs2.Stream[IO, Measurement] =
+  private def tadoReadings(from: OffsetDateTime): fs2.Stream[IO, Measurement] =
     fs2.Stream
       .eval(Tado())
       .flatMap { tadoPuller =>
         Tools
-          .pullRange(from.atZone(ZoneId.systemDefault()).toLocalDate(), Tado.getNextDate(LocalDate.now(), _)) { day =>
+          .pullRange(from.toLocalDate(), Tado.getNextDate(LocalDate.now(), _)) { day =>
             tadoPuller.pullDate(day)
           }
       }

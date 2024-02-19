@@ -1,9 +1,10 @@
 package com.colofabrix.scala.homedata.octopus
 
-import java.time.Instant
+import java.time.OffsetDateTime
 import com.colofabrix.scala.timeflux.measurements.*
+import java.time.OffsetDateTime
 
-final case class ElectricityReading(time: Instant, consumption: Double)
+final case class ElectricityReading(time: OffsetDateTime, consumption: Double)
 
 object ElectricityReading:
 
@@ -17,7 +18,7 @@ object ElectricityReading:
       )
 
 
-final case class GasReading(time: Instant, consumption: Double)
+final case class GasReading(time: OffsetDateTime, consumption: Double)
 
 object GasReading:
 

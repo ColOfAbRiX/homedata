@@ -119,6 +119,10 @@ class TimefluxClient[F[_]: Async](httpClient: Client[F], config: TimefluxClientC
     val body =
       values
         .map(_.toLineProtocol)
+        .map { x =>
+          println(x)
+          x
+        }
         .through(text.utf8.encode)
 
     val request = Request[F](method = POST, uri = requestUri, body = body, headers = headers)

@@ -10,12 +10,12 @@ import sttp.client4.*
 
 object OctopusGas:
 
-  def pullPage(fromDate: Instant)(pageNumber: Int): IO[(Chunk[GasReading], Boolean)] =
+  def pullPage(fromDate: OffsetDateTime)(pageNumber: Int): IO[(Chunk[GasReading], Boolean)] =
     pull(Some(fromDate), None, pageNumber, OctopusConfig.PageSize)
 
   def pull(
-    fromDate: Option[Instant],
-    toDate: Option[Instant],
+    fromDate: Option[OffsetDateTime],
+    toDate: Option[OffsetDateTime],
     pageNumber: Int,
     pageSize: Int,
   ): IO[(Chunk[GasReading], Boolean)] =
@@ -27,17 +27,15 @@ object OctopusGas:
         .addParam("page_size", pageSize.toString)
 
     IO {
-      val response =
-        basicRequest
-          .get(endpointUrl)
-          .auth
-          .basic(user = OctopusConfig.config.apiKey, password = "")
-          .send(Backend.backend)
-
-      response.body.toOption
+      basicRequest
+        .get(endpointUrl)
+        .auth
+        .basic(user = OctopusConfig.config.apiKey, password = "")
+        .send(Backend.backend)
+        .body
+        .toOption
         .map(deserializeResponse)
         .getOrElse {
-          println(s"ERROR: $response")
           (Chunk.empty, false)
         }
     }
@@ -56,7 +54,7 @@ object OctopusGas:
         case JObject(result) <- results
         case JField("consumption", JDouble(value)) <- result
         case JField("interval_start", JString(time)) <- result
-        intervalStart = Instant.parse(time)
+        intervalStart = OffsetDateTime.parse(time)
         reading       = GasReading(intervalStart, value)
       yield reading
 

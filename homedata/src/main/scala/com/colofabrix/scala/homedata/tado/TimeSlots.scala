@@ -130,8 +130,8 @@ final class TimeSlots[A] private (val resolution: FiniteDuration, private val st
   /**
    * Maps the values of the TimeSlots to a new type
    */
-  def map[B](f: A => B): TimeSlots[B] =
-    val newStore = store.map { case (t, as) => t -> as.map(_.map(f)) }
+  def map[B](f: (OffsetDateTime, A) => B): TimeSlots[B] =
+    val newStore = store.map { case (t, as) => t -> as.map(_.map(f(t, _))) }
     new TimeSlots[B](resolution, newStore)
 
   //  Java Overrides  //
@@ -232,8 +232,8 @@ object TimeSlots:
     given [A: Show]: Show[TimeValue[A]] with
       def show(value: TimeValue[A]): String =
         value match {
-          case TimeValue.InstantValue(time, value)      => s"${time}@${value}"
-          case TimeValue.TimeSpanValue(from, to, value) => s"${from}~${to}@${value}"
+          case TimeValue.InstantValue(time, value)      => s"${time}@${value.show}"
+          case TimeValue.TimeSpanValue(from, to, value) => s"${from}~${to}@${value.show}"
         }
 
   //  InnerStore  //
@@ -273,7 +273,7 @@ object TimeSlots:
 
   given Functor[TimeSlots] with
     def map[A, B](fa: TimeSlots[A])(f: A => B): TimeSlots[B] =
-      fa.map(f)
+      fa.map { case (_, a) => f(a) }
 
   given [A]: Semigroup[TimeSlots[A]] with
     def combine(x: TimeSlots[A], y: TimeSlots[A]): TimeSlots[A] =

@@ -1,6 +1,6 @@
 package com.colofabrix.scala.timeflux.measurements
 
-import java.time.Instant
+import java.time.OffsetDateTime
 
 /**
  * InfluxDB Measurement
@@ -9,7 +9,7 @@ final case class Measurement(
   name: String,
   fields: Vector[MeasurementField],
   tags: Vector[MeasurementTag],
-  time: Instant,
+  time: OffsetDateTime,
 )
 
 object Measurement:

@@ -29,6 +29,7 @@ private[timeflux] object MeasurementWriter:
     val lineTime =
       measurement
         .time
+        .toInstant
         .toEpochMilli
         .toString
 

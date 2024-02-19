@@ -1,18 +1,18 @@
 package com.colofabrix.scala.homedata.tado
 
-import java.time.Instant
+import java.time.OffsetDateTime
 import com.colofabrix.scala.timeflux.measurements.*
 import cats.Semigroup
 
 final case class TadoReading(
-  time: Instant,
+  time: OffsetDateTime,
   room: String,
   atHome: Boolean,
   windowOpen: Boolean,
   temperature: Double,
   humidity: Double,
   outsideTemperature: Double,
-  outsideSun: Double,
+  outsideSun: Boolean,
   setTemperature: Double,
   heatingModulation: Double,
 )
