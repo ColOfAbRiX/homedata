@@ -16,6 +16,7 @@ final case class TadoRunningReading(
 )
 
 object TadoRunningReading:
+
   given Show[TadoRunningReading] with
     def show(t: TadoRunningReading): String =
       val fields =
@@ -50,6 +51,7 @@ object TadoRunningReading:
       )
 
   extension [A](self: (Option[A], Option[A]))
+
     def avg(using A: Fractional[A]): Option[A] =
       val list = self.toList.flatMap(_.toList)
       list.reduceOption(A.plus).map(A.div(_, A.fromInt(list.length)))

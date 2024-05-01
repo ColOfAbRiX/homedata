@@ -101,6 +101,8 @@ final class Tado4sClient[F[_]: Async] private (
       val queryUrl = url.withQueryParam("date", date.toString())
       client.expect[DayReportResponse](GET(queryUrl))
 
+  //  Internal operations  //
+
   private def loginRequest(): F[Unit] =
     getCredentials().flatMap: credentials =>
       val requestBody =
@@ -155,23 +157,23 @@ final class Tado4sClient[F[_]: Async] private (
       }
 
   private def useAuthClient[A](f: Client[F] => F[A]): F[A] =
-    def retrieve(retry: Boolean): F[Client[F]] =
+    def retrieve(retries: Int): F[Client[F]] =
       getAuthToken().flatMap:
-        case None if !retry =>
+        case None if retries <= 0 =>
           Async[F].raiseError(Tado4sError("Tado4s could not log in"))
         case None =>
           Async[F].raiseError(Tado4sError("Tado4s is not logged in"))
         case Some(authToken) if isTokenExpired(authToken) =>
-          refreshTokenRequest() >> retrieve(false)
+          refreshTokenRequest() >> retrieve(retries - 1)
         case Some(authToken) =>
           getAuthenticatedClient().flatMap:
             case None =>
               val client = buildAuthenticatedClient(authToken)
-              setAuthenticatedClient(client) >> retrieve(false)
+              setAuthenticatedClient(client) >> retrieve(retries - 1)
             case Some(client) =>
               Async[F].pure(client)
 
-    retrieve(true).flatMap(f)
+    retrieve(1).flatMap(f)
 
   private def buildAuthenticatedClient(authToken: TadoAuthToken): Client[F] =
     Client { request =>
@@ -182,7 +184,7 @@ final class Tado4sClient[F[_]: Async] private (
     }
 
   private def isTokenExpired(authToken: TadoAuthToken): Boolean =
-    authToken.expiry.minus(5, ChronoUnit.SECONDS) isBefore OffsetDateTime.now()
+    authToken.expiry.minus(5, ChronoUnit.SECONDS).isBefore(OffsetDateTime.now())
 
   //  State management  //
 
@@ -229,39 +231,36 @@ final class Tado4sClient[F[_]: Async] private (
  */
 object Tado4sClient:
 
-  private final case class TadoClientState[F[_]](
+  final private case class TadoClientState[F[_]](
     credentials: Option[TadoCredentials] = None,
     authToken: Option[TadoAuthToken] = None,
     useAuthClient: Option[Client[F]] = None,
   )
 
-  private final case class TadoCredentials(
+  final private case class TadoCredentials(
     username: String,
     password: String,
   )
 
-  private final case class TadoAuthToken(
+  final private case class TadoAuthToken(
     bearerToken: String,
     expiry: OffsetDateTime,
   )
 
-  /**
-   * Creates a new instance of Tado4s client using the given client
-   */
-  def apply[F[_]: Async](httpClient: Client[F]): F[Tado4sClient[F]] =
+  /** Creates a new instance of Tado4s client using the given client */
+  def apply[F[_]: Async](maybeConfig: Option[TadoConfig], httpClient: Client[F]): F[Tado4sClient[F]] =
     for
       initialState <- AtomicCell[F].of(TadoClientState[F](None, None, None))
-      client        = new Tado4sClient[F](httpClient, TadoConfig.config, initialState)
+      config        = maybeConfig.getOrElse(TadoConfig.config)
+      client        = new Tado4sClient[F](httpClient, config, initialState)
     yield client
 
-  /**
-   * Creates a new instance of Tado4s client using http4s Ember Client
-   */
-  def clientF[F[_]: Async: Network](): F[Tado4sClient[F]] =
+  /** Creates a new instance of Tado4s client using http4s Ember Client */
+  def apply[F[_]: Async: Network](maybeConfig: Option[TadoConfig]): F[Tado4sClient[F]] =
     EmberClientBuilder
       .default[F]
       .build
       .allocated
       .flatMap {
-        case (httpClient, _) => Tado4sClient(httpClient)
+        case (httpClient, _) => Tado4sClient(maybeConfig, httpClient)
       }

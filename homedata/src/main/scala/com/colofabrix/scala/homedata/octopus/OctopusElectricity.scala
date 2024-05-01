@@ -1,12 +1,12 @@
 package com.colofabrix.scala.homedata.octopus
 
 import cats.effect.IO
-import com.colofabrix.scala.homedata.Backend
 import fs2.Chunk
 import java.time.*
 import org.json4s.*
 import org.json4s.native.JsonMethods.*
 import sttp.client4.*
+import sttp.client4.httpclient.HttpClientSyncBackend
 
 object OctopusElectricity:
 
@@ -31,7 +31,7 @@ object OctopusElectricity:
         .get(endpointUrl)
         .auth
         .basic(user = OctopusConfig.config.apiKey, password = "")
-        .send(Backend.backend)
+        .send(HttpClientSyncBackend())
         .body
         .toOption
         .map(deserializeResponse)

@@ -1,37 +1,38 @@
 package com.colofabrix.scala.homedata.tado
 
 import java.time.OffsetDateTime
-import com.colofabrix.scala.timeflux.measurements.*
+import com.colofabrix.scala.timeflux.measures.*
 import cats.Semigroup
 
 final case class TadoReading(
   time: OffsetDateTime,
   room: String,
-  atHome: Boolean,
-  windowOpen: Boolean,
   temperature: Double,
   humidity: Double,
   outsideTemperature: Double,
-  outsideSun: Boolean,
   setTemperature: Double,
-  heatingModulation: Double,
+  atHome: Option[Boolean],
+  windowOpen: Option[Boolean],
+  outsideSun: Option[Boolean],
+  heatingModulation: Option[Double],
 )
 
 object TadoReading:
 
-  given InfluxSerializable[TadoReading] with
-    override def toMeasurement(reading: TadoReading): Measurement =
-      val room = MeasurementTag("room", reading.room)
+  given TimefluxSerializable[TadoReading] with
 
-      val temperature    = MeasurementField("temperature", FieldValue(reading.temperature))
-      val humidity       = MeasurementField("humidity", FieldValue(reading.humidity))
-      val outsideTemp    = MeasurementField("outsideTemperature", FieldValue(reading.outsideTemperature))
-      val atHome         = MeasurementField("atHome", FieldValue(reading.atHome))
-      val windowOpen     = MeasurementField("windowOpen", FieldValue(reading.windowOpen))
-      val outsideSun     = MeasurementField("outsideSun", FieldValue(reading.outsideSun))
-      val setTemperature = MeasurementField("setTemperature", FieldValue(reading.setTemperature))
-      val heating        = MeasurementField("heatingModulation", FieldValue(reading.heatingModulation))
+    override def toMeasure(reading: TadoReading): Measure =
+      val room = MeasureTag("room", reading.room)
+
+      val temperature    = MeasureField("temperature", FieldValue(reading.temperature))
+      val humidity       = MeasureField("humidity", FieldValue(reading.humidity))
+      val outsideTemp    = MeasureField("outsideTemperature", FieldValue(reading.outsideTemperature))
+      val atHome         = MeasureField("atHome", FieldValue(reading.atHome))
+      val windowOpen     = MeasureField("windowOpen", FieldValue(reading.windowOpen))
+      val outsideSun     = MeasureField("outsideSun", FieldValue(reading.outsideSun))
+      val setTemperature = MeasureField("setTemperature", FieldValue(reading.setTemperature))
+      val heating        = MeasureField("heatingModulation", FieldValue(reading.heatingModulation))
 
       val fields = Vector(temperature, humidity, outsideTemp, atHome, windowOpen, outsideSun, setTemperature, heating)
 
-      Measurement("tado", fields, Vector(room), reading.time)
+      Measure("tado", fields, Vector(room), reading.time)

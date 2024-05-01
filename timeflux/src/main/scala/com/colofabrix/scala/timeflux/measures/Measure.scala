@@ -1,26 +1,26 @@
-package com.colofabrix.scala.timeflux.measurements
+package com.colofabrix.scala.timeflux.measures
 
 import java.time.OffsetDateTime
 
 /**
- * InfluxDB Measurement
+ * InfluxDB Measure
  */
-final case class Measurement(
+final case class Measure(
   name: String,
-  fields: Vector[MeasurementField],
-  tags: Vector[MeasurementTag],
+  fields: Vector[MeasureField],
+  tags: Vector[MeasureTag],
   time: OffsetDateTime,
 )
 
-object Measurement:
+object Measure:
 
-  given InfluxSerializable[Measurement] with
-    def toMeasurement(m: Measurement): Measurement = m
+  given TimefluxSerializable[Measure] with
+    def toMeasure(m: Measure): Measure = m
 
 /**
- * Measurement Field
+ * Measure Field
  */
-final case class MeasurementField(name: String, value: FieldValue)
+final case class MeasureField(name: String, value: FieldValue)
 
 enum FieldValue:
   case StringValue(value: String)    extends FieldValue
@@ -42,6 +42,6 @@ object FieldValue:
       case v: Any        => FieldValue.StringValue(v.toString())
 
 /**
- * Measurement Tag
+ * Measure Tag
  */
-final case class MeasurementTag(name: String, value: String)
+final case class MeasureTag(name: String, value: String)

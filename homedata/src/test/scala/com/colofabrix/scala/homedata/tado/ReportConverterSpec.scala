@@ -10,7 +10,7 @@ import scala.io.Source
 class ReportConverterSpec extends AnyFlatSpecLike with Matchers:
 
   "ReportConverter" should "load the report" in {
-    ReportConverter.convert(sampleReport)
+    ReportConverter.convert("Room #1", sampleReport)
   }
 
   private lazy val sampleReport: DayReportResponse =

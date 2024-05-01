@@ -5,7 +5,7 @@ import org.http4s.Uri
 import pureconfig.*
 import pureconfig.generic.derivation.default.*
 
-final private[tado4s] case class TadoConfig(
+final case class TadoConfig(
   apiBase: Uri,
   apiAuth: Uri,
   clientSecret: String,
@@ -16,13 +16,13 @@ final private[tado4s] case class TadoConfig(
  */
 object TadoConfig:
 
-  private[this] case class TadoReaderConfig(
+  private case class TadoReaderConfig(
     apiBase: String,
     apiAuth: String,
     clientSecret: String,
   ) derives ConfigReader
 
-  val config =
+  val config: TadoConfig =
     ConfigSource
       .default
       .at("tado")

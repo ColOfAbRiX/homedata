@@ -1,16 +1,19 @@
-package com.colofabrix.scala.restbee.encoding
+package com.colofabrix.scala.timeflux.encoding
 
 /**
  * URL Query Parameters Encoding
+ *
+ * Transforms any ADT into a Map[String, String] to be used as QueryParameters in http4s. Product types are encoded
+ * as dot-separated paths and sum types are encoded as strings
  */
-trait UrlParamsEncoder[A]:
+private[timeflux] trait UrlParamsEncoder[A]:
   def encode(a: A): Map[String, String]
 
   extension (a: A)
     def toQueryParams: Map[String, String] =
       encode(a)
 
-object UrlParamsEncoder:
+private[timeflux] object UrlParamsEncoder:
   def apply[A](using ev: UrlParamsEncoder[A]): UrlParamsEncoder[A] = ev
 
   import scala.deriving.Mirror

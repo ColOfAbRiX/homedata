@@ -1,32 +1,43 @@
 package com.colofabrix.scala.homedata.octopus
 
+import com.colofabrix.scala.timeflux.measures.*
 import java.time.OffsetDateTime
-import com.colofabrix.scala.timeflux.measurements.*
 import java.time.OffsetDateTime
+import sttp.client4.httpclient.HttpClientSyncBackend
 
-final case class ElectricityReading(time: OffsetDateTime, consumption: Double)
+sealed trait OctopusReading
+
+object OctopusReading:
+
+  given TimefluxSerializable[OctopusReading] with
+    override def toMeasure(reading: OctopusReading): Measure =
+      reading match {
+        case er: ElectricityReading => er.toMeasure
+        case gr: GasReading         => gr.toMeasure
+      }
+
+final case class ElectricityReading(time: OffsetDateTime, consumption: Double) extends OctopusReading
 
 object ElectricityReading:
 
-  given InfluxSerializable[ElectricityReading] with
-    override def toMeasurement(reading: ElectricityReading): Measurement =
-      Measurement(
+  given TimefluxSerializable[ElectricityReading] with
+    override def toMeasure(reading: ElectricityReading): Measure =
+      Measure(
         name = "electricity",
-        fields = Vector(MeasurementField("consumption", FieldValue(reading.consumption))),
+        fields = Vector(MeasureField("consumption", FieldValue(reading.consumption))),
         tags = Vector.empty,
         time = reading.time,
       )
 
-
-final case class GasReading(time: OffsetDateTime, consumption: Double)
+final case class GasReading(time: OffsetDateTime, consumption: Double) extends OctopusReading
 
 object GasReading:
 
-  given InfluxSerializable[GasReading] with
-    override def toMeasurement(reading: GasReading): Measurement =
-      Measurement(
+  given TimefluxSerializable[GasReading] with
+    override def toMeasure(reading: GasReading): Measure =
+      Measure(
         name = "gas",
-        fields = Vector(MeasurementField("consumption", FieldValue(reading.consumption))),
+        fields = Vector(MeasureField("consumption", FieldValue(reading.consumption))),
         tags = Vector.empty,
         time = reading.time,
       )

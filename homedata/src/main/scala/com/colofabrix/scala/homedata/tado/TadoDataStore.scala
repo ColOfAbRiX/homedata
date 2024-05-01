@@ -22,6 +22,7 @@ object TadoDataStore:
     TimeSlots[TadoRunningReading](TimeResolution, from, to, reading)
 
   given Monoid[TadoDataStore] with
+
     def empty: TadoDataStore =
       TadoDataStore()
 

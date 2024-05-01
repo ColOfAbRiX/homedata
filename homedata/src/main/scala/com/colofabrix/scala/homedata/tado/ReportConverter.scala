@@ -32,14 +32,10 @@ object ReportConverter:
       .transform(
         Field.const(_.time, time),
         Field.const(_.room, room),
-        Field.computed(_.atHome, _.atHome.getOrElse(false)),
-        Field.computed(_.windowOpen, _.windowOpen.getOrElse(false)),
         Field.computed(_.temperature, _.temperature.getOrElse(0.0)),
         Field.computed(_.humidity, _.humidity.getOrElse(0.0)),
         Field.computed(_.outsideTemperature, _.outsideTemperature.getOrElse(0.0)),
-        Field.computed(_.outsideSun, _.outsideSun.getOrElse(false)),
         Field.computed(_.setTemperature, _.setTemperature.getOrElse(0.0)),
-        Field.computed(_.heatingModulation, _.heatingModulation.getOrElse(0.0)),
       )
 
   private def getInsideTemperatures(report: DayReportResponse): IO[TadoDataStore] =

@@ -52,7 +52,7 @@ final class TimeSlots[A] private (val resolution: FiniteDuration, private val st
   /**
    * Non-commutative combine of two TimeSlots
    */
-  def combine(other: TimeSlots[A]): TimeSlots[A] =
+  infix def combine(other: TimeSlots[A]): TimeSlots[A] =
     if store.isEmpty then
       other
     else if other.store.isEmpty then
@@ -212,7 +212,9 @@ object TimeSlots:
   //  TimeValue  //
 
   enum TimeValue[A]:
-    case InstantValue[A](time: OffsetDateTime, value: A)                      extends TimeValue[A]
+
+    case InstantValue[A](time: OffsetDateTime, value: A) extends TimeValue[A]
+
     case TimeSpanValue[A](from: OffsetDateTime, to: OffsetDateTime, value: A) extends TimeValue[A]
 
   object TimeValue:
@@ -251,7 +253,7 @@ object TimeSlots:
     new TimeSlots(resolution, InnerStore.empty[A])
 
   def apply[A](resolution: FiniteDuration, time: OffsetDateTime, value: A): TimeSlots[A] =
-    new TimeSlots(resolution, InnerStore.empty[A]) add (time, value)
+    new TimeSlots(resolution, InnerStore.empty[A]).add(time, value)
 
   def apply[A](resolution: FiniteDuration, from: OffsetDateTime, to: OffsetDateTime, value: A): TimeSlots[A] =
     new TimeSlots(resolution, InnerStore.empty[A]).add(from, to, value)
@@ -277,7 +279,7 @@ object TimeSlots:
 
   given [A]: Semigroup[TimeSlots[A]] with
     def combine(x: TimeSlots[A], y: TimeSlots[A]): TimeSlots[A] =
-      x combine y
+      x.combine(y)
 
   //  OffsetDateTime  //
 

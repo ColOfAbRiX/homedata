@@ -1,4 +1,4 @@
-package com.colofabrix.scala.timeflux.model
+package com.colofabrix.scala.timeflux.api
 
 import io.circe.*
 import io.circe.derivation.*
@@ -38,11 +38,3 @@ final case class Labels(
   orgID: Option[String],
   properties: Map[String, String],
 ) derives Codec.AsObject
-
-//  ---  //
-
-opaque type RetentionPolicy = String
-object RetentionPolicy:
-  extension (self: RetentionPolicy) def value: String = self
-  def apply(value: String): RetentionPolicy =
-    value
