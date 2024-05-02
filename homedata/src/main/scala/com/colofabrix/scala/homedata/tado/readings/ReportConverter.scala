@@ -1,4 +1,4 @@
-package com.colofabrix.scala.homedata.tado
+package com.colofabrix.scala.homedata.tado.readings
 
 import cats.*
 import cats.effect.*
@@ -6,12 +6,15 @@ import cats.effect.implicits.given
 import cats.effect.unsafe.implicits.given
 import cats.implicits.given
 import com.colofabrix.scala.homedata.tado.*
-import com.colofabrix.scala.homedata.tado.TadoDataStore.given
+import com.colofabrix.scala.homedata.tado.store.TadoDataStore
+import com.colofabrix.scala.homedata.tado.store.TadoDataStore.given
 import com.colofabrix.scala.tado4s.api.DayReportResponse
 import com.colofabrix.scala.tado4s.api.DayReportResponse.*
 import com.colofabrix.scala.tado4s.api.DayReportResponse.ValueType.*
 import io.github.arainko.ducktape.*
 import java.time.OffsetDateTime
+import readings.TadoReading
+import readings.TadoRunningReading
 
 object ReportConverter:
 

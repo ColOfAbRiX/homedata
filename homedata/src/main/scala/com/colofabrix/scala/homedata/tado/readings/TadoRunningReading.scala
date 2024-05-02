@@ -1,9 +1,9 @@
-package com.colofabrix.scala.homedata.tado
+package com.colofabrix.scala.homedata.tado.readings
 
 import cats.*
 import cats.implicits.given
 
-final case class TadoRunningReading(
+private[tado] final case class TadoRunningReading(
   atHome: Option[Boolean] = None,
   windowOpen: Option[Boolean] = None,
   temperature: Option[Double] = None,
@@ -15,7 +15,7 @@ final case class TadoRunningReading(
   heatingModulation: Option[Double] = None,
 )
 
-object TadoRunningReading:
+private[tado] object TadoRunningReading:
 
   given Show[TadoRunningReading] with
     def show(t: TadoRunningReading): String =

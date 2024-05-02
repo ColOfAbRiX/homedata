@@ -1,4 +1,4 @@
-package com.colofabrix.scala.homedata.tado
+package com.colofabrix.scala.homedata.tado.readings
 
 import java.time.OffsetDateTime
 import com.colofabrix.scala.timeflux.measures.*

@@ -14,7 +14,7 @@ final case class InfluxDbConfig(
   octopusBucket: String,
 )
 
-object InfluxDB:
+object InfluxDbConfig:
 
   final private case class InfluxDbReaderConfig(
     serverUrl: String,
@@ -36,7 +36,7 @@ object InfluxDB:
         Field.computed(_.authToken, c => AuthToken(c.authToken)),
       )
 
-  val timefluxClientConfig: TimefluxClientConfig =
+  val clientConfig: TimefluxClientConfig =
     config
       .into[TimefluxClientConfig]
       .transform()

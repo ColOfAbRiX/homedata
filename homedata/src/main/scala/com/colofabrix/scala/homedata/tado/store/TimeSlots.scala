@@ -1,8 +1,8 @@
-package com.colofabrix.scala.homedata.tado
+package com.colofabrix.scala.homedata.tado.store
 
 import cats.*
 import cats.implicits.given
-import com.colofabrix.scala.homedata.tado.TimeSlots.*
+import com.colofabrix.scala.homedata.tado.store.TimeSlots.*
 import java.time.*
 import java.util.concurrent.TimeUnit
 import scala.collection.immutable.TreeMap
@@ -116,7 +116,7 @@ final class TimeSlots[A] private (val resolution: FiniteDuration, private val st
     store.keySet.minOption
 
   /**
-   * Time time of the earliest stored time slot
+   * Time time of the latest stored time slot
    */
   lazy val maxDateTime: Option[OffsetDateTime] =
     store.keySet.maxOption

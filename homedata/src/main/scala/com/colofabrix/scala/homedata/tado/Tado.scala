@@ -2,6 +2,7 @@ package com.colofabrix.scala.homedata.tado
 
 import cats.effect.IO
 import cats.implicits.given
+import com.colofabrix.scala.homedata.tado.readings.*
 import com.colofabrix.scala.tado4s.api.HomeZonesResponse
 import com.colofabrix.scala.tado4s.Tado4sClient
 import fs2.{ Chunk, Stream }
@@ -23,7 +24,7 @@ class Tado private (tadoClient: Tado4sClient[IO], state: Tado.TadoState):
       .flatMap(Stream.chunk)
       .evalTap(reading => logger.debug(s"Tado reading: $reading"))
 
-  def pullDate(date: LocalDate): IO[Chunk[TadoReading]] =
+  private def pullDate(date: LocalDate): IO[Chunk[TadoReading]] =
     state
       .rooms
       .keys

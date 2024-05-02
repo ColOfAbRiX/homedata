@@ -1,4 +1,4 @@
-package com.colofabrix.scala.homedata.tado
+package com.colofabrix.scala.homedata.tado.readings
 
 import cats.implicits.given
 import com.colofabrix.scala.tado4s.api.DayReportResponse

@@ -1,7 +1,8 @@
-package com.colofabrix.scala.homedata.tado
+package com.colofabrix.scala.homedata.tado.store
 
-import java.time.OffsetDateTime
 import cats.kernel.Monoid
+import com.colofabrix.scala.homedata.tado.readings.TadoRunningReading
+import java.time.OffsetDateTime
 import scala.concurrent.duration.*
 
 type TadoDataStore =
