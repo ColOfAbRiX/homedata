@@ -180,6 +180,7 @@ final class Tado4sClient[F[_]: Async] private (
       val authorization = Authorization(Credentials.Token(AuthScheme.Bearer, authToken.bearerToken))
       val authHeaders   = request.headers.put(authorization)
       val authRequest   = request.withHeaders(authHeaders)
+      logger.debug(s"Running Tado4s request: $authRequest")
       httpClient.run(authRequest)
     }
 

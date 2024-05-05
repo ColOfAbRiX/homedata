@@ -18,6 +18,7 @@ import org.http4s.client.Client
 import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.Method.*
+import org.http4s.client.UnexpectedStatus
 
 /**
  * InfluxDB Client for Scala
@@ -49,8 +50,8 @@ final class TimefluxClient[F[_]: Async] private (
   def listBuckets(request: ListBucketRequest): F[ListBucketsResponse] =
     getApiUrl().flatMap: apiUrl =>
       useAuthClient: client =>
-        val requestUri = apiUrl.withQueryParams(request.toQueryParams)
-        client.expect[ListBucketsResponse](GET(requestUri))
+        val requestUri = (apiUrl / "buckets").withQueryParams(request.toQueryParams)
+        client.expectOr[ListBucketsResponse](GET(requestUri))(handleRequestError)
 
   /**
    * Creates a bucket
@@ -58,17 +59,25 @@ final class TimefluxClient[F[_]: Async] private (
   def createBucket(request: CreateBucketRequest): F[CreateBucketResponse] =
     getApiUrl().flatMap: apiUrl =>
       useAuthClient: client =>
-        client.expect[CreateBucketResponse](POST(request, apiUrl))
+        val requestUri = apiUrl / "buckets"
+        client.expectOr[CreateBucketResponse](POST(request, requestUri))(handleRequestError)
 
   /**
    * Checks if a bucket exists and, if it doesn't, it creates it
    */
   def createBucketIfMissing(request: CreateBucketRequest): F[Option[CreateBucketResponse]] =
-    for
-      found <- listBuckets(ListBucketRequest(name = Some(request.name)))
-      result <- if found.buckets.isEmpty then createBucket(request).map(Some(_))
-                else Async[F].pure(None)
-    yield result
+    listBuckets(ListBucketRequest(name = Some(request.name)))
+    .attempt
+    .flatMap {
+      case Left(TimefluxRequestError(_, msg, _, _)) if msg.contains(s"bucket \"${request.name}\" not found") =>
+        Async[F].pure(None)
+      case Left(error) =>
+        Async[F].raiseError(error)
+      case Right(ListBucketsResponse(Nil, _)) =>
+        Async[F].pure(None)
+      case Right(_) =>
+        createBucket(request).map(Some(_))
+    }
 
   /**
    * Writes a stream of TimefluxSerializable values in a bucket
@@ -87,14 +96,19 @@ final class TimefluxClient[F[_]: Async] private (
             "Accept"       -> "application/json",
           )
 
-        val requestUri = apiUrl.withQueryParams(request.toQueryParams)
+        val requestUri = (apiUrl / "write").withQueryParams(request.toQueryParams)
 
         val body =
           values
             .map(_.toLineProtocol.value)
             .through(fs2.text.utf8.encode)
 
-        val postRequest = Request[F](method = POST, uri = requestUri, body = body, headers = headers)
+        val postRequest = Request[F](
+          method = POST,
+          uri = requestUri,
+          body = body,
+          headers = headers,
+        )
 
         client.expect(postRequest)
 
@@ -121,8 +135,13 @@ final class TimefluxClient[F[_]: Async] private (
       val authHeaders   = request.headers.put(authorization)
       val authUri       = request.uri.withQueryParam("orgID", creds.orgId.value)
       val authRequest   = request.withHeaders(authHeaders).withUri(authUri)
+      println(s"Request: $request")
+      logger.debug(s"Running Timeflux request: $request")
       httpClient.run(authRequest)
     }
+
+  private def handleRequestError[A](response: Response[F]): F[Throwable] =
+    response.as[TimefluxRequestError].map(_.asInstanceOf[Throwable])
 
   //  State management  //
 

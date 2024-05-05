@@ -11,7 +11,7 @@ import java.time.*
 import org.json4s.*
 import org.json4s.native.JsonMethods.*
 
-class Tado private (tadoClient: Tado4sClient[IO], state: Tado.TadoState):
+class TadoPuller private (tadoClient: Tado4sClient[IO], state: TadoPuller.TadoState):
 
   private val logger: Logger[IO] = consoleLogger()
 
@@ -22,7 +22,9 @@ class Tado private (tadoClient: Tado4sClient[IO], state: Tado.TadoState):
         pullDate(currentDate).map((_, nextDate))
       }
       .flatMap(Stream.chunk)
-      .evalTap(reading => logger.debug(s"Tado reading: $reading"))
+      .evalTap { reading =>
+        logger.trace(s"Tado reading: $reading")
+      }
 
   private def pullDate(date: LocalDate): IO[Chunk[TadoReading]] =
     state
@@ -39,14 +41,14 @@ class Tado private (tadoClient: Tado4sClient[IO], state: Tado.TadoState):
       .getZoneDayReport(state.homeId, roomId, date)
       .flatMap(ReportConverter.convert(state.rooms(roomId), _))
 
-object Tado:
+object TadoPuller:
 
   private case class TadoState(
     homeId: Int,
     rooms: Map[Int, String],
   )
 
-  def apply(): IO[Tado] =
+  def apply(): IO[TadoPuller] =
     for
       tadoClient <- Tado4sClient[IO](None)
       _          <- tadoClient.login(TadoConfig.config.username, TadoConfig.config.password)
@@ -54,11 +56,11 @@ object Tado:
       homeId      = account.homes.head.id
       zones      <- tadoClient.getHomeZones(homeId)
     yield
-      val rooms = buildRooms(zones)
+      val rooms = buildRoomsList(zones)
       val state = TadoState(homeId, rooms)
-      new Tado(tadoClient, state)
+      new TadoPuller(tadoClient, state)
 
-  private def buildRooms(zones: Vector[HomeZonesResponse]): Map[Int, String] =
+  private def buildRoomsList(zones: Vector[HomeZonesResponse]): Map[Int, String] =
     zones
       .filter(_.`type` =!= "HOT_WATER")
       .map(zone => (zone.id, zone.name))

@@ -11,7 +11,7 @@ final case class InfluxDbConfig(
   serverUrl: Uri,
   orgId: OrgId,
   authToken: AuthToken,
-  octopusBucket: String,
+  projectBucket: String,
 )
 
 object InfluxDbConfig:
@@ -20,7 +20,7 @@ object InfluxDbConfig:
     serverUrl: String,
     orgId: String,
     authToken: String,
-    octopusBucket: String,
+    projectBucket: String,
   ) derives ConfigReader
 
   val config: InfluxDbConfig =

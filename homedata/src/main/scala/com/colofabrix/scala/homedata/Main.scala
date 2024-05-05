@@ -1,5 +1,6 @@
 package com.colofabrix.scala.homedata
 
+import cats.implicits.given
 import cats.effect.*
 import com.colofabrix.scala.homedata.influx.InfluxDbConfig
 import com.colofabrix.scala.homedata.octopus.*
@@ -19,19 +20,15 @@ object Main extends IOApp.Simple with TimefluxDSL:
   val run =
     for {
       timefluxClient <- TimefluxClient[IO](InfluxDbConfig.clientConfig)
-      _              <- timefluxClient.createBucketIfMissing(InfluxDbConfig.config.octopusBucket)
+      buckets        <- timefluxClient.listBuckets()
+      _              <- timefluxClient.createBucketIfMissing(InfluxDbConfig.config.projectBucket)
+      // tadoPuller     <- TadoPuller()
+      // tadoReading     = tadoPuller.pullReadings(periodFrom, periodTo)
       // octopus  = octpusReadings(periodFrom) merge tadoMeasurements(periodFrom)
-      tado = tadoMeasurements(periodFrom, periodTo)
       // _         = tado.foreach(println)
       // allReadings <- octopus merge tado
-      result <- timefluxClient.write(InfluxDbConfig.config.octopusBucket, "s", tado)
+      // result <- timefluxClient.write(InfluxDbConfig.config.projectBucket, tadoReading)
     } yield ()
-
-  private def tadoMeasurements(from: OffsetDateTime, to: OffsetDateTime): fs2.Stream[IO, Measure] =
-    for
-      tado    <- fs2.Stream.eval(Tado())
-      reading <- tado.pullReadings(from, to)
-    yield reading.toMeasure
 
   private def octopusMeasurements(from: OffsetDateTime): fs2.Stream[IO, Measure] =
     Octopus

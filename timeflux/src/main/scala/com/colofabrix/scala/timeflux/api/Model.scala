@@ -2,11 +2,12 @@ package com.colofabrix.scala.timeflux.api
 
 import io.circe.*
 import io.circe.derivation.*
+import java.time.*
 
 final case class Buckets(
   name: String,
   retentionRules: List[RetentionRules],
-  createdAt: Option[String],
+  createdAt: Option[OffsetDateTime],
   description: Option[String],
   id: Option[String],
   labels: Option[List[Labels]],
@@ -14,7 +15,7 @@ final case class Buckets(
   orgID: Option[String],
   schemaType: Option[String],
   `type`: Option[String],
-  updatedAt: Option[String],
+  updatedAt: Option[OffsetDateTime],
 ) derives Codec.AsObject
 
 final case class RetentionRules(
