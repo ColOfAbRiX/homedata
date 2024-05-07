@@ -37,7 +37,7 @@ trait TimefluxDSL:
       retentionRules: List[RetentionRules] = List.empty,
     ): F[CreateBucketResponse] =
       timefluxClient.createBucket(
-        CreateBucketRequest(name, description, retentionRules),
+        CreateBucketRequest(name, None, description, retentionRules),
       )
 
     /**
@@ -49,7 +49,7 @@ trait TimefluxDSL:
       retentionRules: List[RetentionRules] = List.empty,
     ): F[Option[CreateBucketResponse]] =
       timefluxClient.createBucketIfMissing(
-        CreateBucketRequest(name, description, retentionRules),
+        CreateBucketRequest(name, None, description, retentionRules),
       )
 
     /**

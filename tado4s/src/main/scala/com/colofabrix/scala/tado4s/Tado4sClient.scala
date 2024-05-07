@@ -15,6 +15,7 @@ import org.http4s.*
 import org.http4s.circe.CirceEntityDecoder.*
 import org.http4s.client.Client
 import org.http4s.client.dsl.Http4sClientDsl
+import org.http4s.client.middleware.Logger
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.headers.Authorization
 import org.http4s.Method.*
@@ -168,20 +169,21 @@ final class Tado4sClient[F[_]: Async] private (
         case Some(authToken) =>
           getAuthenticatedClient().flatMap:
             case None =>
-              val client = buildAuthenticatedClient(authToken)
+              val client = buildHttpClient(authToken)
               setAuthenticatedClient(client) >> retrieve(retries - 1)
             case Some(client) =>
               Async[F].pure(client)
 
     retrieve(1).flatMap(f)
 
-  private def buildAuthenticatedClient(authToken: TadoAuthToken): Client[F] =
-    Client { request =>
-      val authorization = Authorization(Credentials.Token(AuthScheme.Bearer, authToken.bearerToken))
-      val authHeaders   = request.headers.put(authorization)
-      val authRequest   = request.withHeaders(authHeaders)
-      logger.debug(s"Running Tado4s request: $authRequest")
-      httpClient.run(authRequest)
+  private def buildHttpClient(authToken: TadoAuthToken): Client[F] =
+    Logger(logBody = false, logHeaders = true) {
+      Client { request =>
+        val authorization = Authorization(Credentials.Token(AuthScheme.Bearer, authToken.bearerToken))
+        val authHeaders   = request.headers.put(authorization)
+        val authRequest   = request.withHeaders(authHeaders)
+        httpClient.run(authRequest)
+      }
     }
 
   private def isTokenExpired(authToken: TadoAuthToken): Boolean =

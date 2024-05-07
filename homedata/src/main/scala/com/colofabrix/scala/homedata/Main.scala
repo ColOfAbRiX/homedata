@@ -20,14 +20,12 @@ object Main extends IOApp.Simple with TimefluxDSL:
   val run =
     for {
       timefluxClient <- TimefluxClient[IO](InfluxDbConfig.clientConfig)
-      buckets        <- timefluxClient.listBuckets()
-      _              <- timefluxClient.createBucketIfMissing(InfluxDbConfig.config.projectBucket)
-      // tadoPuller     <- TadoPuller()
-      // tadoReading     = tadoPuller.pullReadings(periodFrom, periodTo)
+      result              <- timefluxClient.createBucketIfMissing(InfluxDbConfig.config.projectBucket)
+      tadoPuller     <- TadoPuller()
+      tadoReading     = tadoPuller.pullReadings(periodFrom, periodTo)
       // octopus  = octpusReadings(periodFrom) merge tadoMeasurements(periodFrom)
-      // _         = tado.foreach(println)
       // allReadings <- octopus merge tado
-      // result <- timefluxClient.write(InfluxDbConfig.config.projectBucket, tadoReading)
+      result <- timefluxClient.write(InfluxDbConfig.config.projectBucket, tadoReading.take(3))
     } yield ()
 
   private def octopusMeasurements(from: OffsetDateTime): fs2.Stream[IO, Measure] =

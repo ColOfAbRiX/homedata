@@ -27,12 +27,13 @@ object TadoReading:
       val temperature    = MeasureField("temperature", FieldValue(reading.temperature))
       val humidity       = MeasureField("humidity", FieldValue(reading.humidity))
       val outsideTemp    = MeasureField("outsideTemperature", FieldValue(reading.outsideTemperature))
-      val atHome         = MeasureField("atHome", FieldValue(reading.atHome))
-      val windowOpen     = MeasureField("windowOpen", FieldValue(reading.windowOpen))
-      val outsideSun     = MeasureField("outsideSun", FieldValue(reading.outsideSun))
       val setTemperature = MeasureField("setTemperature", FieldValue(reading.setTemperature))
-      val heating        = MeasureField("heatingModulation", FieldValue(reading.heatingModulation))
 
-      val fields = Vector(temperature, humidity, outsideTemp, atHome, windowOpen, outsideSun, setTemperature, heating)
+      val atHome         = reading.atHome.map(r => MeasureField("atHome", FieldValue(r))).toVector
+      val windowOpen     = reading.windowOpen.map(r => MeasureField("windowOpen", FieldValue(r))).toVector
+      val outsideSun     = reading.outsideSun.map(r => MeasureField("outsideSun", FieldValue(r))).toVector
+      val heating        = reading.heatingModulation.map(r => MeasureField("heatingModulation", FieldValue(r))).toVector
+
+      val fields = Vector(temperature, humidity, outsideTemp, setTemperature) ++ atHome ++ windowOpen ++ outsideSun ++ heating
 
       Measure("tado", fields, Vector(room), reading.time)

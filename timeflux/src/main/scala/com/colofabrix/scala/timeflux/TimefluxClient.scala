@@ -4,9 +4,9 @@ import cats.effect.Async
 import cats.effect.std.AtomicCell
 import cats.implicits.given
 import com.colofabrix.scala.timeflux.api.*
-import com.colofabrix.scala.timeflux.model.*
 import com.colofabrix.scala.timeflux.config.*
 import com.colofabrix.scala.timeflux.measures.*
+import com.colofabrix.scala.timeflux.model.*
 import com.colofabrix.scala.timeflux.TimefluxClient.*
 import fs2.io.net.Network
 import io.odin.*
@@ -16,9 +16,9 @@ import org.http4s.circe.CirceEntityDecoder.*
 import org.http4s.circe.CirceEntityEncoder.*
 import org.http4s.client.Client
 import org.http4s.client.dsl.Http4sClientDsl
+import org.http4s.client.middleware.Logger
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.Method.*
-import org.http4s.client.UnexpectedStatus
 
 /**
  * InfluxDB Client for Scala
@@ -51,7 +51,7 @@ final class TimefluxClient[F[_]: Async] private (
     getApiUrl().flatMap: apiUrl =>
       useAuthClient: client =>
         val requestUri = (apiUrl / "buckets").withQueryParams(request.toQueryParams)
-        client.expectOr[ListBucketsResponse](GET(requestUri))(handleRequestError)
+        client.expectOr[ListBucketsResponse](GET(requestUri))(handleResponseError)
 
   /**
    * Creates a bucket
@@ -60,24 +60,26 @@ final class TimefluxClient[F[_]: Async] private (
     getApiUrl().flatMap: apiUrl =>
       useAuthClient: client =>
         val requestUri = apiUrl / "buckets"
-        client.expectOr[CreateBucketResponse](POST(request, requestUri))(handleRequestError)
+        request.injectOrgId(_.orgID, x => request.copy(orgID = x)) { req =>
+          client.expectOr[CreateBucketResponse](POST(req, requestUri))(handleResponseError)
+        }
 
   /**
    * Checks if a bucket exists and, if it doesn't, it creates it
    */
   def createBucketIfMissing(request: CreateBucketRequest): F[Option[CreateBucketResponse]] =
     listBuckets(ListBucketRequest(name = Some(request.name)))
-    .attempt
-    .flatMap {
-      case Left(TimefluxRequestError(_, msg, _, _)) if msg.contains(s"bucket \"${request.name}\" not found") =>
-        Async[F].pure(None)
-      case Left(error) =>
-        Async[F].raiseError(error)
-      case Right(ListBucketsResponse(Nil, _)) =>
-        Async[F].pure(None)
-      case Right(_) =>
-        createBucket(request).map(Some(_))
-    }
+      .attempt
+      .flatMap {
+        case Left(TimefluxRequestError(_, msg, _, _)) if msg.contains(s"bucket \"${request.name}\" not found") =>
+          createBucket(request).map(Some(_))
+        case Left(error) =>
+          Async[F].raiseError(error)
+        case Right(ListBucketsResponse(Nil, _)) =>
+          createBucket(request).map(Some(_))
+        case Right(_) =>
+          Async[F].pure(None)
+      }
 
   /**
    * Writes a stream of TimefluxSerializable values in a bucket
@@ -100,17 +102,27 @@ final class TimefluxClient[F[_]: Async] private (
 
         val body =
           values
-            .map(_.toLineProtocol.value)
+            .map(_.toLineProtocol.value + "\n")
             .through(fs2.text.utf8.encode)
 
-        val postRequest = Request[F](
-          method = POST,
-          uri = requestUri,
-          body = body,
-          headers = headers,
-        )
+        val postRequest =
+          Request[F](
+            method = POST,
+            uri = requestUri,
+            body = body,
+            headers = headers,
+          )
 
-        client.expect(postRequest)
+        client
+          .run(postRequest)
+          .use { response =>
+            if (response.status.isSuccess)
+              Async[F].unit
+            else
+              response
+                .as[TimefluxRequestError]
+                .flatMap(Async[F].raiseError)
+          }
 
   private def useAuthClient[A](f: Client[F] => F[A]): F[A] =
     def retrieve(): F[Client[F]] =
@@ -120,7 +132,7 @@ final class TimefluxClient[F[_]: Async] private (
             case None =>
               Async[F].raiseError(TimefluxException("No Influx credentials set.", None))
             case Some(creds) =>
-              val client = buildAuthenticatedClient(creds)
+              val client = buildHttpClient(creds)
               setAuthenticatedClient(client) >> retrieve()
           }
         case Some(client) =>
@@ -129,18 +141,32 @@ final class TimefluxClient[F[_]: Async] private (
 
     retrieve().flatMap(f)
 
-  private def buildAuthenticatedClient(creds: TimefluxCredentials): Client[F] =
-    Client { request =>
-      val authorization = Headers("Authorization" -> s"Token ${creds.token.value}")
-      val authHeaders   = request.headers.put(authorization)
-      val authUri       = request.uri.withQueryParam("orgID", creds.orgId.value)
-      val authRequest   = request.withHeaders(authHeaders).withUri(authUri)
-      println(s"Request: $request")
-      logger.debug(s"Running Timeflux request: $request")
-      httpClient.run(authRequest)
+  extension [A](self: A)
+    private def injectOrgId[B](g: A => Option[String], s: Option[String] => A)(f: A => F[B]): F[B] =
+      g(self) match {
+        case Some(_) =>
+          Async[F].pure(self).flatMap(f)
+        case None =>
+          getCredentials().flatMap {
+            case Some(TimefluxCredentials(_, orgId)) =>
+              Async[F].pure(s(Some(orgId.value))).flatMap(f)
+            case None =>
+              Async[F].raiseError(TimefluxException("Required OrgID parameter is not set.", None))
+          }
+      }
+
+  private def buildHttpClient(creds: TimefluxCredentials): Client[F] =
+    Logger(logBody = false, logHeaders = true) {
+      Client { request =>
+        val authorization = Headers("Authorization" -> s"Token ${creds.token.value}")
+        val authHeaders   = request.headers.put(authorization)
+        val authUri       = request.uri.withQueryParam("orgID", creds.orgId.value)
+        val authRequest   = request.withHeaders(authHeaders).withUri(authUri)
+        httpClient.run(authRequest)
+      }
     }
 
-  private def handleRequestError[A](response: Response[F]): F[Throwable] =
+  private def handleResponseError[A](response: Response[F]): F[Throwable] =
     response.as[TimefluxRequestError].map(_.asInstanceOf[Throwable])
 
   //  State management  //

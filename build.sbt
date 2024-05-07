@@ -37,6 +37,7 @@ lazy val homedata =
       organization := "com.colofabrix.scala.homedata",
       scalaVersion := scala3Version,
       libraryDependencies ++= List(
+        "ch.qos.logback"                 % "logback-classic" % "1.3.4",
         "co.fs2"                        %% "fs2-core"        % "3.9.3",
         "co.fs2"                        %% "fs2-io"          % "3.9.3",
         "com.github.pureconfig"         %% "pureconfig-cats" % "0.17.4",
@@ -94,8 +95,8 @@ lazy val tado4s =
         "org.http4s"            %% "http4s-client"       % "0.23.24",
         "org.http4s"            %% "http4s-dsl"          % "0.23.24",
         "org.http4s"            %% "http4s-ember-client" % "0.23.24",
+        "org.scalatest"         %% "scalatest"           % "3.2.17" % Test,
         "org.typelevel"         %% "cats-core"           % "2.10.0",
         "org.typelevel"         %% "cats-effect"         % "3.5.2",
-        "org.scalatest"         %% "scalatest"           % "3.2.17" % Test,
       ),
     )
