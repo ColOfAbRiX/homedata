@@ -3,11 +3,8 @@ package com.colofabrix.scala.timeflux.api
 import com.colofabrix.scala.timeflux.encoding.UrlParamsEncoder
 
 /**
- * Write GET Request
+ * Delete Bucket DEL Request
  */
-final case class WriteRequest(
-  bucket: String,
-  orgID: Option[String],
-  precision: Option[String],
+final case class DeleteBucketRequest(
+  bucketID: String,
 ) derives UrlParamsEncoder
-

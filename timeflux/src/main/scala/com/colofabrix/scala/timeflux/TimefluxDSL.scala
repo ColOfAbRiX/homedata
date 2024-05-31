@@ -61,6 +61,6 @@ trait TimefluxDSL:
       precision: Option[String] = None,
     ): F[Unit] =
       timefluxClient.write(
-        WriteRequest(bucket, precision),
+        WriteRequest(bucket, None, precision),
         values,
       )

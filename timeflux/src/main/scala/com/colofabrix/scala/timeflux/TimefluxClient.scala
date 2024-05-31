@@ -48,21 +48,35 @@ final class TimefluxClient[F[_]: Async] private (
    * List one or all the buckets
    */
   def listBuckets(request: ListBucketRequest): F[ListBucketsResponse] =
-    getApiUrl().flatMap: apiUrl =>
-      useAuthClient: client =>
-        val requestUri = (apiUrl / "buckets").withQueryParams(request.toQueryParams)
-        client.expectOr[ListBucketsResponse](GET(requestUri))(handleResponseError)
+    for
+      baseApiUrl <- getApiUrl()
+      client     <- getLoggedClient()
+      requestUri  = (baseApiUrl / "buckets").withQueryParams(request.toQueryParams)
+      result     <- client.expectOr[ListBucketsResponse](GET(requestUri))(handleClientExpectError)
+    yield result
 
   /**
    * Creates a bucket
    */
   def createBucket(request: CreateBucketRequest): F[CreateBucketResponse] =
-    getApiUrl().flatMap: apiUrl =>
-      useAuthClient: client =>
-        val requestUri = apiUrl / "buckets"
-        request.injectOrgId(_.orgID, x => request.copy(orgID = x)) { req =>
-          client.expectOr[CreateBucketResponse](POST(req, requestUri))(handleResponseError)
-        }
+    for
+      baseApiUrl <- getApiUrl()
+      client     <- getLoggedClient()
+      reqWithId  <- request.withOrgId(_.orgID, x => request.copy(orgID = x))
+      requestUri  = baseApiUrl / "buckets"
+      result     <- client.expectOr[CreateBucketResponse](POST(reqWithId, requestUri))(handleClientExpectError)
+    yield result
+
+  /**
+   * Deletes a bucket
+   */
+  def deleteBucket(request: DeleteBucketRequest): F[Unit] =
+    for
+      baseApiUrl <- getApiUrl()
+      client     <- getLoggedClient()
+      requestUri  = baseApiUrl / "buckets" / request.bucketID
+      result     <- client.run(DELETE(requestUri)).use(handleClientRunError)
+    yield result
 
   /**
    * Checks if a bucket exists and, if it doesn't, it creates it
@@ -90,73 +104,65 @@ final class TimefluxClient[F[_]: Async] private (
   //  Internal operations  //
 
   private def writeStream(request: WriteRequest, values: fs2.Stream[F, Measure]): F[Unit] =
-    getApiUrl().flatMap: apiUrl =>
-      useAuthClient: client =>
-        val headers =
-          Headers(
-            "Content-Type" -> "text/plain; charset=utf-8",
-            "Accept"       -> "application/json",
-          )
+    getApiUrl().flatMap: baseApiUrl =>
+      getLoggedClient().flatMap: client =>
+        request.withOrgId(_.orgID, x => request.copy(orgID = x)).flatMap: requestWithOrg =>
+          val headers =
+            Headers(
+              "Content-Type" -> "text/plain; charset=utf-8",
+              "Accept"       -> "application/json",
+            )
 
-        val requestUri = (apiUrl / "write").withQueryParams(request.toQueryParams)
+          val requestUri = (baseApiUrl / "write").withQueryParams(requestWithOrg.toQueryParams)
 
-        val body =
-          values
-            .map(_.toLineProtocol.value + "\n")
-            .through(fs2.text.utf8.encode)
+          val body =
+            values
+              .map(_.toLineProtocol.value.trim + "\n")
+              .evalTap(line => logger.trace(line))
+              .through(fs2.text.utf8.encode)
 
-        val postRequest =
-          Request[F](
-            method = POST,
-            uri = requestUri,
-            body = body,
-            headers = headers,
-          )
+          val postRequest =
+            Request[F](
+              method = POST,
+              uri = requestUri,
+              body = body,
+              headers = headers,
+            )
 
-        client
-          .run(postRequest)
-          .use { response =>
-            if (response.status.isSuccess)
-              Async[F].unit
-            else
-              response
-                .as[TimefluxRequestError]
-                .flatMap(Async[F].raiseError)
-          }
+          client
+            .run(postRequest)
+            .use(handleClientRunError)
 
-  private def useAuthClient[A](f: Client[F] => F[A]): F[A] =
-    def retrieve(): F[Client[F]] =
-      getAuthenticatedClient().flatMap {
-        case None =>
-          getCredentials().flatMap {
-            case None =>
-              Async[F].raiseError(TimefluxException("No Influx credentials set.", None))
-            case Some(creds) =>
-              val client = buildHttpClient(creds)
-              setAuthenticatedClient(client) >> retrieve()
-          }
-        case Some(client) =>
-          Async[F].pure(client)
-      }
-
-    retrieve().flatMap(f)
+  private def getLoggedClient[A](): F[Client[F]] =
+    getAuthenticatedClient().flatMap {
+      case None =>
+        getCredentials().flatMap {
+          case None =>
+            Async[F].raiseError(TimefluxException("No Influx credentials set.", None))
+          case Some(creds) =>
+            val client = buildHttpClient(creds)
+            setAuthenticatedClient(client) >> getLoggedClient()
+        }
+      case Some(client) =>
+        Async[F].pure(client)
+    }
 
   extension [A](self: A)
-    private def injectOrgId[B](g: A => Option[String], s: Option[String] => A)(f: A => F[B]): F[B] =
-      g(self) match {
+    private def withOrgId[B](get: A => Option[String], set: Option[String] => A): F[A] =
+      get(self) match {
         case Some(_) =>
-          Async[F].pure(self).flatMap(f)
+          Async[F].pure(self)
         case None =>
           getCredentials().flatMap {
             case Some(TimefluxCredentials(_, orgId)) =>
-              Async[F].pure(s(Some(orgId.value))).flatMap(f)
+              Async[F].pure(set(Some(orgId.value)))
             case None =>
               Async[F].raiseError(TimefluxException("Required OrgID parameter is not set.", None))
           }
       }
 
   private def buildHttpClient(creds: TimefluxCredentials): Client[F] =
-    Logger(logBody = false, logHeaders = true) {
+    // Logger(logBody = true, logHeaders = true) {
       Client { request =>
         val authorization = Headers("Authorization" -> s"Token ${creds.token.value}")
         val authHeaders   = request.headers.put(authorization)
@@ -164,10 +170,22 @@ final class TimefluxClient[F[_]: Async] private (
         val authRequest   = request.withHeaders(authHeaders).withUri(authUri)
         httpClient.run(authRequest)
       }
-    }
+    // }
 
-  private def handleResponseError[A](response: Response[F]): F[Throwable] =
-    response.as[TimefluxRequestError].map(_.asInstanceOf[Throwable])
+  //  Error handlers  //
+
+  private def handleClientRunError(response: Response[F]): F[Unit] =
+    if (response.status.isSuccess)
+      Async[F].unit
+    else
+      response
+        .as[TimefluxRequestError]
+        .flatMap(Async[F].raiseError)
+
+  private def handleClientExpectError(response: Response[F]): F[Throwable] =
+    response
+      .as[TimefluxRequestError]
+      .map(_.asInstanceOf[Throwable])
 
   //  State management  //
 
@@ -227,16 +245,16 @@ object TimefluxClient:
     clientConfig: TimefluxClientConfig,
     httpClient: Client[F],
   ): F[TimefluxClient[F]] =
-    val initialState =
-      TimefluxClientState[F](
-        serverUrl = Some(clientConfig.serverUrl),
-        credentials = Some(TimefluxCredentials(clientConfig.authToken, clientConfig.orgId)),
-      )
-
-    for
-      initialState <- AtomicCell[F].of(initialState)
-      client        = new TimefluxClient[F](httpClient, TimefluxConfig.config, initialState)
-    yield client
+    AtomicCell[F]
+      .of {
+        TimefluxClientState[F](
+          serverUrl = Some(clientConfig.serverUrl),
+          credentials = Some(TimefluxCredentials(clientConfig.authToken, clientConfig.orgId)),
+        )
+      }
+      .map { initialAtomicState =>
+        new TimefluxClient[F](httpClient, TimefluxConfig.config, initialAtomicState)
+      }
 
   /**
    * Creates a new instance of TimefluxClient client using http4s Ember Client

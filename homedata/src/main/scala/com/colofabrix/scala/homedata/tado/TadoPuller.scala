@@ -22,9 +22,7 @@ class TadoPuller private (tadoClient: Tado4sClient[IO], state: TadoPuller.TadoSt
         pullDate(currentDate).map((_, nextDate))
       }
       .flatMap(Stream.chunk)
-      .evalTap { reading =>
-        logger.trace(s"Tado reading: $reading")
-      }
+      .evalTap(reading => logger.trace(reading.show))
 
   private def pullDate(date: LocalDate): IO[Chunk[TadoReading]] =
     state

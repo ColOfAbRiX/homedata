@@ -14,18 +14,18 @@ import java.time.temporal.ChronoUnit
 
 object Main extends IOApp.Simple with TimefluxDSL:
 
-  val periodFrom = OffsetDateTime.now.minus(2, ChronoUnit.DAYS)
+  val periodFrom = OffsetDateTime.now.minus(1, ChronoUnit.DAYS)
   val periodTo   = OffsetDateTime.now
 
   val run =
     for {
       timefluxClient <- TimefluxClient[IO](InfluxDbConfig.clientConfig)
-      result              <- timefluxClient.createBucketIfMissing(InfluxDbConfig.config.projectBucket)
+      _              <- timefluxClient.createBucketIfMissing(InfluxDbConfig.config.projectBucket)
       tadoPuller     <- TadoPuller()
       tadoReading     = tadoPuller.pullReadings(periodFrom, periodTo)
       // octopus  = octpusReadings(periodFrom) merge tadoMeasurements(periodFrom)
       // allReadings <- octopus merge tado
-      result <- timefluxClient.write(InfluxDbConfig.config.projectBucket, tadoReading.take(3))
+      _ <- timefluxClient.write(InfluxDbConfig.config.projectBucket, tadoReading, Some("ms"))
     } yield ()
 
   private def octopusMeasurements(from: OffsetDateTime): fs2.Stream[IO, Measure] =
