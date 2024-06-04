@@ -3,8 +3,8 @@ package com.colofabrix.scala.timeflux.encoding
 /**
  * URL Query Parameters Encoding
  *
- * Transforms any ADT into a Map[String, String] to be used as QueryParameters in http4s. Product types are encoded
- * as dot-separated paths and sum types are encoded as strings
+ * Transforms any ADT into a Map[String, String] to be used as QueryParameters in http4s. Product types are encoded as
+ * dot-separated paths and sum types are encoded as strings
  */
 private[timeflux] trait UrlParamsEncoder[A]:
   def encode(a: A): Map[String, String]
@@ -14,10 +14,10 @@ private[timeflux] trait UrlParamsEncoder[A]:
       encode(a)
 
 private[timeflux] object UrlParamsEncoder:
-  def apply[A](using ev: UrlParamsEncoder[A]): UrlParamsEncoder[A] = ev
-
   import scala.deriving.Mirror
   import scala.compiletime.*
+
+  def apply[A](using ev: UrlParamsEncoder[A]): UrlParamsEncoder[A] = ev
 
   final inline def derived[A](using inline m: Mirror.Of[A]): UrlParamsEncoder[A] =
     inline m match
@@ -39,7 +39,7 @@ private[timeflux] object UrlParamsEncoder:
           }
           .toMap
 
-      private def encodeElement(elem: Any, elemLabel: String, elemEncoder: UrlParamsEncoder[Any]) =
+      private def encodeElement(elem: Any, elemLabel: String, elemEncoder: UrlParamsEncoder[Any]): List[(String, String)] =
         elemEncoder
           .encode(elem)
           .toList
@@ -58,7 +58,8 @@ private[timeflux] object UrlParamsEncoder:
 
   inline def getElemLabels[A <: Tuple]: List[String] =
     inline erasedValue[A] match
-      case _: EmptyTuple => Nil
+      case _: EmptyTuple =>
+        Nil
       case _: (head *: tail) =>
         val headElementLabel  = constValue[head].toString
         val tailElementLabels = getElemLabels[tail]
@@ -66,7 +67,8 @@ private[timeflux] object UrlParamsEncoder:
 
   inline def getTypeclassInstances[A <: Tuple]: List[UrlParamsEncoder[Any]] =
     inline erasedValue[A] match
-      case _: EmptyTuple => Nil
+      case _: EmptyTuple =>
+        Nil
       case _: (head *: tail) =>
         val headTypeClass   = summonInline[UrlParamsEncoder[head]]
         val tailTypeClasses = getTypeclassInstances[tail]
@@ -75,8 +77,8 @@ private[timeflux] object UrlParamsEncoder:
   //  Aggregations  //
 
   given optionUrlParamsEncoder[A](using UrlParamsEncoder[A]): UrlParamsEncoder[Option[A]] with
-    def encode(oa: Option[A]): Map[String, String] =
-      oa.fold(Map.empty)(UrlParamsEncoder[A].encode)
+    def encode(as: Option[A]): Map[String, String] =
+      as.fold(Map.empty)(UrlParamsEncoder[A].encode)
 
   given iterableUrlParamsEncoder[A](using UrlParamsEncoder[A]): UrlParamsEncoder[Iterable[A]] with
     def encode(as: Iterable[A]): Map[String, String] =

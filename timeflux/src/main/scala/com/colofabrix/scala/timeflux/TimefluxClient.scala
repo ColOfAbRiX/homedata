@@ -162,7 +162,7 @@ final class TimefluxClient[F[_]: Async] private (
       }
 
   private def buildHttpClient(creds: TimefluxCredentials): Client[F] =
-    // Logger(logBody = true, logHeaders = true) {
+    Logger(logBody = true, logHeaders = true) {
       Client { request =>
         val authorization = Headers("Authorization" -> s"Token ${creds.token.value}")
         val authHeaders   = request.headers.put(authorization)
@@ -170,7 +170,7 @@ final class TimefluxClient[F[_]: Async] private (
         val authRequest   = request.withHeaders(authHeaders).withUri(authUri)
         httpClient.run(authRequest)
       }
-    // }
+    }
 
   //  Error handlers  //
 

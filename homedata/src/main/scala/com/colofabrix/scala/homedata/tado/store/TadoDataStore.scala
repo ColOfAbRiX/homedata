@@ -1,12 +1,15 @@
 package com.colofabrix.scala.homedata.tado.store
 
 import cats.kernel.Monoid
-import com.colofabrix.scala.homedata.tado.readings.TadoRunningReading
+import com.colofabrix.scala.homedata.tado.readings.TadoReading
 import java.time.OffsetDateTime
 import scala.concurrent.duration.*
 
+/**
+  * Store for Tado Readings
+  */
 type TadoDataStore =
-  TimeSlots[TadoRunningReading]
+  TimeSlots[TadoReading]
 
 object TadoDataStore:
 
@@ -14,13 +17,13 @@ object TadoDataStore:
     15.minutes
 
   def apply(): TadoDataStore =
-    TimeSlots[TadoRunningReading](TimeResolution)
+    TimeSlots[TadoReading](TimeResolution)
 
-  def apply(time: OffsetDateTime, reading: TadoRunningReading): TadoDataStore =
-    TimeSlots[TadoRunningReading](TimeResolution, time, reading)
+  def apply(time: OffsetDateTime, reading: TadoReading): TadoDataStore =
+    TimeSlots[TadoReading](TimeResolution, time, reading)
 
-  def apply(from: OffsetDateTime, to: OffsetDateTime, reading: TadoRunningReading): TadoDataStore =
-    TimeSlots[TadoRunningReading](TimeResolution, from, to, reading)
+  def apply(from: OffsetDateTime, to: OffsetDateTime, reading: TadoReading): TadoDataStore =
+    TimeSlots[TadoReading](TimeResolution, from, to, reading)
 
   given Monoid[TadoDataStore] with
 

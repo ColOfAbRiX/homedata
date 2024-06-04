@@ -8,4 +8,3 @@ final case class TimefluxClientConfig(
   authToken: AuthToken,
   orgId: OrgId,
 )
-

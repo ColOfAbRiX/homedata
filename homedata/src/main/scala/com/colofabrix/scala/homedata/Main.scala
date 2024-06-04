@@ -1,16 +1,13 @@
 package com.colofabrix.scala.homedata
 
-import cats.implicits.given
 import cats.effect.*
 import com.colofabrix.scala.homedata.influx.InfluxDbConfig
-import com.colofabrix.scala.homedata.octopus.*
+// import com.colofabrix.scala.homedata.octopus.*
 import com.colofabrix.scala.homedata.tado.*
 import com.colofabrix.scala.timeflux.*
-import com.colofabrix.scala.timeflux.api.*
-import com.colofabrix.scala.timeflux.config.TimefluxClientConfig
-import com.colofabrix.scala.timeflux.measures.*
 import java.time.*
 import java.time.temporal.ChronoUnit
+import com.colofabrix.scala.timeflux.api.TimePrecision
 
 object Main extends IOApp.Simple with TimefluxDSL:
 
@@ -25,10 +22,5 @@ object Main extends IOApp.Simple with TimefluxDSL:
       tadoReading     = tadoPuller.pullReadings(periodFrom, periodTo)
       // octopus  = octpusReadings(periodFrom) merge tadoMeasurements(periodFrom)
       // allReadings <- octopus merge tado
-      _ <- timefluxClient.write(InfluxDbConfig.config.projectBucket, tadoReading, Some("ms"))
+      _ <- timefluxClient.write(InfluxDbConfig.config.projectBucket, tadoReading, Some(TimePrecision.Milliseconds))
     } yield ()
-
-  private def octopusMeasurements(from: OffsetDateTime): fs2.Stream[IO, Measure] =
-    Octopus
-      .pullReadings(from)
-      .map(_.toMeasure)

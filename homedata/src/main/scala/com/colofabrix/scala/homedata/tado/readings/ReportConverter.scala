@@ -3,7 +3,6 @@ package com.colofabrix.scala.homedata.tado.readings
 import cats.*
 import cats.effect.*
 import cats.effect.implicits.given
-import cats.effect.unsafe.implicits.given
 import cats.implicits.given
 import com.colofabrix.scala.homedata.tado.*
 import com.colofabrix.scala.homedata.tado.store.TadoDataStore
@@ -11,35 +10,31 @@ import com.colofabrix.scala.homedata.tado.store.TadoDataStore.given
 import com.colofabrix.scala.tado4s.api.DayReportResponse
 import com.colofabrix.scala.tado4s.api.DayReportResponse.*
 import com.colofabrix.scala.tado4s.api.DayReportResponse.ValueType.*
-import io.github.arainko.ducktape.*
 import java.time.OffsetDateTime
-import readings.TadoReading
-import readings.TadoRunningReading
 
 object ReportConverter:
 
   def convert(room: String, report: DayReportResponse): IO[Vector[TadoReading]] =
-    List(getInsideTemperatures(report), getHumidity(report), getWeatherCondition(report.weather))
+    val getters =
+      List(
+        getInsideTemperatures(report),
+        getHumidity(report),
+        getSetTemperature(report.settings),
+        getWeatherCondition(report.weather.condition),
+        getOutsideSun(report.weather.sunny)
+      )
+
+    getters
       .parSequence
       .map { disjointReadings =>
         disjointReadings
           .combineAll
           .toRawMapM
           .toVector
-          .map { (time, reading) => adaptRunningReading(time, room, reading) }
+          .map { (time, reading) =>
+            reading.copy(room = Some(room), time = Some(time))
+          }
       }
-
-  private def adaptRunningReading(time: OffsetDateTime, room: String, reading: TadoRunningReading): TadoReading =
-    reading
-      .into[TadoReading]
-      .transform(
-        Field.const(_.time, time),
-        Field.const(_.room, room),
-        Field.computed(_.temperature, _.temperature.getOrElse(0.0)),
-        Field.computed(_.humidity, _.humidity.getOrElse(0.0)),
-        Field.computed(_.outsideTemperature, _.outsideTemperature.getOrElse(0.0)),
-        Field.computed(_.setTemperature, _.setTemperature.getOrElse(0.0)),
-      )
 
   private def getInsideTemperatures(report: DayReportResponse): IO[TadoDataStore] =
     IO {
@@ -49,7 +44,7 @@ object ReportConverter:
         .dataPoints
         .foldMap {
           case TimeSeriesType.DataPoints(time, Temperature(temperature, _)) =>
-            TadoDataStore(time, TadoRunningReading(temperature = Some(temperature)))
+            TadoDataStore(time, TadoReading(temperature = Some(temperature)))
         }
     }
 
@@ -61,18 +56,41 @@ object ReportConverter:
         .dataPoints
         .foldMap {
           case TimeSeriesType.DataPoints(time, humidity) =>
-            TadoDataStore(time, TadoRunningReading(humidity = Some(humidity)))
+            TadoDataStore(time, TadoReading(humidity = Some(humidity)))
         }
     }
 
-  private def getWeatherCondition(weather: Weather): IO[TadoDataStore] =
+  private def getSetTemperature(settings: Measure.DataIntervals[ValueType.HeatingSetting]): IO[TadoDataStore] =
     IO {
-      weather
-        .condition
+      settings
+        .dataIntervals
+        .foldMap {
+          case TimeSeriesType.DataIntervals(from, to, ValueType.HeatingSetting(_, _, Some(Temperature(temp, _)))) =>
+            val reading = TadoReading(setTemperature = Some(temp))
+            TadoDataStore(from, to, reading)
+          case TimeSeriesType.DataIntervals(_, _, ValueType.HeatingSetting(_, _, None)) =>
+            TadoDataStore()
+        }
+    }
+
+  private def getWeatherCondition(condition: Measure.DataIntervals[ValueType.WeatherCondition]): IO[TadoDataStore] =
+    IO {
+      condition
         .dataIntervals
         .foldMap {
           case TimeSeriesType.DataIntervals(from, to, WeatherCondition(state, Temperature(temperature, _))) =>
-            val reading = TadoRunningReading(outsideTemperature = Some(temperature), outsideState = Some(state))
+            val reading = TadoReading(outsideTemperature = Some(temperature), outsideState = Some(state))
+            TadoDataStore(from, to, reading)
+        }
+    }
+
+  private def getOutsideSun(sunny: Measure.DataIntervals[ValueType.Bool]): IO[TadoDataStore] =
+    IO {
+      sunny
+        .dataIntervals
+        .foldMap {
+          case TimeSeriesType.DataIntervals(from, to, isSunny) =>
+            val reading = TadoReading(outsideSun = Some(isSunny))
             TadoDataStore(from, to, reading)
         }
     }

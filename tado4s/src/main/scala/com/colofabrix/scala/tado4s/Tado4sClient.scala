@@ -49,58 +49,72 @@ final class Tado4sClient[F[_]: Async] private (
    * Information about the Tado account
    */
   def getAccountInfo(): F[AccountResponse] =
-    useAuthClient: client =>
-      val request = GET(config.apiBase / "me")
-      client.expect[AccountResponse](request)
+    for
+      client <- withAuthClient()
+      request = GET(config.apiBase / "me")
+      result <- client.expect[AccountResponse](request)
+    yield result
 
   /**
    * Information about a specific Home
    */
   def getHomeDetails(homeId: Int): F[HomeResponse] =
-    useAuthClient: client =>
-      val request = GET(config.apiBase / "homes" / homeId)
-      client.expect[HomeResponse](request)
+    for
+      client <- withAuthClient()
+      request = GET(config.apiBase / "homes" / homeId)
+      result <- client.expect[HomeResponse](request)
+    yield result
 
   /**
    * Information about the zones of a specific Home
    */
   def getHomeZones(homeId: Int): F[Vector[HomeZonesResponse]] =
-    useAuthClient: client =>
-      val request = GET(config.apiBase / "homes" / homeId / "zones")
-      client.expect[Vector[HomeZonesResponse]](request)
+    for
+      client <- withAuthClient()
+      request = GET(config.apiBase / "homes" / homeId / "zones")
+      result <- client.expect[Vector[HomeZonesResponse]](request)
+    yield result
 
   /**
    * Information the state of a Home
    */
   def getHomeState(homeId: Int): F[HomeStateResponse] =
-    useAuthClient: client =>
-      val request = GET(config.apiBase / "homes" / homeId / "state")
-      client.expect[HomeStateResponse](request)
+    for
+      client <- withAuthClient()
+      request = GET(config.apiBase / "homes" / homeId / "state")
+      result <- client.expect[HomeStateResponse](request)
+    yield result
 
   /**
    * State of a specific Zone in a specific Home
    */
   def getZoneState(homeId: Int, zoneId: Int): F[ZoneStateResponse] =
-    useAuthClient: client =>
-      val request = GET(config.apiBase / "homes" / homeId / "zones" / zoneId / "state")
-      client.expect[ZoneStateResponse](request)
+    for
+      client <- withAuthClient()
+      request = GET(config.apiBase / "homes" / homeId / "zones" / zoneId / "state")
+      result <- client.expect[ZoneStateResponse](request)
+    yield result
 
   /**
    * The weather reported at the house
    */
   def getHomeWeather(homeId: Int): F[WeatherResponse] =
-    useAuthClient: client =>
-      val request = GET(config.apiBase / "homes" / homeId / "weather")
-      client.expect[WeatherResponse](request)
+    for
+      client <- withAuthClient()
+      request = GET(config.apiBase / "homes" / homeId / "weather")
+      result <- client.expect[WeatherResponse](request)
+    yield result
 
   /**
    * The a daily reportfor a specific house and zone
    */
   def getZoneDayReport(homeId: Int, zoneId: Int, date: LocalDate): F[DayReportResponse] =
-    useAuthClient: client =>
-      val url      = config.apiBase / "homes" / homeId / "zones" / zoneId / "dayReport"
-      val queryUrl = url.withQueryParam("date", date.toString())
-      client.expect[DayReportResponse](GET(queryUrl))
+    for
+      client  <- withAuthClient()
+      url      = config.apiBase / "homes" / homeId / "zones" / zoneId / "dayReport"
+      queryUrl = url.withQueryParam("date", date.toString())
+      result  <- client.expect[DayReportResponse](GET(queryUrl))
+    yield result
 
   //  Internal operations  //
 
@@ -125,8 +139,9 @@ final class Tado4sClient[F[_]: Async] private (
           val authToken = TadoAuthToken(authResponse.access_token, expiry)
           setAuthToken(authToken)
         }
-        .onError { error =>
+        .adaptError { error =>
           logger.error("Error while logging in", error)
+          Tado4sError("Error while logging in", Some(error))
         }
 
   private def refreshTokenRequest(): F[Unit] =
@@ -153,28 +168,26 @@ final class Tado4sClient[F[_]: Async] private (
         logger.warn("Unauthenticated, trying to login...") >>
         loginRequest()
       }
-      .onError { error =>
-        logger.error("Error while logging in", error)
+      .adaptError { error =>
+        logger.error("Error while refreshing API token", error)
+        Tado4sError("Error while refreshing API token", Some(error))
       }
 
-  private def useAuthClient[A](f: Client[F] => F[A]): F[A] =
-    def retrieve(retries: Int): F[Client[F]] =
-      getAuthToken().flatMap:
-        case None if retries <= 0 =>
-          Async[F].raiseError(Tado4sError("Tado4s could not log in"))
-        case None =>
-          Async[F].raiseError(Tado4sError("Tado4s is not logged in"))
-        case Some(authToken) if isTokenExpired(authToken) =>
-          refreshTokenRequest() >> retrieve(retries - 1)
-        case Some(authToken) =>
-          getAuthenticatedClient().flatMap:
-            case None =>
-              val client = buildHttpClient(authToken)
-              setAuthenticatedClient(client) >> retrieve(retries - 1)
-            case Some(client) =>
-              Async[F].pure(client)
-
-    retrieve(1).flatMap(f)
+  private def withAuthClient[A](retries: Int = 1): F[Client[F]] =
+    getAuthToken().flatMap:
+      case None if retries <= 0 =>
+        Async[F].raiseError(Tado4sError("Tado4s could not log in"))
+      case None =>
+        Async[F].raiseError(Tado4sError("Tado4s is not logged in"))
+      case Some(authToken) if isTokenExpired(authToken) =>
+        refreshTokenRequest() >> withAuthClient(retries - 1)
+      case Some(authToken) =>
+        getAuthenticatedClient().flatMap:
+          case None =>
+            val client = buildHttpClient(authToken)
+            setAuthenticatedClient(client) >> withAuthClient(retries - 1)
+          case Some(client) =>
+            Async[F].pure(client)
 
   private def buildHttpClient(authToken: TadoAuthToken): Client[F] =
     Logger(logBody = false, logHeaders = true) {
@@ -195,19 +208,19 @@ final class Tado4sClient[F[_]: Async] private (
     atomicState.get.flatMap: state =>
       state.credentials match
         case Some(credentials) => Async[F].pure(credentials)
-        case None              => Async[F].raiseError(Tado4sError("No credentials have been provided"))
+        case None              => Async[F].raiseError(Tado4sError("No Tado credentials provided"))
 
   private def getAuthenticatedClient(): F[Option[Client[F]]] =
     atomicState.get.map:
-      _.useAuthClient
+      _.authenticatedClient
 
   private def setAuthenticatedClient(client: Client[F]): F[Unit] =
     atomicState.update:
-      _.copy(useAuthClient = Some(client))
+      _.copy(authenticatedClient = Some(client))
 
   private def clearAuthenticatedClient(): F[Unit] =
     atomicState.update:
-      _.copy(useAuthClient = None)
+      _.copy(authenticatedClient = None)
 
   private def setAuthToken(authToken: TadoAuthToken): F[Unit] =
     atomicState.update:
@@ -237,7 +250,7 @@ object Tado4sClient:
   final private case class TadoClientState[F[_]](
     credentials: Option[TadoCredentials] = None,
     authToken: Option[TadoAuthToken] = None,
-    useAuthClient: Option[Client[F]] = None,
+    authenticatedClient: Option[Client[F]] = None,
   )
 
   final private case class TadoCredentials(

@@ -1,7 +1,6 @@
 package com.colofabrix.scala.homedata.octopus
 
 import cats.effect.IO
-import com.colofabrix.scala.timeflux.measures.Measure
 import fs2.{ Chunk, Stream }
 import io.odin.*
 import java.time.OffsetDateTime

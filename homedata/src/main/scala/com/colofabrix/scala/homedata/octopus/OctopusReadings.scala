@@ -2,8 +2,6 @@ package com.colofabrix.scala.homedata.octopus
 
 import com.colofabrix.scala.timeflux.measures.*
 import java.time.OffsetDateTime
-import java.time.OffsetDateTime
-import sttp.client4.httpclient.HttpClientSyncBackend
 
 sealed trait OctopusReading
 

@@ -6,14 +6,14 @@ Global / run / fork           := true
 Global / onChangedBuildSource := ReloadOnSourceChanges
 Global / tpolecatExcludeOptions ++=
   Set(
-    ScalacOptions.warnUnusedNoWarn,
+    // ScalacOptions.warnUnusedNoWarn,
     // ScalacOptions.warnUnusedImplicits,
-    ScalacOptions.warnUnusedExplicits,
-    ScalacOptions.warnUnusedImports,
+    // ScalacOptions.warnUnusedExplicits,
+    // ScalacOptions.warnUnusedImports,
     ScalacOptions.warnUnusedLocals,
-    // ScalacOptions.warnUnusedParams,
-    ScalacOptions.warnUnusedPatVars,
-    ScalacOptions.warnUnusedPrivates,
+      // ScalacOptions.warnUnusedParams,
+      // ScalacOptions.warnUnusedPatVars,
+      // ScalacOptions.warnUnusedPrivates,
   )
 
 lazy val root =
@@ -21,10 +21,12 @@ lazy val root =
     .in(file("."))
     .aggregate(homedata, timeflux, tado4s)
     .settings(
-      name         := "root",
-      version      := "0.1.0",
-      organization := "com.colofabrix.scala",
-      scalaVersion := scala3Version,
+      name              := "root",
+      version           := "0.1.0",
+      organization      := "com.colofabrix.scala",
+      scalaVersion      := scala3Version,
+      semanticdbEnabled := true,
+      semanticdbVersion := scalafixSemanticdb.revision,
     )
 
 lazy val homedata =

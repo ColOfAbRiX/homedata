@@ -1,20 +1,8 @@
 package com.colofabrix.scala.timeflux
 
 import cats.effect.Async
-import cats.implicits.given
 import com.colofabrix.scala.timeflux.api.*
-import com.colofabrix.scala.timeflux.config.*
 import com.colofabrix.scala.timeflux.measures.*
-import com.colofabrix.scala.timeflux.model.*
-import com.colofabrix.scala.timeflux.TimefluxClient.*
-import fs2.io.net.Network
-import io.odin.*
-import io.odin.formatter.Formatter
-import org.http4s.*
-import org.http4s.client.Client
-import org.http4s.client.dsl.Http4sClientDsl
-import org.http4s.ember.client.EmberClientBuilder
-import org.http4s.Method.*
 
 trait TimefluxDSL:
 
@@ -58,7 +46,7 @@ trait TimefluxDSL:
     def write[A: TimefluxSerializable](
       bucket: String,
       values: fs2.Stream[F, A],
-      precision: Option[String] = None,
+      precision: Option[TimePrecision] = None,
     ): F[Unit] =
       timefluxClient.write(
         WriteRequest(bucket, None, precision),

@@ -1,8 +1,22 @@
 package com.colofabrix.scala.timeflux.api
 
+import com.colofabrix.scala.timeflux.encoding.UrlParamsEncoder
 import io.circe.*
 import io.circe.derivation.*
 import java.time.*
+
+enum TimePrecision(val value: String):
+
+  case Seconds      extends TimePrecision("s")
+  case Milliseconds extends TimePrecision("ms")
+  case Microseconds extends TimePrecision("us")
+  case Nanoseconds  extends TimePrecision("ns")
+
+object TimePrecision:
+
+  given UrlParamsEncoder[TimePrecision] with
+    def encode(a: TimePrecision): Map[String, String] =
+      Map("" -> a.value)
 
 final case class Buckets(
   name: String,

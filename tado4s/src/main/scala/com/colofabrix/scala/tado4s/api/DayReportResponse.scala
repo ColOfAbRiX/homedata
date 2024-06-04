@@ -71,12 +71,6 @@ object DayReportResponse:
 
     type Bool = Boolean
 
-    final case class HeatingSetting(
-      `type`: String,
-      power: String,
-      temperature: Option[Temperature],
-    ) extends ValueType derives Decoder
-
     final case class Stripes(
       stripeType: String,
       setting: Option[HeatingSetting],
@@ -90,6 +84,12 @@ object DayReportResponse:
     final case class WeatherCondition(
       state: String,
       temperature: Temperature,
+    ) extends ValueType derives Decoder
+
+    final case class HeatingSetting(
+      `type`: String,
+      power: String,
+      temperature: Option[Temperature],
     ) extends ValueType derives Decoder
 
   final case class Interval(
