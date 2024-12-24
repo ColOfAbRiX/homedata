@@ -42,7 +42,7 @@ object AccountResponse:
     stale: Boolean,
     atHome: Boolean,
     bearingFromHome: BearingFromHome,
-    relativeDistanceFromHomeFence: Int,
+    relativeDistanceFromHomeFence: Double,
   ) derives Decoder
 
   final case class BearingFromHome(
@@ -65,4 +65,6 @@ object AccountResponse:
     energySavingsReportReminder: Boolean,
     incidentDetection: Boolean,
     energyIqReminder: Boolean,
+    tariffHighPriceAlert: Boolean,
+    tariffLowPriceAlert: Boolean
   ) derives Decoder

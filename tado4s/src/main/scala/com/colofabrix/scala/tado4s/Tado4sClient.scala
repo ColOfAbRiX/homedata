@@ -19,6 +19,7 @@ import org.http4s.client.middleware.Logger
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.headers.Authorization
 import org.http4s.Method.*
+import scala.concurrent.duration.*
 
 /**
  * Tado Client for Scala
@@ -35,7 +36,8 @@ final class Tado4sClient[F[_]: Async] private (
    * Logs into the Tado service
    */
   def login(username: String, password: String): F[Unit] =
-    setCredentials(username, password) >> loginRequest()
+    setCredentials(username, password) >>
+    loginRequest()
 
   /**
    * Logs out the Tado service
@@ -76,7 +78,7 @@ final class Tado4sClient[F[_]: Async] private (
     yield result
 
   /**
-   * Information the state of a Home
+   * Information about the state of a Home
    */
   def getHomeState(homeId: Int): F[HomeStateResponse] =
     for
@@ -139,8 +141,10 @@ final class Tado4sClient[F[_]: Async] private (
           val authToken = TadoAuthToken(authResponse.access_token, expiry)
           setAuthToken(authToken)
         }
-        .adaptError { error =>
+        .onError { error =>
           logger.error("Error while logging in", error)
+        }
+        .adaptError { error =>
           Tado4sError("Error while logging in", Some(error))
         }
 
@@ -168,8 +172,10 @@ final class Tado4sClient[F[_]: Async] private (
         logger.warn("Unauthenticated, trying to login...") >>
         loginRequest()
       }
+      .onError { error =>
+        logger.error("Error while logging in", error)
+      }
       .adaptError { error =>
-        logger.error("Error while refreshing API token", error)
         Tado4sError("Error while refreshing API token", Some(error))
       }
 
@@ -275,6 +281,7 @@ object Tado4sClient:
   def apply[F[_]: Async: Network](maybeConfig: Option[TadoConfig]): F[Tado4sClient[F]] =
     EmberClientBuilder
       .default[F]
+      .withTimeout(30.seconds)
       .build
       .allocated
       .flatMap {

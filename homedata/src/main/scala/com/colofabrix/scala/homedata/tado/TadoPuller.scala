@@ -5,11 +5,12 @@ import cats.implicits.given
 import com.colofabrix.scala.homedata.tado.readings.*
 import com.colofabrix.scala.tado4s.api.HomeZonesResponse
 import com.colofabrix.scala.tado4s.Tado4sClient
+import dev.kovstas.fs2throttler.Throttler
 import fs2.{ Chunk, Stream }
 import io.odin.*
 import java.time.*
-import org.json4s.*
 import org.json4s.native.JsonMethods.*
+import scala.concurrent.duration.*
 
 class TadoPuller private (tadoClient: Tado4sClient[IO], state: TadoPuller.TadoState):
 
@@ -21,6 +22,7 @@ class TadoPuller private (tadoClient: Tado4sClient[IO], state: TadoPuller.TadoSt
         val nextDate =  if (currentDate.isBefore(to.toLocalDate)) then Some(currentDate.plusDays(1)) else None
         pullDate(currentDate).map((_, nextDate))
       }
+      .through(Throttler.throttle(1, 1.second, Throttler.Shaping))
       .flatMap(Stream.chunk)
       .evalTap(reading => logger.trace(reading.show))
 

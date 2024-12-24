@@ -77,8 +77,5 @@ object TadoReading:
   extension [A](self: (Option[A], Option[A]))
 
     def avg(using A: Fractional[A]): Option[A] =
-      val list = self.toList.flatMap(_.toList)
+      val list = self._1.toList ::: self._2.toList
       list.reduceOption(A.plus).map(A.div(_, A.fromInt(list.length)))
-
-    def last: Option[A] =
-      self._2

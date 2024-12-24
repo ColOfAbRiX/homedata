@@ -1,6 +1,6 @@
 import org.typelevel.scalacoptions.ScalacOptions
 
-val scala3Version = "3.4.1"
+val scala3Version = "3.6.2"
 
 Global / run / fork           := true
 Global / onChangedBuildSource := ReloadOnSourceChanges
@@ -45,6 +45,7 @@ lazy val homedata =
         "com.github.pureconfig"         %% "pureconfig-cats" % "0.17.4",
         "com.github.valskalla"          %% "odin-core"       % "0.13.0",
         "com.softwaremill.sttp.client4" %% "core"            % "4.0.0-M8",
+        "dev.kovstas"                   %% "fs2-throttler"   % "1.0.12",
         "io.github.arainko"             %% "ducktape"        % "0.1.11",
         "org.http4s"                    %% "http4s-client"   % "0.23.24",
         "org.json4s"                    %% "json4s-native"   % "4.1.0-M4",

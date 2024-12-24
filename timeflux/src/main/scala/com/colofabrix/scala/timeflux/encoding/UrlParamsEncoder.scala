@@ -1,5 +1,7 @@
 package com.colofabrix.scala.timeflux.encoding
 
+import scala.annotation.nowarn
+
 /**
  * URL Query Parameters Encoding
  *
@@ -26,7 +28,7 @@ private[timeflux] object UrlParamsEncoder:
 
   //  ADT  //
 
-  inline def deriveProductType[A](using m: Mirror.ProductOf[A]): UrlParamsEncoder[A] =
+  @nowarn inline def deriveProductType[A](using m: Mirror.ProductOf[A]): UrlParamsEncoder[A] =
     new UrlParamsEncoder[A]:
       def encode(a: A): Map[String, String] =
         val elemLabels   = getElemLabels[m.MirroredElemLabels]
@@ -49,7 +51,7 @@ private[timeflux] object UrlParamsEncoder:
               qualifiedKey -> v
           }
 
-  inline def deriveSumType[A](using m: Mirror.SumOf[A]) =
+  @nowarn inline def deriveSumType[A](using m: Mirror.SumOf[A]): UrlParamsEncoder[A] =
     new UrlParamsEncoder[A]:
       def encode(a: A): Map[String, String] =
         val elemEncoders = getTypeclassInstances[m.MirroredElemTypes]

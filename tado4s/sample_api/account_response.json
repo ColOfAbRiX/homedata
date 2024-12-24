@@ -1,18 +1,18 @@
 {
-  "name": "John Smith",
-  "email": "johnsmith@gmail.com",
-  "username": "johnsmith@gmail.com",
-  "id": "6361c921-47ab-40c8-8b9f-de8e81922ab4",
+  "name": "John Doe",
+  "email": "user@example.com",
+  "username": "user@example.com",
+  "id": "11111111-1111-1111-1111-111111111111",
   "homes": [
     {
-      "id": 1000002,
+      "id": 1000001,
       "name": "Example House"
     }
   ],
   "locale": "en",
   "mobileDevices": [
     {
-      "name": "John Smith's Phone",
+      "name": "John's Phone",
       "id": 1000003,
       "settings": {
         "geoTrackingEnabled": true,
@@ -25,15 +25,17 @@
           "openWindowReminder": true,
           "energySavingsReportReminder": true,
           "incidentDetection": true,
-          "energyIqReminder": false
+          "energyIqReminder": false,
+          "tariffHighPriceAlert": true,
+          "tariffLowPriceAlert": true
         }
       },
       "location": {
         "stale": false,
-        "atHome": true,
+        "atHome": false,
         "bearingFromHome": {
-          "degrees": 255.5822604820668,
-          "radians": 4.4607519551018555
+          "degrees": 129.68596737761283,
+          "radians": 2.2634471243733003
         },
         "relativeDistanceFromHomeFence": 0.0
       },

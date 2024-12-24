@@ -19,6 +19,7 @@ import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.client.middleware.Logger
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.Method.*
+import scala.concurrent.duration.*
 
 /**
  * InfluxDB Client for Scala
@@ -28,6 +29,8 @@ final class TimefluxClient[F[_]: Async] private (
   config: TimefluxConfig,
   atomicState: AtomicCell[F, TimefluxClientState[F]],
 ) extends Http4sClientDsl[F]:
+
+  private type StreamF[+A] = fs2.Stream[F, A]
 
   private val logger: Logger[F] = consoleLogger(formatter = Formatter.colorful)
 
@@ -98,40 +101,51 @@ final class TimefluxClient[F[_]: Async] private (
   /**
    * Writes a stream of TimefluxSerializable values in a bucket
    */
-  def write[A: TimefluxSerializable](request: WriteRequest, values: fs2.Stream[F, A]): F[Unit] =
+  def writeData[A: TimefluxSerializable](request: WriteRequest, values: StreamF[A]): F[Unit] =
     writeStream(request, values.through(_.map(TimefluxSerializable[A].toMeasure)))
+
+  /**
+   * Writes a stream of TimefluxSerializable values in a bucket
+   */
+  def writeMeasures(request: WriteRequest, values: StreamF[Measure]): F[Unit] =
+    writeStream(request, values)
 
   //  Internal operations  //
 
-  private def writeStream(request: WriteRequest, values: fs2.Stream[F, Measure]): F[Unit] =
-    getApiUrl().flatMap: baseApiUrl =>
-      getLoggedClient().flatMap: client =>
-        request.withOrgId(_.orgID, x => request.copy(orgID = x)).flatMap: requestWithOrg =>
-          val headers =
-            Headers(
-              "Content-Type" -> "text/plain; charset=utf-8",
-              "Accept"       -> "application/json",
-            )
+  private def writeStream(request: WriteRequest, values: StreamF[Measure]): F[Unit] =
+    for
+      baseApiUrl     <- getApiUrl()
+      client         <- getLoggedClient()
+      requestWithOrg <- request.withOrgId(_.orgID, x => request.copy(orgID = x))
+      result         <- sendWriteRequest(baseApiUrl, client, requestWithOrg, values)
+    yield result
 
-          val requestUri = (baseApiUrl / "write").withQueryParams(requestWithOrg.toQueryParams)
+  private def sendWriteRequest(url: Uri, client: Client[F], request: WriteRequest, values: StreamF[Measure]): F[Unit] =
+    val headers =
+      Headers(
+        "Content-Type" -> "text/plain; charset=utf-8",
+        "Accept"       -> "application/json",
+      )
 
-          val body =
-            values
-              .map(_.toLineProtocol.value.trim + "\n")
-              .evalTap(line => logger.trace(line))
-              .through(fs2.text.utf8.encode)
+    val requestUri = (url / "write").withQueryParams(request.toQueryParams)
 
-          val postRequest =
-            Request[F](
-              method = POST,
-              uri = requestUri,
-              body = body,
-              headers = headers,
-            )
+    val body =
+      values
+        .map(_.toLineProtocol.value.trim + "\n")
+        .evalTap(line => logger.trace(line))
+        .through(fs2.text.utf8.encode)
 
-          client
-            .run(postRequest)
-            .use(handleClientRunError)
+    val postRequest =
+      Request[F](
+        method = POST,
+        uri = requestUri,
+        body = body,
+        headers = headers,
+      )
+
+    client
+      .run(postRequest)
+      .use(handleClientRunError)
 
   private def getLoggedClient[A](): F[Client[F]] =
     getAuthenticatedClient().flatMap {
@@ -176,8 +190,10 @@ final class TimefluxClient[F[_]: Async] private (
 
   private def handleClientRunError(response: Response[F]): F[Unit] =
     if (response.status.isSuccess)
+      logger.trace(s"Successfull request with response ${response.as[String]}") >>
       Async[F].unit
     else
+      logger.error(s"Error request with response ${response.as[String]}") >>
       response
         .as[TimefluxRequestError]
         .flatMap(Async[F].raiseError)
@@ -262,6 +278,7 @@ object TimefluxClient:
   def apply[F[_]: Async: Network](clientConfig: TimefluxClientConfig): F[TimefluxClient[F]] =
     EmberClientBuilder
       .default[F]
+      .withTimeout(30.seconds)
       .build
       .allocated
       .flatMap {

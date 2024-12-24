@@ -43,12 +43,25 @@ trait TimefluxDSL:
     /**
      * Writes a stream of TimefluxSerializable values in a bucket
      */
-    def write[A: TimefluxSerializable](
+    def writeData[A: TimefluxSerializable](
       bucket: String,
       values: fs2.Stream[F, A],
       precision: Option[TimePrecision] = None,
     ): F[Unit] =
-      timefluxClient.write(
+      timefluxClient.writeData(
+        WriteRequest(bucket, None, precision),
+        values,
+      )
+
+    /**
+     * Writes a stream of TimefluxSerializable values in a bucket
+     */
+    def writeMeasures(
+      bucket: String,
+      values: fs2.Stream[F, Measure],
+      precision: Option[TimePrecision] = None,
+    ): F[Unit] =
+      timefluxClient.writeMeasures(
         WriteRequest(bucket, None, precision),
         values,
       )
