@@ -9,16 +9,15 @@ import com.colofabrix.scala.timeflux.measures.*
 import com.colofabrix.scala.timeflux.model.*
 import com.colofabrix.scala.timeflux.TimefluxClient.*
 import fs2.io.net.Network
-import io.odin.*
-import io.odin.formatter.Formatter
 import org.http4s.*
 import org.http4s.circe.CirceEntityDecoder.*
 import org.http4s.circe.CirceEntityEncoder.*
 import org.http4s.client.Client
 import org.http4s.client.dsl.Http4sClientDsl
-import org.http4s.client.middleware.Logger
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.Method.*
+import org.typelevel.log4cats.SelfAwareStructuredLogger
+import org.typelevel.log4cats.slf4j.Slf4jLogger
 import scala.concurrent.duration.*
 
 /**
@@ -30,20 +29,24 @@ final class TimefluxClient[F[_]: Async] private (
   atomicState: AtomicCell[F, TimefluxClientState[F]],
 ) extends Http4sClientDsl[F]:
 
-  private type StreamF[+A] = fs2.Stream[F, A]
+  private type StreamF[+A] =
+    fs2.Stream[F, A]
 
-  private val logger: Logger[F] = consoleLogger(formatter = Formatter.colorful)
+  implicit private val logger: SelfAwareStructuredLogger[F] =
+    Slf4jLogger.getLogger[F]
 
   /**
    * Logs into the Timeflux service
    */
   def login(orgId: OrgId, token: AuthToken): F[Unit] =
+    logger.debug("Login") >>
     setCredentials(orgId, token)
 
   /**
    * Logs out the Tado service
    */
   def logout(): F[Unit] =
+    logger.debug("Logout") >>
     clearCredentials() >>
     clearAuthenticatedClient()
 
@@ -52,6 +55,7 @@ final class TimefluxClient[F[_]: Async] private (
    */
   def listBuckets(request: ListBucketRequest): F[ListBucketsResponse] =
     for
+      _          <- logger.debug("List Buckets")
       baseApiUrl <- getApiUrl()
       client     <- getLoggedClient()
       requestUri  = (baseApiUrl / "buckets").withQueryParams(request.toQueryParams)
@@ -63,6 +67,7 @@ final class TimefluxClient[F[_]: Async] private (
    */
   def createBucket(request: CreateBucketRequest): F[CreateBucketResponse] =
     for
+      _          <- logger.debug("Create Bucket")
       baseApiUrl <- getApiUrl()
       client     <- getLoggedClient()
       reqWithId  <- request.withOrgId(_.orgID, x => request.copy(orgID = x))
@@ -75,6 +80,7 @@ final class TimefluxClient[F[_]: Async] private (
    */
   def deleteBucket(request: DeleteBucketRequest): F[Unit] =
     for
+      _          <- logger.debug("Delete Bucket")
       baseApiUrl <- getApiUrl()
       client     <- getLoggedClient()
       requestUri  = baseApiUrl / "buckets" / request.bucketID
@@ -85,6 +91,7 @@ final class TimefluxClient[F[_]: Async] private (
    * Checks if a bucket exists and, if it doesn't, it creates it
    */
   def createBucketIfMissing(request: CreateBucketRequest): F[Option[CreateBucketResponse]] =
+    logger.debug("Create Bucket If Missing") >>
     listBuckets(ListBucketRequest(name = Some(request.name)))
       .attempt
       .flatMap {
@@ -102,12 +109,17 @@ final class TimefluxClient[F[_]: Async] private (
    * Writes a stream of TimefluxSerializable values in a bucket
    */
   def writeData[A: TimefluxSerializable](request: WriteRequest, values: StreamF[A]): F[Unit] =
-    writeStream(request, values.through(_.map(TimefluxSerializable[A].toMeasure)))
+    for
+      _       <- logger.debug("Write Data")
+      measures = values.through(TimefluxSerializable.fs2ToMeasure)
+      result  <- writeStream(request, measures)
+    yield result
 
   /**
    * Writes a stream of TimefluxSerializable values in a bucket
    */
   def writeMeasures(request: WriteRequest, values: StreamF[Measure]): F[Unit] =
+    logger.debug("Write Measures") >>
     writeStream(request, values)
 
   //  Internal operations  //
@@ -132,7 +144,9 @@ final class TimefluxClient[F[_]: Async] private (
     val body =
       values
         .map(_.toLineProtocol.value.trim + "\n")
-        .evalTap(line => logger.trace(line))
+        .evalTap { line =>
+          logger.trace(line.dropRight(1))
+        }
         .through(fs2.text.utf8.encode)
 
     val postRequest =
@@ -144,8 +158,10 @@ final class TimefluxClient[F[_]: Async] private (
       )
 
     client
-      .run(postRequest)
-      .use(handleClientRunError)
+      .stream(postRequest)
+      .flatMap(handleClientStreamError)
+      .compile
+      .drain
 
   private def getLoggedClient[A](): F[Client[F]] =
     getAuthenticatedClient().flatMap {
@@ -154,8 +170,12 @@ final class TimefluxClient[F[_]: Async] private (
           case None =>
             Async[F].raiseError(TimefluxException("No Influx credentials set.", None))
           case Some(creds) =>
-            val client = buildHttpClient(creds)
-            setAuthenticatedClient(client) >> getLoggedClient()
+            for
+              client <- buildHttpClient(creds)
+              _      <- setAuthenticatedClient(client)
+              _      <- logger.debug("New Timeflux authenticated client")
+              result <- getLoggedClient()
+            yield result
         }
       case Some(client) =>
         Async[F].pure(client)
@@ -175,28 +195,21 @@ final class TimefluxClient[F[_]: Async] private (
           }
       }
 
-  private def buildHttpClient(creds: TimefluxCredentials): Client[F] =
-    Logger(logBody = true, logHeaders = true) {
-      Client { request =>
-        val authorization = Headers("Authorization" -> s"Token ${creds.token.value}")
-        val authHeaders   = request.headers.put(authorization)
-        val authUri       = request.uri.withQueryParam("orgID", creds.orgId.value)
-        val authRequest   = request.withHeaders(authHeaders).withUri(authUri)
-        httpClient.run(authRequest)
-      }
-    }
+  private def buildHttpClient(creds: TimefluxCredentials): F[Client[F]] =
+    val authClient = TimefluxAuthenticatedClient[F](httpClient, creds.token, creds.orgId)
+    TimefluxLoggedClient[F](authClient, logger)
 
   //  Error handlers  //
 
   private def handleClientRunError(response: Response[F]): F[Unit] =
     if (response.status.isSuccess)
-      logger.trace(s"Successfull request with response ${response.as[String]}") >>
       Async[F].unit
     else
-      logger.error(s"Error request with response ${response.as[String]}") >>
-      response
-        .as[TimefluxRequestError]
+      handleClientExpectError(response)
         .flatMap(Async[F].raiseError)
+
+  private def handleClientStreamError(response: Response[F]): StreamF[Unit] =
+    fs2.Stream.eval(handleClientRunError(response))
 
   private def handleClientExpectError(response: Response[F]): F[Throwable] =
     response
@@ -257,10 +270,7 @@ object TimefluxClient:
   /**
    * Creates a new instance of TimefluxClient client using the given client
    */
-  def apply[F[_]: Async](
-    clientConfig: TimefluxClientConfig,
-    httpClient: Client[F],
-  ): F[TimefluxClient[F]] =
+  def apply[F[_]: Async](clientConfig: TimefluxClientConfig, httpClient: Client[F]): F[TimefluxClient[F]] =
     AtomicCell[F]
       .of {
         TimefluxClientState[F](

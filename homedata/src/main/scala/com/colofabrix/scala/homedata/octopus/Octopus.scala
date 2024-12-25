@@ -2,14 +2,17 @@ package com.colofabrix.scala.homedata.octopus
 
 import cats.effect.IO
 import fs2.{ Chunk, Stream }
-import io.odin.*
 import java.time.OffsetDateTime
+import org.typelevel.log4cats.Logger
+import org.typelevel.log4cats.slf4j.Slf4jLogger
 
 object Octopus:
 
-  private type PagePull[A] = Int => IO[(Chunk[A], Boolean)]
+  private type PagePull[A] =
+    Int => IO[(Chunk[A], Boolean)]
 
-  private val logger: Logger[IO] = consoleLogger()
+  implicit private val logger: Logger[IO] =
+    Slf4jLogger.getLogger[IO]
 
   def pullReadings(from: OffsetDateTime): Stream[IO, OctopusReading] =
     val electricityReadings = pullPaged(OctopusElectricity.pullPage(from))

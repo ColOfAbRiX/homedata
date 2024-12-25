@@ -12,7 +12,7 @@ import java.time.temporal.ChronoUnit
 
 object Main extends IOApp.Simple with TimefluxDSL:
 
-  val periodFrom = OffsetDateTime.now.minus(1, ChronoUnit.DAYS)
+  val periodFrom = OffsetDateTime.now.minus(1, ChronoUnit.MONTHS)
   val periodTo   = OffsetDateTime.now
 
   val run =
@@ -21,7 +21,7 @@ object Main extends IOApp.Simple with TimefluxDSL:
       _              <- timefluxClient.createBucketIfMissing(InfluxConf.projectBucket)
       tadoPuller     <- TadoPuller()
       tadoReading     = tadoPuller.pullReadings(periodFrom, periodTo)
-      // octopus  = octpusReadings(periodFrom) merge tadoMeasurements(periodFrom)
-      // allReadings <- octopus merge tado
+      // octopus         = octpusReadings(periodFrom) merge tadoMeasurements(periodFrom)
+      // allReadings    <- octopus merge tado
       _ <- timefluxClient.writeData(InfluxConf.projectBucket, tadoReading, Some(TimePrecision.Milliseconds))
     } yield ()

@@ -39,11 +39,11 @@ lazy val homedata =
       organization := "com.colofabrix.scala.homedata",
       scalaVersion := scala3Version,
       libraryDependencies ++= List(
+        "ch.qos.logback"                 % "logback-classic" % "1.2.10",
         "ch.qos.logback"                 % "logback-classic" % "1.3.4",
         "co.fs2"                        %% "fs2-core"        % "3.9.3",
         "co.fs2"                        %% "fs2-io"          % "3.9.3",
         "com.github.pureconfig"         %% "pureconfig-cats" % "0.17.4",
-        "com.github.valskalla"          %% "odin-core"       % "0.13.0",
         "com.softwaremill.sttp.client4" %% "core"            % "4.0.0-M8",
         "dev.kovstas"                   %% "fs2-throttler"   % "1.0.12",
         "io.github.arainko"             %% "ducktape"        % "0.1.11",
@@ -52,6 +52,7 @@ lazy val homedata =
         "org.scalatest"                 %% "scalatest"       % "3.2.17" % Test,
         "org.typelevel"                 %% "cats-core"       % "2.10.0",
         "org.typelevel"                 %% "cats-effect"     % "3.5.2",
+        "org.typelevel"                 %% "log4cats-core"   % "2.7.0",
       ),
     )
 
@@ -64,9 +65,9 @@ lazy val timeflux =
       organization := "com.colofabrix.scala.timeflux",
       scalaVersion := scala3Version,
       libraryDependencies ++= List(
+        "ch.qos.logback"         % "logback-classic"     % "1.2.10",
         "co.fs2"                %% "fs2-core"            % "3.9.3",
         "com.github.pureconfig" %% "pureconfig-cats"     % "0.17.4",
-        "com.github.valskalla"  %% "odin-core"           % "0.13.0",
         "io.circe"              %% "circe-core"          % "0.14.6",
         "io.circe"              %% "circe-fs2"           % "0.14.1",
         "io.circe"              %% "circe-generic"       % "0.14.6",
@@ -77,6 +78,7 @@ lazy val timeflux =
         "org.scalatest"         %% "scalatest"           % "3.2.17" % Test,
         "org.typelevel"         %% "cats-core"           % "2.10.0",
         "org.typelevel"         %% "cats-effect"         % "3.5.2",
+        "org.typelevel"         %% "log4cats-core"       % "2.7.0",
       ),
     )
 
@@ -89,8 +91,8 @@ lazy val tado4s =
       organization := "com.colofabrix.scala.tado4s",
       scalaVersion := scala3Version,
       libraryDependencies ++= List(
+        "ch.qos.logback"         % "logback-classic"     % "1.2.10",
         "com.github.pureconfig" %% "pureconfig-cats"     % "0.17.4",
-        "com.github.valskalla"  %% "odin-core"           % "0.13.0",
         "io.circe"              %% "circe-core"          % "0.14.6",
         "io.circe"              %% "circe-generic"       % "0.14.6",
         "io.github.arainko"     %% "ducktape"            % "0.1.11",
@@ -101,5 +103,6 @@ lazy val tado4s =
         "org.scalatest"         %% "scalatest"           % "3.2.17" % Test,
         "org.typelevel"         %% "cats-core"           % "2.10.0",
         "org.typelevel"         %% "cats-effect"         % "3.5.2",
+        "org.typelevel"         %% "log4cats-core"       % "2.7.0",
       ),
     )

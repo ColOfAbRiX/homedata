@@ -6,8 +6,6 @@ import cats.implicits.given
 import com.colofabrix.scala.tado4s.api.*
 import com.colofabrix.scala.tado4s.Tado4sClient.*
 import fs2.io.net.Network
-import io.odin.*
-import io.odin.formatter.Formatter
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
@@ -15,10 +13,10 @@ import org.http4s.*
 import org.http4s.circe.CirceEntityDecoder.*
 import org.http4s.client.Client
 import org.http4s.client.dsl.Http4sClientDsl
-import org.http4s.client.middleware.Logger
 import org.http4s.ember.client.EmberClientBuilder
-import org.http4s.headers.Authorization
 import org.http4s.Method.*
+import org.typelevel.log4cats.SelfAwareStructuredLogger
+import org.typelevel.log4cats.slf4j.Slf4jLogger
 import scala.concurrent.duration.*
 
 /**
@@ -30,12 +28,14 @@ final class Tado4sClient[F[_]: Async] private (
   atomicState: AtomicCell[F, TadoClientState[F]],
 ) extends Http4sClientDsl[F]:
 
-  private val logger: Logger[F] = consoleLogger(formatter = Formatter.colorful)
+  implicit private val logger: SelfAwareStructuredLogger[F] =
+    Slf4jLogger.getLogger[F]
 
   /**
    * Logs into the Tado service
    */
   def login(username: String, password: String): F[Unit] =
+    logger.debug(s"Login") >>
     setCredentials(username, password) >>
     loginRequest()
 
@@ -43,6 +43,7 @@ final class Tado4sClient[F[_]: Async] private (
    * Logs out the Tado service
    */
   def logout(): F[Unit] =
+    logger.debug(s"Logout") >>
     clearCredentials() >>
     clearAuthToken() >>
     clearAuthenticatedClient()
@@ -52,6 +53,7 @@ final class Tado4sClient[F[_]: Async] private (
    */
   def getAccountInfo(): F[AccountResponse] =
     for
+      _      <- logger.debug(s"Get Account Info")
       client <- withAuthClient()
       request = GET(config.apiBase / "me")
       result <- client.expect[AccountResponse](request)
@@ -62,6 +64,7 @@ final class Tado4sClient[F[_]: Async] private (
    */
   def getHomeDetails(homeId: Int): F[HomeResponse] =
     for
+      _      <- logger.debug(s"Get Home Details, homeId=$homeId")
       client <- withAuthClient()
       request = GET(config.apiBase / "homes" / homeId)
       result <- client.expect[HomeResponse](request)
@@ -72,6 +75,7 @@ final class Tado4sClient[F[_]: Async] private (
    */
   def getHomeZones(homeId: Int): F[Vector[HomeZonesResponse]] =
     for
+      _      <- logger.debug(s"Get Home Zone, homeId=$homeId")
       client <- withAuthClient()
       request = GET(config.apiBase / "homes" / homeId / "zones")
       result <- client.expect[Vector[HomeZonesResponse]](request)
@@ -82,6 +86,7 @@ final class Tado4sClient[F[_]: Async] private (
    */
   def getHomeState(homeId: Int): F[HomeStateResponse] =
     for
+      _      <- logger.debug(s"Get Home State, homeId=$homeId")
       client <- withAuthClient()
       request = GET(config.apiBase / "homes" / homeId / "state")
       result <- client.expect[HomeStateResponse](request)
@@ -92,6 +97,7 @@ final class Tado4sClient[F[_]: Async] private (
    */
   def getZoneState(homeId: Int, zoneId: Int): F[ZoneStateResponse] =
     for
+      _      <- logger.debug(s"Get Zone State, homeId=$homeId, zoneId=$zoneId")
       client <- withAuthClient()
       request = GET(config.apiBase / "homes" / homeId / "zones" / zoneId / "state")
       result <- client.expect[ZoneStateResponse](request)
@@ -102,6 +108,7 @@ final class Tado4sClient[F[_]: Async] private (
    */
   def getHomeWeather(homeId: Int): F[WeatherResponse] =
     for
+      _      <- logger.debug(s"Get Home Weather, homeId=$homeId")
       client <- withAuthClient()
       request = GET(config.apiBase / "homes" / homeId / "weather")
       result <- client.expect[WeatherResponse](request)
@@ -112,6 +119,7 @@ final class Tado4sClient[F[_]: Async] private (
    */
   def getZoneDayReport(homeId: Int, zoneId: Int, date: LocalDate): F[DayReportResponse] =
     for
+      _       <- logger.debug(s"Get Zone State, homeId=$homeId, zoneId=$zoneId, date=$date")
       client  <- withAuthClient()
       url      = config.apiBase / "homes" / homeId / "zones" / zoneId / "dayReport"
       queryUrl = url.withQueryParam("date", date.toString())
@@ -141,9 +149,6 @@ final class Tado4sClient[F[_]: Async] private (
           val authToken = TadoAuthToken(authResponse.access_token, expiry)
           setAuthToken(authToken)
         }
-        .onError { error =>
-          logger.error("Error while logging in", error)
-        }
         .adaptError { error =>
           Tado4sError("Error while logging in", Some(error))
         }
@@ -168,42 +173,42 @@ final class Tado4sClient[F[_]: Async] private (
         setAuthToken(authToken)
       }
       .handleErrorWith { error =>
-        logger.debug("Refresh token failed with error", error) >>
+        logger.debug(error)("Refresh token failed with error") >>
         logger.warn("Unauthenticated, trying to login...") >>
         loginRequest()
       }
       .onError { error =>
-        logger.error("Error while logging in", error)
+        logger.error(error)("Error while logging in")
       }
       .adaptError { error =>
         Tado4sError("Error while refreshing API token", Some(error))
       }
 
   private def withAuthClient[A](retries: Int = 1): F[Client[F]] =
+    logger.trace("Getting Authenticated Client") >>
     getAuthToken().flatMap:
       case None if retries <= 0 =>
         Async[F].raiseError(Tado4sError("Tado4s could not log in"))
       case None =>
         Async[F].raiseError(Tado4sError("Tado4s is not logged in"))
       case Some(authToken) if isTokenExpired(authToken) =>
+        logger.info("Tado token expired, getting a new one") >>
         refreshTokenRequest() >> withAuthClient(retries - 1)
       case Some(authToken) =>
         getAuthenticatedClient().flatMap:
-          case None =>
-            val client = buildHttpClient(authToken)
-            setAuthenticatedClient(client) >> withAuthClient(retries - 1)
           case Some(client) =>
             Async[F].pure(client)
+          case None =>
+            for
+              client <- buildHttpClient(authToken)
+              _      <- setAuthenticatedClient(client)
+              _      <- logger.debug("New Tado authenticated client")
+              result <- withAuthClient(retries - 1)
+            yield result
 
-  private def buildHttpClient(authToken: TadoAuthToken): Client[F] =
-    Logger(logBody = false, logHeaders = true) {
-      Client { request =>
-        val authorization = Authorization(Credentials.Token(AuthScheme.Bearer, authToken.bearerToken))
-        val authHeaders   = request.headers.put(authorization)
-        val authRequest   = request.withHeaders(authHeaders)
-        httpClient.run(authRequest)
-      }
-    }
+  private def buildHttpClient(authToken: TadoAuthToken): F[Client[F]] =
+    val authClient = TadoAuthenticatedClient[F](httpClient, authToken.bearerToken)
+    TadoLoggedClient[F](authClient, logger)
 
   private def isTokenExpired(authToken: TadoAuthToken): Boolean =
     authToken.expiry.minus(5, ChronoUnit.SECONDS).isBefore(OffsetDateTime.now())

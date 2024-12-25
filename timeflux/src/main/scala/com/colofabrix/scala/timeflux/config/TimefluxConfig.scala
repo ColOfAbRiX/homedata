@@ -7,7 +7,8 @@ import pureconfig.generic.derivation.default.*
   * Client configuration
   */
 final case class TimefluxConfig(
-  apiBase: String
+  apiBase: String,
+  devMode: Boolean
 ) derives ConfigReader
 
 object TimefluxConfig:

@@ -28,3 +28,6 @@ object TimefluxSerializable:
 
   def apply[A](using ev: TimefluxSerializable[A]): TimefluxSerializable[A] =
     ev
+
+  def fs2ToMeasure[F[_], A](using ev: TimefluxSerializable[A]): fs2.Pipe[F, A, Measure] =
+    _.map(ev.toMeasure)

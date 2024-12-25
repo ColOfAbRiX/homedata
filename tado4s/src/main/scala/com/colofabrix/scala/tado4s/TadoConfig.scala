@@ -8,7 +8,7 @@ import pureconfig.generic.derivation.default.*
 final case class TadoConfig(
   apiBase: Uri,
   apiAuth: Uri,
-  clientSecret: String,
+  clientSecret: String
 )
 
 /**
@@ -19,7 +19,7 @@ object TadoConfig:
   private case class TadoReaderConfig(
     apiBase: String,
     apiAuth: String,
-    clientSecret: String,
+    clientSecret: String
   ) derives ConfigReader
 
   val config: TadoConfig =
@@ -30,5 +30,5 @@ object TadoConfig:
       .into[TadoConfig]
       .transform(
         Field.computed(_.apiBase, c => Uri.unsafeFromString(c.apiBase)),
-        Field.computed(_.apiAuth, c => Uri.unsafeFromString(c.apiAuth)),
+        Field.computed(_.apiAuth, c => Uri.unsafeFromString(c.apiAuth))
       )

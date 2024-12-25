@@ -1,0 +1,16 @@
+<configuration>
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %highlight(%-5level) %cyan(%logger{24}) -%kvp- %msg %X %n</pattern>
+    </encoder>
+  </appender>
+
+  <logger name="com.colofabrix.scala.homedata" level="DEBUG"/>
+  <logger name="com.colofabrix.scala.tado4s" level="DEBUG"/>
+  <logger name="com.colofabrix.scala.timeflux" level="DEBUG"/>
+  <logger name="com.colofabrix.scala" level="INFO"/>
+
+  <root level="OFF">
+    <appender-ref ref="STDOUT" />
+  </root>
+</configuration>
