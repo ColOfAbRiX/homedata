@@ -17,12 +17,13 @@ object ReportConverter:
   def convert(room: String, report: DayReportResponse): IO[Vector[TadoReading]] =
     val getters =
       List(
-        getInsideTemperatures(report),
-        getHumidity(report),
+        getHeatingModulation(report.callForHeat),
+        getHumidity(report.measuredData.humidity),
+        getInfoFromStripes(report.stripes),
+        getInsideTemperatures(report.measuredData.insideTemperature),
+        getOutsideSun(report.weather.sunny),
         getSetTemperature(report.settings),
         getWeatherCondition(report.weather.condition),
-        getOutsideSun(report.weather.sunny),
-        getHeatingModulation(report.callForHeat),
       )
 
     getters
@@ -36,28 +37,28 @@ object ReportConverter:
             reading.copy(room = Some(room), time = Some(time))
           }
       }
+      .flatTap { reading =>
+        reading.traverse(r => IO.println(s"${r.time} - atHome=${r.atHome}")) >>
+        IO.raiseError(new RuntimeException("dd"))
+      }
 
-  private def getInsideTemperatures(report: DayReportResponse): IO[TadoDataStore] =
+  private def getInsideTemperatures(insideTemperature: Measure.DataPoints[ValueType.Temperature]): IO[TadoDataStore] =
     IO.pure {
-      report
-        .measuredData
-        .insideTemperature
+      insideTemperature
         .dataPoints
         .foldMap {
           case TimeSeriesType.DataPoints(time, Temperature(temperature, _)) =>
-            TadoDataStore(time, TadoReading(temperature = Some(temperature)))
+            TadoDataStore(time, TadoReading.build(temperature = Some(temperature)))
         }
     }
 
-  private def getHumidity(report: DayReportResponse): IO[TadoDataStore] =
+  private def getHumidity(humidity: Measure.DataPoints[ValueType.Percentage]): IO[TadoDataStore] =
     IO.pure {
-      report
-        .measuredData
-        .humidity
+      humidity
         .dataPoints
         .foldMap {
           case TimeSeriesType.DataPoints(time, humidity) =>
-            TadoDataStore(time, TadoReading(humidity = Some(humidity)))
+            TadoDataStore(time, TadoReading.build(humidity = Some(humidity)))
         }
     }
 
@@ -67,8 +68,7 @@ object ReportConverter:
         .dataIntervals
         .foldMap {
           case TimeSeriesType.DataIntervals(from, to, ValueType.HeatingSetting(_, _, Some(Temperature(temp, _)))) =>
-            val reading = TadoReading(setTemperature = Some(temp))
-            TadoDataStore(from, to, reading)
+            TadoDataStore(from, to, TadoReading.build(setTemperature = Some(temp)))
           case TimeSeriesType.DataIntervals(_, _, ValueType.HeatingSetting(_, _, None)) =>
             TadoDataStore()
         }
@@ -80,7 +80,12 @@ object ReportConverter:
         .dataIntervals
         .foldMap {
           case TimeSeriesType.DataIntervals(from, to, WeatherCondition(state, Temperature(temperature, _))) =>
-            val reading = TadoReading(outsideTemperature = Some(temperature), outsideState = Some(state.dbValue))
+            val reading =
+              TadoReading.build(
+                outsideTemperature = Some(temperature),
+                outsideState = Some(state.dbValue),
+              )
+
             TadoDataStore(from, to, reading)
         }
     }
@@ -91,8 +96,7 @@ object ReportConverter:
         .dataIntervals
         .foldMap {
           case TimeSeriesType.DataIntervals(from, to, isSunny) =>
-            val reading = TadoReading(outsideSun = Some(isSunny))
-            TadoDataStore(from, to, reading)
+            TadoDataStore(from, to, TadoReading.build(outsideSun = Some(isSunny)))
         }
     }
 
@@ -101,8 +105,33 @@ object ReportConverter:
       callForHeat
         .dataIntervals
         .foldMap {
-          case cfh @ TimeSeriesType.DataIntervals(from, to, callForHeat) =>
-            val reading = TadoReading(heatingModulation = Some(callForHeat.dbValue.toDouble))
+          case TimeSeriesType.DataIntervals(from, to, callForHeat) =>
+            TadoDataStore(from, to, TadoReading.build(heatingModulation = Some(callForHeat.dbValue.toDouble)))
+        }
+    }
+
+  private def getInfoFromStripes(stripes: Measure.DataIntervals[ValueType.Stripes]): IO[TadoDataStore] =
+    IO.pure {
+      stripes
+        .dataIntervals
+        .foldMap {
+          case TimeSeriesType.DataIntervals(from, to, ValueType.Stripes(stripeType, _)) =>
+            val reading =
+              stripeType.toUpperCase match {
+                case "AWAY" =>
+                  TadoReading.build(atHome = Some(false), windowOpen = Some(false), manualSet = Some(false))
+                case "HOME" =>
+                  TadoReading.build(atHome = Some(true), windowOpen = Some(false), manualSet = Some(false))
+                case "OPEN_WINDOW_DETECTED" =>
+                  TadoReading.build(atHome = Some(true), windowOpen = Some(true), manualSet = Some(false))
+                case "OVERLAY_ACTIVE" =>
+                  TadoReading.build(atHome = Some(true), windowOpen = Some(false), manualSet = Some(true))
+                case unknown =>
+                  println(s" *** Unknown stripe type: '$unknown'")
+                  TadoReading.build()
+              }
+
+            println(s"TadoDataStore($from, $to, $reading)")
             TadoDataStore(from, to, reading)
         }
     }

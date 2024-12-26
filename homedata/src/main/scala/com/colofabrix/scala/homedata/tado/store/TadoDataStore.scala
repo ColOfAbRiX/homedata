@@ -13,7 +13,7 @@ type TadoDataStore =
 
 object TadoDataStore:
 
-  private def TimeResolution =
+  private def TimeResolution: FiniteDuration =
     15.minutes
 
   def apply(): TadoDataStore =

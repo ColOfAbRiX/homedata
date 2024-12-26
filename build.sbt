@@ -21,17 +21,11 @@ val sttpVersion           = "4.0.0-M8"
 
 Global / run / fork           := true
 Global / onChangedBuildSource := ReloadOnSourceChanges
-Global / tpolecatExcludeOptions ++=
-  Set(
-    // ScalacOptions.warnUnusedNoWarn,
-    // ScalacOptions.warnUnusedImplicits,
-    // ScalacOptions.warnUnusedExplicits,
-    // ScalacOptions.warnUnusedImports,
-    ScalacOptions.warnUnusedLocals,
-      // ScalacOptions.warnUnusedParams,
-      // ScalacOptions.warnUnusedPatVars,
-      // ScalacOptions.warnUnusedPrivates,
-  )
+
+Global / tpolecatExcludeOptions         += ScalacOptions.warnUnusedLocals
+homedata / Test / tpolecatScalacOptions := Set.empty
+tado4s / Test / tpolecatScalacOptions   := Set.empty
+timeflux / Test / tpolecatScalacOptions := Set.empty
 
 lazy val root =
   project
@@ -112,6 +106,7 @@ lazy val tado4s =
         "com.github.pureconfig" %% "pureconfig-cats"     % pureconfigCatsVersion,
         "io.circe"              %% "circe-core"          % circeCoreVersion,
         "io.circe"              %% "circe-generic"       % circeCoreVersion,
+        "io.circe"              %% "circe-parser"        % circeCoreVersion % Test,
         "io.github.arainko"     %% "ducktape"            % ducktapeVersion,
         "org.http4s"            %% "http4s-circe"        % http4sClientVersion,
         "org.http4s"            %% "http4s-client"       % http4sClientVersion,

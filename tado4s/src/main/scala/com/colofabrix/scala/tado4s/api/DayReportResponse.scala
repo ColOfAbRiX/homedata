@@ -4,6 +4,7 @@ import com.colofabrix.scala.tado4s.api.DayReportResponse.*
 import enumeratum.*
 import enumeratum.EnumEntry.UpperSnakecase
 import io.circe.Decoder
+import io.circe.derivation.Configuration
 import java.time.*
 
 /**

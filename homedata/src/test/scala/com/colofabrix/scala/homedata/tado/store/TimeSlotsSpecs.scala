@@ -1,6 +1,5 @@
 package com.colofabrix.scala.homedata.tado.store
 
-import cats.implicits.given
 import com.colofabrix.scala.homedata.tado.store.TimeSlots.*
 import java.time.OffsetDateTime
 import org.scalatest.flatspec.AnyFlatSpecLike
