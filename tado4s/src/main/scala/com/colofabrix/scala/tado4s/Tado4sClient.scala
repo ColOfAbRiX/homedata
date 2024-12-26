@@ -13,6 +13,7 @@ import org.http4s.*
 import org.http4s.circe.CirceEntityDecoder.*
 import org.http4s.client.Client
 import org.http4s.client.dsl.Http4sClientDsl
+import org.http4s.client.middleware.Logger
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.Method.*
 import org.typelevel.log4cats.SelfAwareStructuredLogger
@@ -200,15 +201,17 @@ final class Tado4sClient[F[_]: Async] private (
             Async[F].pure(client)
           case None =>
             for
-              client <- buildHttpClient(authToken)
-              _      <- setAuthenticatedClient(client)
+              _      <- setAuthenticatedClient(buildHttpClient(authToken))
               _      <- logger.debug("New Tado authenticated client")
               result <- withAuthClient(retries - 1)
             yield result
 
-  private def buildHttpClient(authToken: TadoAuthToken): F[Client[F]] =
-    val authClient = TadoAuthenticatedClient[F](httpClient, authToken.bearerToken)
-    TadoLoggedClient[F](authClient, logger)
+  private def buildHttpClient(authToken: TadoAuthToken): Client[F] =
+    Logger.colored[F](logBody = true, logHeaders = true) {
+      TadoAuthenticatedClient[F](authToken.bearerToken) {
+        httpClient
+      }
+    }
 
   private def isTokenExpired(authToken: TadoAuthToken): Boolean =
     authToken.expiry.minus(5, ChronoUnit.SECONDS).isBefore(OffsetDateTime.now())

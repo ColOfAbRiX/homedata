@@ -20,11 +20,10 @@ class TadoPuller private (tadoClient: Tado4sClient[IO], state: TadoPuller.TadoSt
   def pullReadings(from: OffsetDateTime, to: OffsetDateTime): fs2.Stream[IO, TadoReading] =
     fs2.Stream
       .unfold(from.toLocalDate)(generateNextDate(to))
-      .flatMap(expandRooms)
-      .through(Throttler.throttle(2, 1.second, Throttler.Shaping))
-      .flatMap { case (date, roomId) =>
-        pullRoom(date, roomId)
-      }
+      .flatMap(collectRoomIds)
+      .through(Throttler.throttle(TadoConfig.config.maxSpamPerSecond, 1.second, Throttler.Shaping))
+      .map(pullRoom)
+      .parJoinUnbounded
 
   private def generateNextDate(to: OffsetDateTime)(current: LocalDate): Option[(LocalDate, LocalDate)] =
     if (current.isBefore(to.toLocalDate)) then
@@ -32,7 +31,7 @@ class TadoPuller private (tadoClient: Tado4sClient[IO], state: TadoPuller.TadoSt
     else
       None
 
-  private def expandRooms(date: LocalDate): fs2.Stream[IO, (LocalDate, Int)] =
+  private def collectRoomIds(date: LocalDate): fs2.Stream[IO, (LocalDate, Int)] =
     fs2.Stream.emits {
       state
         .rooms
@@ -61,17 +60,16 @@ object TadoPuller:
 
   def apply(): IO[TadoPuller] =
     for
-      _          <- logger.info(s"Initializing Tado puller...")
-      tadoClient <- Tado4sClient[IO](None)
-      _          <- tadoClient.login(TadoConfig.config.username, TadoConfig.config.password)
-      account    <- tadoClient.getAccountInfo()
-      homeId      = account.homes.head.id
-      zones      <- tadoClient.getHomeZones(homeId)
-      _          <- logger.info(s"Initialized Tado puller for account=${account.name}, homeId=$homeId, zones=${zones.map(_.id)}")
-    yield
-      val rooms = buildRoomsList(zones)
-      val state = TadoState(homeId, rooms)
-      new TadoPuller(tadoClient, state)
+      _           <- logger.info(s"Initializing Tado puller...")
+      tadoClient  <- Tado4sClient[IO](None)
+      _           <- tadoClient.login(TadoConfig.config.username, TadoConfig.config.password)
+      account     <- tadoClient.getAccountInfo()
+      homeId       = account.homes.head.id
+      zones       <- tadoClient.getHomeZones(homeId)
+      _           <- logger.info(s"Initialized Tado puller: account=${account.email}, homeId=$homeId, zones=${zones.map(_.id)}")
+      initialState = TadoState(homeId, buildRoomsList(zones))
+      result       = new TadoPuller(tadoClient, initialState)
+    yield result
 
   private def buildRoomsList(zones: Vector[HomeZonesResponse]): Map[Int, String] =
     zones

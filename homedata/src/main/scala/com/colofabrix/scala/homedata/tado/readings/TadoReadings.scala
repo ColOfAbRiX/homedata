@@ -14,9 +14,9 @@ final case class TadoReading(
   setTemperature: Option[Double] = None,     // DONE
   atHome: Option[Boolean] = None,
   windowOpen: Option[Boolean] = None,
-  outsideSun: Option[Boolean] = None, // DONE
-  outsideState: Option[String] = None,
-  heatingModulation: Option[Double] = None,
+  outsideSun: Option[Boolean] = None,      // DONE
+  outsideState: Option[Int] = None,        // DONE
+  heatingModulation: Option[Double] = None,// DONE
 )
 
 object TadoReading:
@@ -34,6 +34,7 @@ object TadoReading:
         reading.atHome.map(r => MeasureField("atHome", FieldValue(r))).toVector ++
         reading.windowOpen.map(r => MeasureField("windowOpen", FieldValue(r))).toVector ++
         reading.outsideSun.map(r => MeasureField("outsideSun", FieldValue(r))).toVector ++
+        reading.outsideState.map(r => MeasureField("outsideState", FieldValue(r))).toVector ++
         reading.heatingModulation.map(r => MeasureField("heatingModulation", FieldValue(r))).toVector
 
       Measure("tado", fields, Vector(room), reading.time.getOrElse(OffsetDateTime.MAX))
@@ -52,10 +53,13 @@ object TadoReading:
           t.atHome.map(x => s"atHome=$x"),
           t.windowOpen.map(x => s"windowOpen=$x"),
           t.outsideSun.map(x => s"outsideSun=$x"),
+          t.outsideState.map(x => s"outsideState=$x"),
           t.heatingModulation.map(x => s"heatingModulation=$x"),
         )
 
-      fields.flattenOption.mkString("TadoReading(", ", ", ")")
+      fields
+        .flattenOption
+        .mkString("TadoReading(", ", ", ")")
 
   given Monoid[TadoReading] with
     def empty: TadoReading =
@@ -75,7 +79,6 @@ object TadoReading:
       )
 
   extension [A](self: (Option[A], Option[A]))
-
     def avg(using A: Fractional[A]): Option[A] =
       val list = self._1.toList ::: self._2.toList
       list.reduceOption(A.plus).map(A.div(_, A.fromInt(list.length)))

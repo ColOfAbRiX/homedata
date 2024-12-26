@@ -21,7 +21,8 @@ object ReportConverter:
         getHumidity(report),
         getSetTemperature(report.settings),
         getWeatherCondition(report.weather.condition),
-        getOutsideSun(report.weather.sunny)
+        getOutsideSun(report.weather.sunny),
+        getHeatingModulation(report.callForHeat),
       )
 
     getters
@@ -37,7 +38,7 @@ object ReportConverter:
       }
 
   private def getInsideTemperatures(report: DayReportResponse): IO[TadoDataStore] =
-    IO {
+    IO.pure {
       report
         .measuredData
         .insideTemperature
@@ -49,7 +50,7 @@ object ReportConverter:
     }
 
   private def getHumidity(report: DayReportResponse): IO[TadoDataStore] =
-    IO {
+    IO.pure {
       report
         .measuredData
         .humidity
@@ -61,7 +62,7 @@ object ReportConverter:
     }
 
   private def getSetTemperature(settings: Measure.DataIntervals[ValueType.HeatingSetting]): IO[TadoDataStore] =
-    IO {
+    IO.pure {
       settings
         .dataIntervals
         .foldMap {
@@ -74,23 +75,34 @@ object ReportConverter:
     }
 
   private def getWeatherCondition(condition: Measure.DataIntervals[ValueType.WeatherCondition]): IO[TadoDataStore] =
-    IO {
+    IO.pure {
       condition
         .dataIntervals
         .foldMap {
           case TimeSeriesType.DataIntervals(from, to, WeatherCondition(state, Temperature(temperature, _))) =>
-            val reading = TadoReading(outsideTemperature = Some(temperature), outsideState = Some(state))
+            val reading = TadoReading(outsideTemperature = Some(temperature), outsideState = Some(state.dbValue))
             TadoDataStore(from, to, reading)
         }
     }
 
   private def getOutsideSun(sunny: Measure.DataIntervals[ValueType.Bool]): IO[TadoDataStore] =
-    IO {
+    IO.pure {
       sunny
         .dataIntervals
         .foldMap {
           case TimeSeriesType.DataIntervals(from, to, isSunny) =>
             val reading = TadoReading(outsideSun = Some(isSunny))
+            TadoDataStore(from, to, reading)
+        }
+    }
+
+  private def getHeatingModulation(callForHeat: Measure.DataIntervals[ValueType.CallForHeat]): IO[TadoDataStore] =
+    IO.pure {
+      callForHeat
+        .dataIntervals
+        .foldMap {
+          case cfh @ TimeSeriesType.DataIntervals(from, to, callForHeat) =>
+            val reading = TadoReading(heatingModulation = Some(callForHeat.dbValue.toDouble))
             TadoDataStore(from, to, reading)
         }
     }

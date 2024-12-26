@@ -1,11 +1,19 @@
 package com.colofabrix.scala.tado4s.api
 
 import com.colofabrix.scala.tado4s.api.DayReportResponse.*
+import enumeratum.*
+import enumeratum.EnumEntry.UpperSnakecase
 import io.circe.Decoder
 import java.time.*
 
 /**
  * DayReportResponse
+ *
+ * @param interval
+ *   It's the interval of time that the report contains
+ * @param stripes
+ *   Stripes are the colored bands at the bottom of a graph, they represent the overall state of Tado, for example if
+ *   the person is Away, Manual mode, Window, ...
  */
 final case class DayReportResponse(
   zoneType: String,
@@ -21,7 +29,11 @@ final case class DayReportResponse(
 
 object DayReportResponse:
 
-  transparent trait Measure
+  //  Measure  //
+
+  transparent trait Measure:
+    def timeSeriesType: String
+    def valueType: String
 
   object Measure:
 
@@ -31,7 +43,7 @@ object DayReportResponse:
       min: Option[A],
       max: Option[A],
       percentageUnit: Option[String],
-      dataPoints: Vector[TimeSeriesType.DataPoints[A]]
+      dataPoints: Vector[TimeSeriesType.DataPoints[A]],
     ) extends Measure derives Decoder
 
     final case class DataIntervals[A](
@@ -46,7 +58,10 @@ object DayReportResponse:
       slots: Map[String, A],
     ) extends Measure derives Decoder
 
-  transparent trait TimeSeriesType
+  //  TimeSeriesType  //
+
+  transparent trait TimeSeriesType[A]:
+    def value: A
 
   object TimeSeriesType:
 
@@ -54,22 +69,26 @@ object DayReportResponse:
       from: OffsetDateTime,
       to: OffsetDateTime,
       value: A,
-    ) extends TimeSeriesType derives Decoder
+    ) extends TimeSeriesType[A] derives Decoder
 
     final case class DataPoints[A](
       timestamp: OffsetDateTime,
       value: A,
-    ) extends TimeSeriesType derives Decoder
+    ) extends TimeSeriesType[A] derives Decoder
+
+  //  ValueType  //
 
   transparent trait ValueType
 
   object ValueType:
 
-    type CallForHeat = String
+    //  Primitive Types  //
 
     type Percentage = Double
 
     type Bool = Boolean
+
+    //  Groups  //
 
     final case class Stripes(
       stripeType: String,
@@ -82,7 +101,7 @@ object DayReportResponse:
     ) extends ValueType derives Decoder
 
     final case class WeatherCondition(
-      state: String,
+      state: OutsideState,
       temperature: Temperature,
     ) extends ValueType derives Decoder
 
@@ -91,6 +110,23 @@ object DayReportResponse:
       power: String,
       temperature: Option[Temperature],
     ) extends ValueType derives Decoder
+
+    //  CallForHeat  //
+
+    sealed abstract class CallForHeat(val dbValue: Int) extends ValueType with EnumEntry with UpperSnakecase
+
+    object CallForHeat extends Enum[CallForHeat] with CirceEnum[CallForHeat]:
+
+      case object None   extends CallForHeat(0)
+      case object Low    extends CallForHeat(1)
+      case object Medium extends CallForHeat(2)
+      case object High   extends CallForHeat(3)
+
+      val values = findValues
+
+  end ValueType
+
+  //  Other  //
 
   final case class Interval(
     from: OffsetDateTime,
@@ -108,3 +144,21 @@ object DayReportResponse:
     sunny: Measure.DataIntervals[ValueType.Bool],
     slots: Measure.Slots[ValueType.WeatherCondition],
   ) derives Decoder
+
+  //  OutsideState  //
+
+  sealed abstract class OutsideState(val dbValue: Int) extends EnumEntry with UpperSnakecase
+
+  object OutsideState extends Enum[OutsideState] with CirceEnum[OutsideState]:
+
+    case object Cloudy        extends OutsideState(1)
+    case object CloudyMostly  extends OutsideState(2)
+    case object CloudyPartly  extends OutsideState(3)
+    case object Drizzle       extends OutsideState(4)
+    case object NightClear    extends OutsideState(5)
+    case object NightCloudy   extends OutsideState(6)
+    case object Rain          extends OutsideState(7)
+    case object ScatteredRain extends OutsideState(8)
+    case object Sun           extends OutsideState(9)
+
+    val values = findValues

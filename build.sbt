@@ -2,6 +2,23 @@ import org.typelevel.scalacoptions.ScalacOptions
 
 val scala3Version = "3.6.2"
 
+val catsEffectVersion     = "3.5.2"
+val catsVersion           = "2.10.0"
+val circeCoreVersion      = "0.14.10"
+val circeGenericVersion   = "0.14.10"
+val coreVersion           = "4.0.0-M8"
+val ducktapeVersion       = "0.1.11"
+val enumeratumVersion     = "1.7.5"
+val fs2ThrottlerVersion   = "1.0.12"
+val fs2Version            = "3.9.3"
+val http4sClientVersion   = "0.23.24"
+val json4sNativeVersion   = "4.1.0-M4"
+val log4catsCoreVersion   = "2.7.0"
+val logbackClassicVersion = "1.3.4"
+val pureconfigCatsVersion = "0.17.4"
+val scalatestVersion      = "3.2.17"
+val sttpVersion           = "4.0.0-M8"
+
 Global / run / fork           := true
 Global / onChangedBuildSource := ReloadOnSourceChanges
 Global / tpolecatExcludeOptions ++=
@@ -39,20 +56,19 @@ lazy val homedata =
       organization := "com.colofabrix.scala.homedata",
       scalaVersion := scala3Version,
       libraryDependencies ++= List(
-        "ch.qos.logback"                 % "logback-classic" % "1.2.10",
-        "ch.qos.logback"                 % "logback-classic" % "1.3.4",
-        "co.fs2"                        %% "fs2-core"        % "3.9.3",
-        "co.fs2"                        %% "fs2-io"          % "3.9.3",
-        "com.github.pureconfig"         %% "pureconfig-cats" % "0.17.4",
-        "com.softwaremill.sttp.client4" %% "core"            % "4.0.0-M8",
-        "dev.kovstas"                   %% "fs2-throttler"   % "1.0.12",
-        "io.github.arainko"             %% "ducktape"        % "0.1.11",
-        "org.http4s"                    %% "http4s-client"   % "0.23.24",
-        "org.json4s"                    %% "json4s-native"   % "4.1.0-M4",
-        "org.scalatest"                 %% "scalatest"       % "3.2.17" % Test,
-        "org.typelevel"                 %% "cats-core"       % "2.10.0",
-        "org.typelevel"                 %% "cats-effect"     % "3.5.2",
-        "org.typelevel"                 %% "log4cats-core"   % "2.7.0",
+        "ch.qos.logback"                 % "logback-classic" % logbackClassicVersion,
+        "co.fs2"                        %% "fs2-core"        % fs2Version,
+        "co.fs2"                        %% "fs2-io"          % fs2Version,
+        "com.github.pureconfig"         %% "pureconfig-cats" % pureconfigCatsVersion,
+        "com.softwaremill.sttp.client4" %% "core"            % sttpVersion,
+        "dev.kovstas"                   %% "fs2-throttler"   % fs2ThrottlerVersion,
+        "io.github.arainko"             %% "ducktape"        % ducktapeVersion,
+        "org.http4s"                    %% "http4s-client"   % http4sClientVersion,
+        "org.json4s"                    %% "json4s-native"   % json4sNativeVersion,
+        "org.scalatest"                 %% "scalatest"       % scalatestVersion % Test,
+        "org.typelevel"                 %% "cats-core"       % catsVersion,
+        "org.typelevel"                 %% "cats-effect"     % catsEffectVersion,
+        "org.typelevel"                 %% "log4cats-core"   % log4catsCoreVersion,
       ),
     )
 
@@ -65,20 +81,19 @@ lazy val timeflux =
       organization := "com.colofabrix.scala.timeflux",
       scalaVersion := scala3Version,
       libraryDependencies ++= List(
-        "ch.qos.logback"         % "logback-classic"     % "1.2.10",
-        "co.fs2"                %% "fs2-core"            % "3.9.3",
-        "com.github.pureconfig" %% "pureconfig-cats"     % "0.17.4",
-        "io.circe"              %% "circe-core"          % "0.14.6",
-        "io.circe"              %% "circe-fs2"           % "0.14.1",
-        "io.circe"              %% "circe-generic"       % "0.14.6",
-        "io.circe"              %% "circe-parser"        % "0.14.6",
-        "io.github.arainko"     %% "ducktape"            % "0.1.11",
-        "org.http4s"            %% "http4s-circe"        % "0.23.24",
-        "org.http4s"            %% "http4s-ember-client" % "0.23.24",
-        "org.scalatest"         %% "scalatest"           % "3.2.17" % Test,
-        "org.typelevel"         %% "cats-core"           % "2.10.0",
-        "org.typelevel"         %% "cats-effect"         % "3.5.2",
-        "org.typelevel"         %% "log4cats-core"       % "2.7.0",
+        "ch.qos.logback"         % "logback-classic"     % logbackClassicVersion,
+        "co.fs2"                %% "fs2-core"            % fs2Version,
+        "com.github.pureconfig" %% "pureconfig-cats"     % pureconfigCatsVersion,
+        "io.circe"              %% "circe-core"          % circeCoreVersion,
+        "io.circe"              %% "circe-generic"       % circeCoreVersion,
+        "io.circe"              %% "circe-parser"        % circeCoreVersion,
+        "io.github.arainko"     %% "ducktape"            % ducktapeVersion,
+        "org.http4s"            %% "http4s-circe"        % http4sClientVersion,
+        "org.http4s"            %% "http4s-ember-client" % http4sClientVersion,
+        "org.scalatest"         %% "scalatest"           % scalatestVersion % Test,
+        "org.typelevel"         %% "cats-core"           % catsVersion,
+        "org.typelevel"         %% "cats-effect"         % catsEffectVersion,
+        "org.typelevel"         %% "log4cats-core"       % log4catsCoreVersion,
       ),
     )
 
@@ -91,18 +106,20 @@ lazy val tado4s =
       organization := "com.colofabrix.scala.tado4s",
       scalaVersion := scala3Version,
       libraryDependencies ++= List(
-        "ch.qos.logback"         % "logback-classic"     % "1.2.10",
-        "com.github.pureconfig" %% "pureconfig-cats"     % "0.17.4",
-        "io.circe"              %% "circe-core"          % "0.14.6",
-        "io.circe"              %% "circe-generic"       % "0.14.6",
-        "io.github.arainko"     %% "ducktape"            % "0.1.11",
-        "org.http4s"            %% "http4s-circe"        % "0.23.24",
-        "org.http4s"            %% "http4s-client"       % "0.23.24",
-        "org.http4s"            %% "http4s-dsl"          % "0.23.24",
-        "org.http4s"            %% "http4s-ember-client" % "0.23.24",
-        "org.scalatest"         %% "scalatest"           % "3.2.17" % Test,
-        "org.typelevel"         %% "cats-core"           % "2.10.0",
-        "org.typelevel"         %% "cats-effect"         % "3.5.2",
-        "org.typelevel"         %% "log4cats-core"       % "2.7.0",
+        "ch.qos.logback"         % "logback-classic"     % logbackClassicVersion,
+        "com.beachape"          %% "enumeratum"          % enumeratumVersion,
+        "com.beachape"          %% "enumeratum-circe"    % enumeratumVersion,
+        "com.github.pureconfig" %% "pureconfig-cats"     % pureconfigCatsVersion,
+        "io.circe"              %% "circe-core"          % circeCoreVersion,
+        "io.circe"              %% "circe-generic"       % circeCoreVersion,
+        "io.github.arainko"     %% "ducktape"            % ducktapeVersion,
+        "org.http4s"            %% "http4s-circe"        % http4sClientVersion,
+        "org.http4s"            %% "http4s-client"       % http4sClientVersion,
+        "org.http4s"            %% "http4s-dsl"          % http4sClientVersion,
+        "org.http4s"            %% "http4s-ember-client" % http4sClientVersion,
+        "org.scalatest"         %% "scalatest"           % scalatestVersion % Test,
+        "org.typelevel"         %% "cats-core"           % catsVersion,
+        "org.typelevel"         %% "cats-effect"         % catsEffectVersion,
+        "org.typelevel"         %% "log4cats-core"       % log4catsCoreVersion,
       ),
     )
