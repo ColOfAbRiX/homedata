@@ -1,10 +1,12 @@
 package com.colofabrix.scala.homedata.octopus
 
 import cats.effect.IO
+import dev.kovstas.fs2throttler.Throttler
 import fs2.{ Chunk, Stream }
 import java.time.OffsetDateTime
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
+import scala.concurrent.duration.*
 
 object Octopus:
 
@@ -28,5 +30,6 @@ object Octopus:
           case (readings, false) => (readings, None)
         }
       }
+      .through(Throttler.throttle(1, 1.second, Throttler.Shaping))
       .flatMap(Stream.chunk)
       .evalTap(reading => logger.debug(s"Octopus reading: $reading"))
