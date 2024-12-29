@@ -6,7 +6,6 @@ import com.colofabrix.scala.homedata.influx.InfluxDbConfig
 import com.colofabrix.scala.homedata.influx.InfluxDbConfig.{ config => InfluxConf }
 import com.colofabrix.scala.homedata.tado.*
 import com.colofabrix.scala.timeflux.*
-import com.colofabrix.scala.timeflux.api.TimePrecision
 import com.colofabrix.scala.timeflux.measures.Measure
 import fs2.concurrent.Channel
 import java.time.*
@@ -32,5 +31,5 @@ object Main extends IOApp.Simple with TimefluxDSL:
       tadoReading     = tadoPuller.pullReadings(periodFrom, periodTo)
       // octopus         = octpusReadings(periodFrom) merge tadoMeasurements(periodFrom)
       // allReadings    <- octopus merge tado
-      _ <- timefluxClient.writeData(InfluxConf.projectBucket, tadoReading, Some(TimePrecision.Milliseconds))
+      _ <- timefluxClient.writeData(InfluxConf.projectBucket, tadoReading)
     } yield ()

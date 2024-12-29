@@ -1,6 +1,8 @@
 package com.colofabrix.scala.timeflux.measures
 
+import cats.implicits.given
 import com.colofabrix.scala.timeflux.model.LineProtocolValue
+import com.colofabrix.scala.timeflux.api.TimePrecision
 
 /**
  * Serializes a Measure into a Line Protocol value
@@ -9,7 +11,7 @@ import com.colofabrix.scala.timeflux.model.LineProtocolValue
  */
 private[timeflux] object MeasureWriter:
 
-  def writeToLineProtocol(measure: Measure): LineProtocolValue =
+  def writeToLineProtocol(measure: Measure, timePrecision: TimePrecision): LineProtocolValue =
     val lineMeasure =
       measure
         .name
@@ -34,11 +36,12 @@ private[timeflux] object MeasureWriter:
         }
 
     val lineTime =
-      measure
-        .time
-        .toInstant
-        .toEpochMilli
-        .toString
+      if timePrecision =!= TimePrecision.Milliseconds then
+        val timeExponent   = TimePrecision.Milliseconds.multiplier - timePrecision.multiplier
+        val timeMultiplier = Math.pow(10, timeExponent.toDouble).toLong
+        (measure.time.toInstant.toEpochMilli * timeMultiplier).toString
+      else
+        measure.time.toInstant.toEpochMilli.toString
 
     LineProtocolValue(s"${lineMeasure}${lineTags}${lineFields} ${lineTime}".trim)
 

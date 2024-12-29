@@ -14,6 +14,7 @@ import org.http4s.circe.CirceEntityDecoder.*
 import org.http4s.circe.CirceEntityEncoder.*
 import org.http4s.client.Client
 import org.http4s.client.dsl.Http4sClientDsl
+import org.http4s.client.middleware.Logger
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.Method.*
 import org.typelevel.log4cats.SelfAwareStructuredLogger
@@ -110,10 +111,9 @@ final class TimefluxClient[F[_]: Async] private (
    */
   def writeData[A: TimefluxSerializable](request: WriteRequest, values: StreamF[A]): F[Unit] =
     for
-      _        <- logger.debug("Write Data")
-      precision = request.precision.getOrElse(TimePrecision.Microseconds)
-      measures  = values.through(TimefluxSerializable.toApiMeasureStream(precision))
-      result   <- writeStream(request, measures)
+      _       <- logger.debug("Write Data")
+      measures = values.through(TimefluxSerializable.toApiMeasureStream)
+      result  <- writeStream(request, measures)
     yield result
 
   /**
@@ -144,7 +144,7 @@ final class TimefluxClient[F[_]: Async] private (
 
     val body =
       values
-        .map(_.toLineProtocol.value.trim + "\n")
+        .map(_.toLineProtocol(request.precision).value.trim + "\n")
         .evalTap { line =>
           logger.trace(line.dropRight(1))
         }
@@ -172,8 +172,7 @@ final class TimefluxClient[F[_]: Async] private (
             Async[F].raiseError(TimefluxException("No Influx credentials set.", None))
           case Some(creds) =>
             for
-              client <- buildHttpClient(creds)
-              _      <- setAuthenticatedClient(client)
+              _      <- setAuthenticatedClient(buildHttpClient(creds))
               _      <- logger.debug("New Timeflux authenticated client")
               result <- getLoggedClient()
             yield result
@@ -196,9 +195,10 @@ final class TimefluxClient[F[_]: Async] private (
           }
       }
 
-  private def buildHttpClient(creds: TimefluxCredentials): F[Client[F]] =
-    val authClient = TimefluxAuthenticatedClient[F](httpClient, creds.token, creds.orgId)
-    TimefluxLoggedClient[F](authClient, logger)
+  private def buildHttpClient(creds: TimefluxCredentials): Client[F] =
+    Logger.colored[F](logBody = true, logHeaders = true):
+      TimefluxAuthenticatedClient[F](creds.token, creds.orgId):
+        httpClient
 
   //  Error handlers  //
 

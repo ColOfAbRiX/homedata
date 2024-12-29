@@ -207,11 +207,9 @@ final class Tado4sClient[F[_]: Async] private (
             yield result
 
   private def buildHttpClient(authToken: TadoAuthToken): Client[F] =
-    Logger.colored[F](logBody = true, logHeaders = true) {
-      TadoAuthenticatedClient[F](authToken.bearerToken) {
+    Logger.colored[F](logBody = true, logHeaders = true):
+      TadoAuthenticatedClient[F](authToken.bearerToken):
         httpClient
-      }
-    }
 
   private def isTokenExpired(authToken: TadoAuthToken): Boolean =
     authToken.expiry.minus(5, ChronoUnit.SECONDS).isBefore(OffsetDateTime.now())

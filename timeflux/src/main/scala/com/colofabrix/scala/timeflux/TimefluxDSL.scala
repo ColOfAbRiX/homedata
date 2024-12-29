@@ -48,10 +48,9 @@ trait TimefluxDSL:
       values: fs2.Stream[F, A],
       precision: Option[TimePrecision] = None,
     ): F[Unit] =
-      timefluxClient.writeData(
-        WriteRequest(bucket, None, precision),
-        values,
-      )
+      val fullPrecision = precision.getOrElse(TimePrecision.Milliseconds)
+      val request       = WriteRequest(bucket, None, fullPrecision)
+      timefluxClient.writeData(request, values)
 
     /**
      * Writes a stream of TimefluxSerializable values in a bucket
@@ -61,7 +60,6 @@ trait TimefluxDSL:
       values: fs2.Stream[F, Measure],
       precision: Option[TimePrecision] = None,
     ): F[Unit] =
-      timefluxClient.writeMeasures(
-        WriteRequest(bucket, None, precision),
-        values,
-      )
+      val fullPrecision = precision.getOrElse(TimePrecision.Milliseconds)
+      val request       = WriteRequest(bucket, None, fullPrecision)
+      timefluxClient.writeMeasures(request, values)

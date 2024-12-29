@@ -2,7 +2,6 @@ package com.colofabrix.scala.homedata.octopus
 
 import com.colofabrix.scala.timeflux.measures.*
 import java.time.OffsetDateTime
-import com.colofabrix.scala.timeflux.api.TimePrecision
 
 sealed trait OctopusReading
 
@@ -25,8 +24,7 @@ object ElectricityReading:
         name = "electricity",
         fields = Vector(MeasureField("consumption", FieldValue(reading.consumption))),
         tags = Vector.empty,
-        time = reading.time,
-        precision = TimePrecision.Milliseconds
+        time = reading.time
       )
 
 final case class GasReading(time: OffsetDateTime, consumption: Double) extends OctopusReading
@@ -39,6 +37,5 @@ object GasReading:
         name = "gas",
         fields = Vector(MeasureField("consumption", FieldValue(reading.consumption))),
         tags = Vector.empty,
-        time = reading.time,
-        precision = TimePrecision.Milliseconds
+        time = reading.time
       )

@@ -8,5 +8,5 @@ import com.colofabrix.scala.timeflux.encoding.UrlParamsEncoder
 final case class WriteRequest(
   bucket: String,
   orgID: Option[String],
-  precision: Option[TimePrecision],
+  precision: TimePrecision,
 ) derives UrlParamsEncoder

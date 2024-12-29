@@ -1,5 +1,6 @@
 package com.colofabrix.scala.timeflux.api
 
+import cats.kernel.Order
 import com.colofabrix.scala.timeflux.encoding.UrlParamsEncoder
 import io.circe.*
 import io.circe.derivation.*
@@ -7,12 +8,16 @@ import java.time.*
 
 enum TimePrecision(val value: String, val multiplier: Long):
 
-  case Seconds      extends TimePrecision("s", 1)
-  case Milliseconds extends TimePrecision("ms", 1000)
-  case Microseconds extends TimePrecision("us", 1000000)
-  case Nanoseconds  extends TimePrecision("ns", 1000000000)
+  case Seconds      extends TimePrecision("s", 0)
+  case Milliseconds extends TimePrecision("ms", 3)
+  case Microseconds extends TimePrecision("us", 6)
+  case Nanoseconds  extends TimePrecision("ns", 9)
 
 object TimePrecision:
+
+  given Order[TimePrecision] with
+    def compare(x: TimePrecision, y: TimePrecision): Int =
+      (x.multiplier - y.multiplier).toInt
 
   given UrlParamsEncoder[TimePrecision] with
     def encode(a: TimePrecision): Map[String, String] =

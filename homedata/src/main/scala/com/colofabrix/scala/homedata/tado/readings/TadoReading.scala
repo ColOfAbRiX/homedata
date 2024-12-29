@@ -4,7 +4,6 @@ import cats.*
 import cats.implicits.given
 import com.colofabrix.scala.timeflux.measures.*
 import java.time.OffsetDateTime
-import com.colofabrix.scala.timeflux.api.TimePrecision
 
 final case class TadoReading(
   time: Option[OffsetDateTime],
@@ -74,8 +73,7 @@ object TadoReading:
         name = "tado",
         fields = fields.flattenOption,
         tags = Vector(room),
-        time = reading.time.getOrElse(OffsetDateTime.MAX),
-        precision = TimePrecision.Milliseconds,
+        time = reading.time.getOrElse(OffsetDateTime.MAX)
       )
 
   given Show[TadoReading] with
