@@ -1,6 +1,7 @@
 package com.colofabrix.scala.timeflux.measures
 
 import com.colofabrix.scala.timeflux.model.LineProtocolValue
+import com.colofabrix.scala.timeflux.api.TimePrecision
 
 /**
  * Data that can be serialized into a measure to be written in InfluxDB
@@ -29,5 +30,5 @@ object TimefluxSerializable:
   def apply[A](using ev: TimefluxSerializable[A]): TimefluxSerializable[A] =
     ev
 
-  def fs2ToMeasure[F[_], A](using ev: TimefluxSerializable[A]): fs2.Pipe[F, A, Measure] =
+  def toApiMeasureStream[F[_], A](apiTimePrecision: TimePrecision)(using ev: TimefluxSerializable[A]): fs2.Pipe[F, A, Measure] =
     _.map(ev.toMeasure)

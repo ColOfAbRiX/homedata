@@ -43,10 +43,15 @@ final class TimeSlots[A] private (val resolution: FiniteDuration, private val st
     if from === to then
       add(from, values)
     else
-      val fromTimeSlot = if from < to then roundToTimeSlot(from) else roundToTimeSlot(to)
-      val toTimeSlot   = if from < to then roundToTimeSlot(to) else roundToTimeSlot(from)
-      val timedValues  = values.map(TimeValue.TimeSpanValue(from, to, _))
-      val newStore     = addRangeToStore(store, resolution, fromTimeSlot, toTimeSlot, timedValues)
+      val (realFrom, realTo) = if from < to then (from, to) else (to, from)
+      val fromTimeSlot       = roundToTimeSlot(realFrom)
+
+      val slottedTo  = roundToTimeSlot(realTo)
+      val toTimeSlot = if (realTo === slottedTo) roundToTimeSlot(realTo.minusSeconds(1)) else slottedTo
+
+      val timedValues = values.map(TimeValue.TimeSpanValue(from, to, _))
+      val newStore    = addRangeToStore(store, resolution, fromTimeSlot, toTimeSlot, timedValues)
+
       copy(store = newStore)
 
   /**
@@ -234,9 +239,13 @@ object TimeSlots:
     given [A: Show]: Show[TimeValue[A]] with
       def show(value: TimeValue[A]): String =
         value match {
-          case TimeValue.InstantValue(time, value)      => s"${time}@${value.show}"
-          case TimeValue.TimeSpanValue(from, to, value) => s"${from}~${to}@${value.show}"
+          case TimeValue.InstantValue(time, value)      => s"${time.show}> ${value.show}"
+          case TimeValue.TimeSpanValue(from, to, value) => s"${from.show} ~ ${to.show}> ${value.show}"
         }
+
+    given Show[OffsetDateTime] with
+      def show(value: OffsetDateTime): String =
+        value.toString
 
   //  InnerStore  //
 
@@ -262,12 +271,29 @@ object TimeSlots:
 
   given [A: Show]: Show[TimeSlots[A]] with
     def show(value: TimeSlots[A]): String =
-      val prettyContent = value.store.map { case (time, a) => s"  $time -> ${a.show}" }
+      val className = value.getClass.getSimpleName
+
+      val prettyContent =
+        value
+          .store
+          .map {
+            case (time, as) =>
+              val prettyAs =
+                if as.isEmpty then "Set()"
+                else as.map(_.show).mkString("Set(\n    ", "\n    ", "\n  )")
+
+              s"  $time -> $prettyAs"
+          }
 
       if prettyContent.isEmpty then
-        s"${value.getClass.getSimpleName}(resolution=${value.resolution})"
+        s"$className(resolution=${value.resolution})"
       else
-        prettyContent.mkString(s"${value.getClass.getSimpleName}(\n  resolution=${value.resolution},\n", ",\n", "\n)")
+        prettyContent
+          .mkString(
+            s"$className(\n  resolution=${value.resolution},\n",
+            ",\n",
+            "\n)",
+          )
 
   given [A]: Eq[TimeSlots[A]] with
     def eqv(x: TimeSlots[A], y: TimeSlots[A]): Boolean =

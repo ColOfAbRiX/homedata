@@ -32,5 +32,5 @@ object Main extends IOApp.Simple with TimefluxDSL:
       tadoReading     = tadoPuller.pullReadings(periodFrom, periodTo)
       // octopus         = octpusReadings(periodFrom) merge tadoMeasurements(periodFrom)
       // allReadings    <- octopus merge tado
-      _ <- timefluxClient.writeData(InfluxConf.projectBucket, tadoReading, Some(TimePrecision.Seconds))
+      _ <- timefluxClient.writeData(InfluxConf.projectBucket, tadoReading, Some(TimePrecision.Milliseconds))
     } yield ()

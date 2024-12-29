@@ -22,7 +22,7 @@ val sttpVersion           = "4.0.0-M8"
 Global / run / fork           := true
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
-Global / tpolecatExcludeOptions         += ScalacOptions.warnUnusedLocals
+Global / tpolecatExcludeOptions ++= ScalacOptions.warnUnusedOptions
 homedata / Test / tpolecatScalacOptions := Set.empty
 tado4s / Test / tpolecatScalacOptions   := Set.empty
 timeflux / Test / tpolecatScalacOptions := Set.empty

@@ -1,6 +1,7 @@
 package com.colofabrix.scala.timeflux.measures
 
 import java.time.OffsetDateTime
+import com.colofabrix.scala.timeflux.api.TimePrecision
 
 /**
  * InfluxDB Measure
@@ -10,6 +11,7 @@ final case class Measure(
   fields: Vector[MeasureField],
   tags: Vector[MeasureTag],
   time: OffsetDateTime,
+  precision: TimePrecision
 )
 
 object Measure:

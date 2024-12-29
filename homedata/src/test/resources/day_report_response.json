@@ -1,8 +1,8 @@
 {
   "zoneType": "HEATING",
   "interval": {
-    "from": "2024-01-24T23:45:00.000Z",
-    "to": "2024-01-26T00:15:00.000Z"
+    "from": "2024-12-12T23:45:00.000Z",
+    "to": "2024-12-14T00:15:00.000Z"
   },
   "hoursInDay": 24,
   "measuredData": {
@@ -11,8 +11,8 @@
       "valueType": "boolean",
       "dataIntervals": [
         {
-          "from": "2024-01-24T23:45:00.000Z",
-          "to": "2024-01-26T00:15:00.000Z",
+          "from": "2024-12-12T23:45:00.000Z",
+          "to": "2024-12-14T00:15:00.000Z",
           "value": true
         }
       ]
@@ -21,705 +21,705 @@
       "timeSeriesType": "dataPoints",
       "valueType": "temperature",
       "min": {
-        "celsius": 17.31,
-        "fahrenheit": 63.16
+        "celsius": 17.25,
+        "fahrenheit": 63.05
       },
       "max": {
-        "celsius": 20.29,
-        "fahrenheit": 68.52
+        "celsius": 19.95,
+        "fahrenheit": 67.91
       },
       "dataPoints": [
         {
-          "timestamp": "2024-01-24T23:45:00.000Z",
+          "timestamp": "2024-12-12T23:45:00.000Z",
           "value": {
-            "celsius": 19.62,
-            "fahrenheit": 67.32
+            "celsius": 19.25,
+            "fahrenheit": 66.65
           }
         },
         {
-          "timestamp": "2024-01-25T00:00:00.000Z",
+          "timestamp": "2024-12-13T00:00:00.000Z",
           "value": {
-            "celsius": 19.44,
-            "fahrenheit": 66.99
+            "celsius": 19.25,
+            "fahrenheit": 66.65
           }
         },
         {
-          "timestamp": "2024-01-25T00:15:00.000Z",
+          "timestamp": "2024-12-13T00:15:00.000Z",
           "value": {
-            "celsius": 19.23,
-            "fahrenheit": 66.61
+            "celsius": 19.13,
+            "fahrenheit": 66.43
           }
         },
         {
-          "timestamp": "2024-01-25T00:30:00.000Z",
+          "timestamp": "2024-12-13T00:30:00.000Z",
           "value": {
-            "celsius": 19.11,
-            "fahrenheit": 66.40
+            "celsius": 18.94,
+            "fahrenheit": 66.09
           }
         },
         {
-          "timestamp": "2024-01-25T00:45:00.000Z",
+          "timestamp": "2024-12-13T00:45:00.000Z",
           "value": {
-            "celsius": 18.89,
-            "fahrenheit": 66.00
+            "celsius": 18.77,
+            "fahrenheit": 65.79
           }
         },
         {
-          "timestamp": "2024-01-25T01:00:00.000Z",
+          "timestamp": "2024-12-13T01:00:00.000Z",
           "value": {
-            "celsius": 18.73,
-            "fahrenheit": 65.71
+            "celsius": 18.68,
+            "fahrenheit": 65.62
           }
         },
         {
-          "timestamp": "2024-01-25T01:15:00.000Z",
-          "value": {
-            "celsius": 18.60,
-            "fahrenheit": 65.48
-          }
-        },
-        {
-          "timestamp": "2024-01-25T01:30:00.000Z",
-          "value": {
-            "celsius": 18.46,
-            "fahrenheit": 65.23
-          }
-        },
-        {
-          "timestamp": "2024-01-25T01:45:00.000Z",
-          "value": {
-            "celsius": 18.46,
-            "fahrenheit": 65.23
-          }
-        },
-        {
-          "timestamp": "2024-01-25T02:00:00.000Z",
-          "value": {
-            "celsius": 18.31,
-            "fahrenheit": 64.96
-          }
-        },
-        {
-          "timestamp": "2024-01-25T02:15:00.000Z",
-          "value": {
-            "celsius": 18.22,
-            "fahrenheit": 64.80
-          }
-        },
-        {
-          "timestamp": "2024-01-25T02:30:00.000Z",
-          "value": {
-            "celsius": 18.14,
-            "fahrenheit": 64.65
-          }
-        },
-        {
-          "timestamp": "2024-01-25T02:45:00.000Z",
-          "value": {
-            "celsius": 17.99,
-            "fahrenheit": 64.38
-          }
-        },
-        {
-          "timestamp": "2024-01-25T03:00:00.000Z",
-          "value": {
-            "celsius": 17.91,
-            "fahrenheit": 64.24
-          }
-        },
-        {
-          "timestamp": "2024-01-25T03:15:00.000Z",
-          "value": {
-            "celsius": 17.80,
-            "fahrenheit": 64.04
-          }
-        },
-        {
-          "timestamp": "2024-01-25T03:30:00.000Z",
-          "value": {
-            "celsius": 17.73,
-            "fahrenheit": 63.91
-          }
-        },
-        {
-          "timestamp": "2024-01-25T03:45:00.000Z",
-          "value": {
-            "celsius": 17.65,
-            "fahrenheit": 63.77
-          }
-        },
-        {
-          "timestamp": "2024-01-25T04:00:00.000Z",
-          "value": {
-            "celsius": 17.65,
-            "fahrenheit": 63.77
-          }
-        },
-        {
-          "timestamp": "2024-01-25T04:15:00.000Z",
-          "value": {
-            "celsius": 17.55,
-            "fahrenheit": 63.59
-          }
-        },
-        {
-          "timestamp": "2024-01-25T04:30:00.000Z",
-          "value": {
-            "celsius": 17.48,
-            "fahrenheit": 63.46
-          }
-        },
-        {
-          "timestamp": "2024-01-25T04:45:00.000Z",
-          "value": {
-            "celsius": 17.38,
-            "fahrenheit": 63.28
-          }
-        },
-        {
-          "timestamp": "2024-01-25T05:00:00.000Z",
-          "value": {
-            "celsius": 17.31,
-            "fahrenheit": 63.16
-          }
-        },
-        {
-          "timestamp": "2024-01-25T05:15:00.000Z",
-          "value": {
-            "celsius": 17.31,
-            "fahrenheit": 63.16
-          }
-        },
-        {
-          "timestamp": "2024-01-25T05:30:00.000Z",
-          "value": {
-            "celsius": 17.38,
-            "fahrenheit": 63.28
-          }
-        },
-        {
-          "timestamp": "2024-01-25T05:45:00.000Z",
-          "value": {
-            "celsius": 17.48,
-            "fahrenheit": 63.46
-          }
-        },
-        {
-          "timestamp": "2024-01-25T06:00:00.000Z",
-          "value": {
-            "celsius": 17.43,
-            "fahrenheit": 63.37
-          }
-        },
-        {
-          "timestamp": "2024-01-25T06:15:00.000Z",
-          "value": {
-            "celsius": 17.39,
-            "fahrenheit": 63.30
-          }
-        },
-        {
-          "timestamp": "2024-01-25T06:30:00.000Z",
-          "value": {
-            "celsius": 17.57,
-            "fahrenheit": 63.63
-          }
-        },
-        {
-          "timestamp": "2024-01-25T06:45:00.000Z",
-          "value": {
-            "celsius": 17.57,
-            "fahrenheit": 63.63
-          }
-        },
-        {
-          "timestamp": "2024-01-25T07:00:00.000Z",
-          "value": {
-            "celsius": 17.48,
-            "fahrenheit": 63.46
-          }
-        },
-        {
-          "timestamp": "2024-01-25T07:15:00.000Z",
-          "value": {
-            "celsius": 17.53,
-            "fahrenheit": 63.55
-          }
-        },
-        {
-          "timestamp": "2024-01-25T07:30:00.000Z",
-          "value": {
-            "celsius": 17.49,
-            "fahrenheit": 63.48
-          }
-        },
-        {
-          "timestamp": "2024-01-25T07:45:00.000Z",
-          "value": {
-            "celsius": 17.73,
-            "fahrenheit": 63.91
-          }
-        },
-        {
-          "timestamp": "2024-01-25T08:00:00.000Z",
-          "value": {
-            "celsius": 18.36,
-            "fahrenheit": 65.05
-          }
-        },
-        {
-          "timestamp": "2024-01-25T08:15:00.000Z",
-          "value": {
-            "celsius": 18.91,
-            "fahrenheit": 66.04
-          }
-        },
-        {
-          "timestamp": "2024-01-25T08:30:00.000Z",
-          "value": {
-            "celsius": 19.23,
-            "fahrenheit": 66.61
-          }
-        },
-        {
-          "timestamp": "2024-01-25T08:45:00.000Z",
-          "value": {
-            "celsius": 19.56,
-            "fahrenheit": 67.21
-          }
-        },
-        {
-          "timestamp": "2024-01-25T09:00:00.000Z",
-          "value": {
-            "celsius": 19.68,
-            "fahrenheit": 67.42
-          }
-        },
-        {
-          "timestamp": "2024-01-25T09:15:00.000Z",
-          "value": {
-            "celsius": 19.75,
-            "fahrenheit": 67.55
-          }
-        },
-        {
-          "timestamp": "2024-01-25T09:30:00.000Z",
-          "value": {
-            "celsius": 19.62,
-            "fahrenheit": 67.32
-          }
-        },
-        {
-          "timestamp": "2024-01-25T09:45:00.000Z",
-          "value": {
-            "celsius": 19.42,
-            "fahrenheit": 66.96
-          }
-        },
-        {
-          "timestamp": "2024-01-25T10:00:00.000Z",
-          "value": {
-            "celsius": 19.21,
-            "fahrenheit": 66.58
-          }
-        },
-        {
-          "timestamp": "2024-01-25T10:15:00.000Z",
-          "value": {
-            "celsius": 19.00,
-            "fahrenheit": 66.20
-          }
-        },
-        {
-          "timestamp": "2024-01-25T10:30:00.000Z",
-          "value": {
-            "celsius": 18.78,
-            "fahrenheit": 65.80
-          }
-        },
-        {
-          "timestamp": "2024-01-25T10:45:00.000Z",
-          "value": {
-            "celsius": 18.59,
-            "fahrenheit": 65.46
-          }
-        },
-        {
-          "timestamp": "2024-01-25T11:00:00.000Z",
-          "value": {
-            "celsius": 18.59,
-            "fahrenheit": 65.46
-          }
-        },
-        {
-          "timestamp": "2024-01-25T11:15:00.000Z",
-          "value": {
-            "celsius": 18.42,
-            "fahrenheit": 65.16
-          }
-        },
-        {
-          "timestamp": "2024-01-25T11:30:00.000Z",
-          "value": {
-            "celsius": 18.29,
-            "fahrenheit": 64.92
-          }
-        },
-        {
-          "timestamp": "2024-01-25T11:45:00.000Z",
-          "value": {
-            "celsius": 18.22,
-            "fahrenheit": 64.80
-          }
-        },
-        {
-          "timestamp": "2024-01-25T12:00:00.000Z",
-          "value": {
-            "celsius": 18.17,
-            "fahrenheit": 64.71
-          }
-        },
-        {
-          "timestamp": "2024-01-25T12:15:00.000Z",
-          "value": {
-            "celsius": 18.21,
-            "fahrenheit": 64.78
-          }
-        },
-        {
-          "timestamp": "2024-01-25T12:30:00.000Z",
-          "value": {
-            "celsius": 18.32,
-            "fahrenheit": 64.98
-          }
-        },
-        {
-          "timestamp": "2024-01-25T12:45:00.000Z",
-          "value": {
-            "celsius": 18.46,
-            "fahrenheit": 65.23
-          }
-        },
-        {
-          "timestamp": "2024-01-25T13:00:00.000Z",
-          "value": {
-            "celsius": 18.48,
-            "fahrenheit": 65.26
-          }
-        },
-        {
-          "timestamp": "2024-01-25T13:15:00.000Z",
+          "timestamp": "2024-12-13T01:15:00.000Z",
           "value": {
             "celsius": 18.51,
             "fahrenheit": 65.32
           }
         },
         {
-          "timestamp": "2024-01-25T13:30:00.000Z",
+          "timestamp": "2024-12-13T01:30:00.000Z",
           "value": {
-            "celsius": 18.50,
-            "fahrenheit": 65.30
+            "celsius": 18.36,
+            "fahrenheit": 65.05
           }
         },
         {
-          "timestamp": "2024-01-25T13:45:00.000Z",
+          "timestamp": "2024-12-13T01:45:00.000Z",
+          "value": {
+            "celsius": 18.25,
+            "fahrenheit": 64.85
+          }
+        },
+        {
+          "timestamp": "2024-12-13T02:00:00.000Z",
+          "value": {
+            "celsius": 18.25,
+            "fahrenheit": 64.85
+          }
+        },
+        {
+          "timestamp": "2024-12-13T02:15:00.000Z",
+          "value": {
+            "celsius": 18.18,
+            "fahrenheit": 64.72
+          }
+        },
+        {
+          "timestamp": "2024-12-13T02:30:00.000Z",
+          "value": {
+            "celsius": 18.04,
+            "fahrenheit": 64.47
+          }
+        },
+        {
+          "timestamp": "2024-12-13T02:45:00.000Z",
+          "value": {
+            "celsius": 17.96,
+            "fahrenheit": 64.33
+          }
+        },
+        {
+          "timestamp": "2024-12-13T03:00:00.000Z",
+          "value": {
+            "celsius": 17.80,
+            "fahrenheit": 64.04
+          }
+        },
+        {
+          "timestamp": "2024-12-13T03:15:00.000Z",
+          "value": {
+            "celsius": 17.74,
+            "fahrenheit": 63.93
+          }
+        },
+        {
+          "timestamp": "2024-12-13T03:30:00.000Z",
+          "value": {
+            "celsius": 17.70,
+            "fahrenheit": 63.86
+          }
+        },
+        {
+          "timestamp": "2024-12-13T03:45:00.000Z",
+          "value": {
+            "celsius": 17.60,
+            "fahrenheit": 63.68
+          }
+        },
+        {
+          "timestamp": "2024-12-13T04:00:00.000Z",
+          "value": {
+            "celsius": 17.60,
+            "fahrenheit": 63.68
+          }
+        },
+        {
+          "timestamp": "2024-12-13T04:15:00.000Z",
+          "value": {
+            "celsius": 17.45,
+            "fahrenheit": 63.41
+          }
+        },
+        {
+          "timestamp": "2024-12-13T04:30:00.000Z",
+          "value": {
+            "celsius": 17.37,
+            "fahrenheit": 63.27
+          }
+        },
+        {
+          "timestamp": "2024-12-13T04:45:00.000Z",
+          "value": {
+            "celsius": 17.28,
+            "fahrenheit": 63.10
+          }
+        },
+        {
+          "timestamp": "2024-12-13T05:00:00.000Z",
+          "value": {
+            "celsius": 17.25,
+            "fahrenheit": 63.05
+          }
+        },
+        {
+          "timestamp": "2024-12-13T05:15:00.000Z",
+          "value": {
+            "celsius": 17.42,
+            "fahrenheit": 63.36
+          }
+        },
+        {
+          "timestamp": "2024-12-13T05:30:00.000Z",
+          "value": {
+            "celsius": 17.49,
+            "fahrenheit": 63.48
+          }
+        },
+        {
+          "timestamp": "2024-12-13T05:45:00.000Z",
+          "value": {
+            "celsius": 17.49,
+            "fahrenheit": 63.48
+          }
+        },
+        {
+          "timestamp": "2024-12-13T06:00:00.000Z",
+          "value": {
+            "celsius": 17.49,
+            "fahrenheit": 63.48
+          }
+        },
+        {
+          "timestamp": "2024-12-13T06:15:00.000Z",
+          "value": {
+            "celsius": 17.59,
+            "fahrenheit": 63.66
+          }
+        },
+        {
+          "timestamp": "2024-12-13T06:30:00.000Z",
+          "value": {
+            "celsius": 17.57,
+            "fahrenheit": 63.63
+          }
+        },
+        {
+          "timestamp": "2024-12-13T06:45:00.000Z",
+          "value": {
+            "celsius": 17.55,
+            "fahrenheit": 63.59
+          }
+        },
+        {
+          "timestamp": "2024-12-13T07:00:00.000Z",
+          "value": {
+            "celsius": 17.44,
+            "fahrenheit": 63.39
+          }
+        },
+        {
+          "timestamp": "2024-12-13T07:15:00.000Z",
+          "value": {
+            "celsius": 17.34,
+            "fahrenheit": 63.21
+          }
+        },
+        {
+          "timestamp": "2024-12-13T07:30:00.000Z",
+          "value": {
+            "celsius": 17.56,
+            "fahrenheit": 63.61
+          }
+        },
+        {
+          "timestamp": "2024-12-13T07:45:00.000Z",
+          "value": {
+            "celsius": 17.89,
+            "fahrenheit": 64.20
+          }
+        },
+        {
+          "timestamp": "2024-12-13T08:00:00.000Z",
+          "value": {
+            "celsius": 18.30,
+            "fahrenheit": 64.94
+          }
+        },
+        {
+          "timestamp": "2024-12-13T08:15:00.000Z",
+          "value": {
+            "celsius": 18.62,
+            "fahrenheit": 65.52
+          }
+        },
+        {
+          "timestamp": "2024-12-13T08:30:00.000Z",
+          "value": {
+            "celsius": 18.94,
+            "fahrenheit": 66.09
+          }
+        },
+        {
+          "timestamp": "2024-12-13T08:45:00.000Z",
+          "value": {
+            "celsius": 19.27,
+            "fahrenheit": 66.69
+          }
+        },
+        {
+          "timestamp": "2024-12-13T09:00:00.000Z",
+          "value": {
+            "celsius": 19.48,
+            "fahrenheit": 67.06
+          }
+        },
+        {
+          "timestamp": "2024-12-13T09:15:00.000Z",
+          "value": {
+            "celsius": 19.69,
+            "fahrenheit": 67.44
+          }
+        },
+        {
+          "timestamp": "2024-12-13T09:30:00.000Z",
+          "value": {
+            "celsius": 19.81,
+            "fahrenheit": 67.66
+          }
+        },
+        {
+          "timestamp": "2024-12-13T09:45:00.000Z",
+          "value": {
+            "celsius": 19.75,
+            "fahrenheit": 67.55
+          }
+        },
+        {
+          "timestamp": "2024-12-13T10:00:00.000Z",
+          "value": {
+            "celsius": 19.61,
+            "fahrenheit": 67.30
+          }
+        },
+        {
+          "timestamp": "2024-12-13T10:15:00.000Z",
+          "value": {
+            "celsius": 19.61,
+            "fahrenheit": 67.30
+          }
+        },
+        {
+          "timestamp": "2024-12-13T10:30:00.000Z",
+          "value": {
+            "celsius": 19.43,
+            "fahrenheit": 66.97
+          }
+        },
+        {
+          "timestamp": "2024-12-13T10:45:00.000Z",
+          "value": {
+            "celsius": 19.27,
+            "fahrenheit": 66.69
+          }
+        },
+        {
+          "timestamp": "2024-12-13T11:00:00.000Z",
+          "value": {
+            "celsius": 19.26,
+            "fahrenheit": 66.67
+          }
+        },
+        {
+          "timestamp": "2024-12-13T11:15:00.000Z",
+          "value": {
+            "celsius": 19.38,
+            "fahrenheit": 66.88
+          }
+        },
+        {
+          "timestamp": "2024-12-13T11:30:00.000Z",
+          "value": {
+            "celsius": 19.29,
+            "fahrenheit": 66.72
+          }
+        },
+        {
+          "timestamp": "2024-12-13T11:45:00.000Z",
+          "value": {
+            "celsius": 18.98,
+            "fahrenheit": 66.16
+          }
+        },
+        {
+          "timestamp": "2024-12-13T12:00:00.000Z",
+          "value": {
+            "celsius": 18.81,
+            "fahrenheit": 65.86
+          }
+        },
+        {
+          "timestamp": "2024-12-13T12:15:00.000Z",
+          "value": {
+            "celsius": 18.72,
+            "fahrenheit": 65.70
+          }
+        },
+        {
+          "timestamp": "2024-12-13T12:30:00.000Z",
+          "value": {
+            "celsius": 18.69,
+            "fahrenheit": 65.64
+          }
+        },
+        {
+          "timestamp": "2024-12-13T12:45:00.000Z",
+          "value": {
+            "celsius": 18.64,
+            "fahrenheit": 65.55
+          }
+        },
+        {
+          "timestamp": "2024-12-13T13:00:00.000Z",
+          "value": {
+            "celsius": 18.64,
+            "fahrenheit": 65.55
+          }
+        },
+        {
+          "timestamp": "2024-12-13T13:15:00.000Z",
           "value": {
             "celsius": 18.46,
             "fahrenheit": 65.23
           }
         },
         {
-          "timestamp": "2024-01-25T14:00:00.000Z",
+          "timestamp": "2024-12-13T13:30:00.000Z",
           "value": {
-            "celsius": 18.41,
-            "fahrenheit": 65.14
+            "celsius": 18.46,
+            "fahrenheit": 65.23
           }
         },
         {
-          "timestamp": "2024-01-25T14:15:00.000Z",
+          "timestamp": "2024-12-13T13:45:00.000Z",
           "value": {
-            "celsius": 18.41,
-            "fahrenheit": 65.14
+            "celsius": 18.30,
+            "fahrenheit": 64.94
           }
         },
         {
-          "timestamp": "2024-01-25T14:30:00.000Z",
+          "timestamp": "2024-12-13T14:00:00.000Z",
           "value": {
-            "celsius": 18.31,
-            "fahrenheit": 64.96
+            "celsius": 18.18,
+            "fahrenheit": 64.72
           }
         },
         {
-          "timestamp": "2024-01-25T14:45:00.000Z",
+          "timestamp": "2024-12-13T14:15:00.000Z",
           "value": {
-            "celsius": 18.24,
-            "fahrenheit": 64.83
+            "celsius": 17.98,
+            "fahrenheit": 64.36
           }
         },
         {
-          "timestamp": "2024-01-25T15:00:00.000Z",
+          "timestamp": "2024-12-13T14:30:00.000Z",
           "value": {
-            "celsius": 18.20,
-            "fahrenheit": 64.76
+            "celsius": 18.08,
+            "fahrenheit": 64.54
           }
         },
         {
-          "timestamp": "2024-01-25T15:15:00.000Z",
+          "timestamp": "2024-12-13T14:45:00.000Z",
           "value": {
-            "celsius": 18.13,
-            "fahrenheit": 64.63
+            "celsius": 18.15,
+            "fahrenheit": 64.67
           }
         },
         {
-          "timestamp": "2024-01-25T15:30:00.000Z",
+          "timestamp": "2024-12-13T15:00:00.000Z",
           "value": {
-            "celsius": 18.13,
-            "fahrenheit": 64.63
+            "celsius": 18.15,
+            "fahrenheit": 64.67
           }
         },
         {
-          "timestamp": "2024-01-25T15:45:00.000Z",
+          "timestamp": "2024-12-13T15:15:00.000Z",
           "value": {
-            "celsius": 18.02,
-            "fahrenheit": 64.44
+            "celsius": 18.15,
+            "fahrenheit": 64.67
           }
         },
         {
-          "timestamp": "2024-01-25T16:00:00.000Z",
+          "timestamp": "2024-12-13T15:30:00.000Z",
           "value": {
-            "celsius": 17.97,
-            "fahrenheit": 64.35
+            "celsius": 17.99,
+            "fahrenheit": 64.38
           }
         },
         {
-          "timestamp": "2024-01-25T16:15:00.000Z",
+          "timestamp": "2024-12-13T15:45:00.000Z",
           "value": {
-            "celsius": 17.90,
-            "fahrenheit": 64.22
+            "celsius": 17.88,
+            "fahrenheit": 64.18
           }
         },
         {
-          "timestamp": "2024-01-25T16:30:00.000Z",
+          "timestamp": "2024-12-13T16:00:00.000Z",
+          "value": {
+            "celsius": 17.72,
+            "fahrenheit": 63.90
+          }
+        },
+        {
+          "timestamp": "2024-12-13T16:15:00.000Z",
           "value": {
             "celsius": 17.84,
             "fahrenheit": 64.11
           }
         },
         {
-          "timestamp": "2024-01-25T16:45:00.000Z",
+          "timestamp": "2024-12-13T16:30:00.000Z",
           "value": {
-            "celsius": 17.84,
-            "fahrenheit": 64.11
+            "celsius": 18.14,
+            "fahrenheit": 64.65
           }
         },
         {
-          "timestamp": "2024-01-25T17:00:00.000Z",
+          "timestamp": "2024-12-13T16:45:00.000Z",
           "value": {
-            "celsius": 17.79,
-            "fahrenheit": 64.02
+            "celsius": 18.45,
+            "fahrenheit": 65.21
           }
         },
         {
-          "timestamp": "2024-01-25T17:15:00.000Z",
+          "timestamp": "2024-12-13T17:00:00.000Z",
           "value": {
-            "celsius": 17.77,
-            "fahrenheit": 63.99
+            "celsius": 18.77,
+            "fahrenheit": 65.79
           }
         },
         {
-          "timestamp": "2024-01-25T17:30:00.000Z",
+          "timestamp": "2024-12-13T17:15:00.000Z",
           "value": {
-            "celsius": 18.03,
-            "fahrenheit": 64.45
+            "celsius": 18.92,
+            "fahrenheit": 66.06
           }
         },
         {
-          "timestamp": "2024-01-25T17:45:00.000Z",
+          "timestamp": "2024-12-13T17:30:00.000Z",
           "value": {
-            "celsius": 18.56,
-            "fahrenheit": 65.41
+            "celsius": 18.93,
+            "fahrenheit": 66.07
           }
         },
         {
-          "timestamp": "2024-01-25T18:00:00.000Z",
+          "timestamp": "2024-12-13T17:45:00.000Z",
           "value": {
-            "celsius": 19.21,
-            "fahrenheit": 66.58
+            "celsius": 18.90,
+            "fahrenheit": 66.02
           }
         },
         {
-          "timestamp": "2024-01-25T18:15:00.000Z",
+          "timestamp": "2024-12-13T18:00:00.000Z",
           "value": {
-            "celsius": 19.64,
-            "fahrenheit": 67.35
+            "celsius": 18.78,
+            "fahrenheit": 65.80
           }
         },
         {
-          "timestamp": "2024-01-25T18:30:00.000Z",
+          "timestamp": "2024-12-13T18:15:00.000Z",
           "value": {
-            "celsius": 19.98,
-            "fahrenheit": 67.96
+            "celsius": 18.78,
+            "fahrenheit": 65.80
           }
         },
         {
-          "timestamp": "2024-01-25T18:45:00.000Z",
+          "timestamp": "2024-12-13T18:30:00.000Z",
           "value": {
-            "celsius": 19.98,
-            "fahrenheit": 67.96
+            "celsius": 18.93,
+            "fahrenheit": 66.07
           }
         },
         {
-          "timestamp": "2024-01-25T19:00:00.000Z",
+          "timestamp": "2024-12-13T18:45:00.000Z",
           "value": {
-            "celsius": 20.29,
-            "fahrenheit": 68.52
+            "celsius": 19.02,
+            "fahrenheit": 66.24
           }
         },
         {
-          "timestamp": "2024-01-25T19:15:00.000Z",
-          "value": {
-            "celsius": 20.16,
-            "fahrenheit": 68.29
-          }
-        },
-        {
-          "timestamp": "2024-01-25T19:30:00.000Z",
-          "value": {
-            "celsius": 20.20,
-            "fahrenheit": 68.36
-          }
-        },
-        {
-          "timestamp": "2024-01-25T19:45:00.000Z",
-          "value": {
-            "celsius": 20.21,
-            "fahrenheit": 68.38
-          }
-        },
-        {
-          "timestamp": "2024-01-25T20:00:00.000Z",
-          "value": {
-            "celsius": 20.08,
-            "fahrenheit": 68.14
-          }
-        },
-        {
-          "timestamp": "2024-01-25T20:15:00.000Z",
-          "value": {
-            "celsius": 19.88,
-            "fahrenheit": 67.78
-          }
-        },
-        {
-          "timestamp": "2024-01-25T20:30:00.000Z",
-          "value": {
-            "celsius": 19.72,
-            "fahrenheit": 67.50
-          }
-        },
-        {
-          "timestamp": "2024-01-25T20:45:00.000Z",
-          "value": {
-            "celsius": 19.59,
-            "fahrenheit": 67.26
-          }
-        },
-        {
-          "timestamp": "2024-01-25T21:00:00.000Z",
-          "value": {
-            "celsius": 19.39,
-            "fahrenheit": 66.90
-          }
-        },
-        {
-          "timestamp": "2024-01-25T21:15:00.000Z",
-          "value": {
-            "celsius": 19.20,
-            "fahrenheit": 66.56
-          }
-        },
-        {
-          "timestamp": "2024-01-25T21:30:00.000Z",
-          "value": {
-            "celsius": 19.20,
-            "fahrenheit": 66.56
-          }
-        },
-        {
-          "timestamp": "2024-01-25T21:45:00.000Z",
-          "value": {
-            "celsius": 19.05,
-            "fahrenheit": 66.29
-          }
-        },
-        {
-          "timestamp": "2024-01-25T22:00:00.000Z",
-          "value": {
-            "celsius": 18.88,
-            "fahrenheit": 65.98
-          }
-        },
-        {
-          "timestamp": "2024-01-25T22:15:00.000Z",
-          "value": {
-            "celsius": 18.85,
-            "fahrenheit": 65.93
-          }
-        },
-        {
-          "timestamp": "2024-01-25T22:30:00.000Z",
+          "timestamp": "2024-12-13T19:00:00.000Z",
           "value": {
             "celsius": 19.15,
             "fahrenheit": 66.47
           }
         },
         {
-          "timestamp": "2024-01-25T22:45:00.000Z",
+          "timestamp": "2024-12-13T19:15:00.000Z",
           "value": {
-            "celsius": 19.31,
-            "fahrenheit": 66.76
+            "celsius": 19.36,
+            "fahrenheit": 66.85
           }
         },
         {
-          "timestamp": "2024-01-25T23:00:00.000Z",
+          "timestamp": "2024-12-13T19:30:00.000Z",
           "value": {
-            "celsius": 19.44,
-            "fahrenheit": 66.99
+            "celsius": 19.58,
+            "fahrenheit": 67.24
           }
         },
         {
-          "timestamp": "2024-01-25T23:15:00.000Z",
+          "timestamp": "2024-12-13T19:45:00.000Z",
           "value": {
-            "celsius": 19.42,
-            "fahrenheit": 66.96
+            "celsius": 19.72,
+            "fahrenheit": 67.50
           }
         },
         {
-          "timestamp": "2024-01-25T23:30:00.000Z",
+          "timestamp": "2024-12-13T20:00:00.000Z",
+          "value": {
+            "celsius": 19.77,
+            "fahrenheit": 67.59
+          }
+        },
+        {
+          "timestamp": "2024-12-13T20:15:00.000Z",
+          "value": {
+            "celsius": 19.74,
+            "fahrenheit": 67.53
+          }
+        },
+        {
+          "timestamp": "2024-12-13T20:30:00.000Z",
+          "value": {
+            "celsius": 19.95,
+            "fahrenheit": 67.91
+          }
+        },
+        {
+          "timestamp": "2024-12-13T20:45:00.000Z",
+          "value": {
+            "celsius": 19.91,
+            "fahrenheit": 67.84
+          }
+        },
+        {
+          "timestamp": "2024-12-13T21:00:00.000Z",
+          "value": {
+            "celsius": 19.72,
+            "fahrenheit": 67.50
+          }
+        },
+        {
+          "timestamp": "2024-12-13T21:15:00.000Z",
+          "value": {
+            "celsius": 19.51,
+            "fahrenheit": 67.12
+          }
+        },
+        {
+          "timestamp": "2024-12-13T21:30:00.000Z",
+          "value": {
+            "celsius": 19.32,
+            "fahrenheit": 66.78
+          }
+        },
+        {
+          "timestamp": "2024-12-13T21:45:00.000Z",
+          "value": {
+            "celsius": 19.25,
+            "fahrenheit": 66.65
+          }
+        },
+        {
+          "timestamp": "2024-12-13T22:00:00.000Z",
+          "value": {
+            "celsius": 19.24,
+            "fahrenheit": 66.63
+          }
+        },
+        {
+          "timestamp": "2024-12-13T22:15:00.000Z",
+          "value": {
+            "celsius": 19.24,
+            "fahrenheit": 66.63
+          }
+        },
+        {
+          "timestamp": "2024-12-13T22:30:00.000Z",
+          "value": {
+            "celsius": 19.28,
+            "fahrenheit": 66.70
+          }
+        },
+        {
+          "timestamp": "2024-12-13T22:45:00.000Z",
           "value": {
             "celsius": 19.35,
             "fahrenheit": 66.83
           }
         },
         {
-          "timestamp": "2024-01-25T23:45:00.000Z",
+          "timestamp": "2024-12-13T23:00:00.000Z",
           "value": {
-            "celsius": 19.22,
-            "fahrenheit": 66.60
+            "celsius": 19.37,
+            "fahrenheit": 66.87
           }
         },
         {
-          "timestamp": "2024-01-26T00:00:00.000Z",
+          "timestamp": "2024-12-13T23:15:00.000Z",
           "value": {
-            "celsius": 19.09,
-            "fahrenheit": 66.36
+            "celsius": 19.33,
+            "fahrenheit": 66.79
           }
         },
         {
-          "timestamp": "2024-01-26T00:15:00.000Z",
+          "timestamp": "2024-12-13T23:30:00.000Z",
           "value": {
-            "celsius": 19.09,
-            "fahrenheit": 66.36
+            "celsius": 19.34,
+            "fahrenheit": 66.81
+          }
+        },
+        {
+          "timestamp": "2024-12-13T23:45:00.000Z",
+          "value": {
+            "celsius": 19.17,
+            "fahrenheit": 66.51
+          }
+        },
+        {
+          "timestamp": "2024-12-14T00:00:00.000Z",
+          "value": {
+            "celsius": 19.17,
+            "fahrenheit": 66.51
+          }
+        },
+        {
+          "timestamp": "2024-12-14T00:15:00.000Z",
+          "value": {
+            "celsius": 19.05,
+            "fahrenheit": 66.29
           }
         }
       ]
@@ -728,404 +728,404 @@
       "timeSeriesType": "dataPoints",
       "valueType": "percentage",
       "percentageUnit": "UNIT_INTERVAL",
-      "min": 0.527,
-      "max": 0.685,
+      "min": 0.579,
+      "max": 0.678,
       "dataPoints": [
         {
-          "timestamp": "2024-01-24T23:45:00.000Z",
-          "value": 0.538
+          "timestamp": "2024-12-12T23:45:00.000Z",
+          "value": 0.633
         },
         {
-          "timestamp": "2024-01-25T00:00:00.000Z",
-          "value": 0.539
+          "timestamp": "2024-12-13T00:00:00.000Z",
+          "value": 0.633
         },
         {
-          "timestamp": "2024-01-25T00:15:00.000Z",
-          "value": 0.539
-        },
-        {
-          "timestamp": "2024-01-25T00:30:00.000Z",
-          "value": 0.54
-        },
-        {
-          "timestamp": "2024-01-25T00:45:00.000Z",
-          "value": 0.54
-        },
-        {
-          "timestamp": "2024-01-25T01:00:00.000Z",
-          "value": 0.542
-        },
-        {
-          "timestamp": "2024-01-25T01:15:00.000Z",
-          "value": 0.542
-        },
-        {
-          "timestamp": "2024-01-25T01:30:00.000Z",
-          "value": 0.544
-        },
-        {
-          "timestamp": "2024-01-25T01:45:00.000Z",
-          "value": 0.544
-        },
-        {
-          "timestamp": "2024-01-25T02:00:00.000Z",
-          "value": 0.545
-        },
-        {
-          "timestamp": "2024-01-25T02:15:00.000Z",
-          "value": 0.546
-        },
-        {
-          "timestamp": "2024-01-25T02:30:00.000Z",
-          "value": 0.547
-        },
-        {
-          "timestamp": "2024-01-25T02:45:00.000Z",
-          "value": 0.548
-        },
-        {
-          "timestamp": "2024-01-25T03:00:00.000Z",
-          "value": 0.549
-        },
-        {
-          "timestamp": "2024-01-25T03:15:00.000Z",
-          "value": 0.549
-        },
-        {
-          "timestamp": "2024-01-25T03:30:00.000Z",
-          "value": 0.55
-        },
-        {
-          "timestamp": "2024-01-25T03:45:00.000Z",
-          "value": 0.551
-        },
-        {
-          "timestamp": "2024-01-25T04:00:00.000Z",
-          "value": 0.551
-        },
-        {
-          "timestamp": "2024-01-25T04:15:00.000Z",
-          "value": 0.551
-        },
-        {
-          "timestamp": "2024-01-25T04:30:00.000Z",
-          "value": 0.552
-        },
-        {
-          "timestamp": "2024-01-25T04:45:00.000Z",
-          "value": 0.552
-        },
-        {
-          "timestamp": "2024-01-25T05:00:00.000Z",
-          "value": 0.553
-        },
-        {
-          "timestamp": "2024-01-25T05:15:00.000Z",
-          "value": 0.553
-        },
-        {
-          "timestamp": "2024-01-25T05:30:00.000Z",
-          "value": 0.551
-        },
-        {
-          "timestamp": "2024-01-25T05:45:00.000Z",
-          "value": 0.549
-        },
-        {
-          "timestamp": "2024-01-25T06:00:00.000Z",
-          "value": 0.549
-        },
-        {
-          "timestamp": "2024-01-25T06:15:00.000Z",
-          "value": 0.55
-        },
-        {
-          "timestamp": "2024-01-25T06:30:00.000Z",
-          "value": 0.547
-        },
-        {
-          "timestamp": "2024-01-25T06:45:00.000Z",
-          "value": 0.547
-        },
-        {
-          "timestamp": "2024-01-25T07:00:00.000Z",
-          "value": 0.548
-        },
-        {
-          "timestamp": "2024-01-25T07:15:00.000Z",
-          "value": 0.547
-        },
-        {
-          "timestamp": "2024-01-25T07:30:00.000Z",
-          "value": 0.548
-        },
-        {
-          "timestamp": "2024-01-25T07:45:00.000Z",
-          "value": 0.544
-        },
-        {
-          "timestamp": "2024-01-25T08:00:00.000Z",
-          "value": 0.533
-        },
-        {
-          "timestamp": "2024-01-25T08:15:00.000Z",
-          "value": 0.527
-        },
-        {
-          "timestamp": "2024-01-25T08:30:00.000Z",
-          "value": 0.537
-        },
-        {
-          "timestamp": "2024-01-25T08:45:00.000Z",
-          "value": 0.537
-        },
-        {
-          "timestamp": "2024-01-25T09:00:00.000Z",
-          "value": 0.539
-        },
-        {
-          "timestamp": "2024-01-25T09:15:00.000Z",
-          "value": 0.538
-        },
-        {
-          "timestamp": "2024-01-25T09:30:00.000Z",
-          "value": 0.541
-        },
-        {
-          "timestamp": "2024-01-25T09:45:00.000Z",
-          "value": 0.545
-        },
-        {
-          "timestamp": "2024-01-25T10:00:00.000Z",
-          "value": 0.548
-        },
-        {
-          "timestamp": "2024-01-25T10:15:00.000Z",
-          "value": 0.549
-        },
-        {
-          "timestamp": "2024-01-25T10:30:00.000Z",
-          "value": 0.55
-        },
-        {
-          "timestamp": "2024-01-25T10:45:00.000Z",
-          "value": 0.552
-        },
-        {
-          "timestamp": "2024-01-25T11:00:00.000Z",
-          "value": 0.552
-        },
-        {
-          "timestamp": "2024-01-25T11:15:00.000Z",
-          "value": 0.554
-        },
-        {
-          "timestamp": "2024-01-25T11:30:00.000Z",
-          "value": 0.555
-        },
-        {
-          "timestamp": "2024-01-25T11:45:00.000Z",
-          "value": 0.558
-        },
-        {
-          "timestamp": "2024-01-25T12:00:00.000Z",
-          "value": 0.56
-        },
-        {
-          "timestamp": "2024-01-25T12:15:00.000Z",
-          "value": 0.564
-        },
-        {
-          "timestamp": "2024-01-25T12:30:00.000Z",
-          "value": 0.561
-        },
-        {
-          "timestamp": "2024-01-25T12:45:00.000Z",
-          "value": 0.576
-        },
-        {
-          "timestamp": "2024-01-25T13:00:00.000Z",
-          "value": 0.641
-        },
-        {
-          "timestamp": "2024-01-25T13:15:00.000Z",
-          "value": 0.676
-        },
-        {
-          "timestamp": "2024-01-25T13:30:00.000Z",
-          "value": 0.685
-        },
-        {
-          "timestamp": "2024-01-25T13:45:00.000Z",
-          "value": 0.671
-        },
-        {
-          "timestamp": "2024-01-25T14:00:00.000Z",
-          "value": 0.665
-        },
-        {
-          "timestamp": "2024-01-25T14:15:00.000Z",
-          "value": 0.665
-        },
-        {
-          "timestamp": "2024-01-25T14:30:00.000Z",
-          "value": 0.659
-        },
-        {
-          "timestamp": "2024-01-25T14:45:00.000Z",
-          "value": 0.652
-        },
-        {
-          "timestamp": "2024-01-25T15:00:00.000Z",
-          "value": 0.646
-        },
-        {
-          "timestamp": "2024-01-25T15:15:00.000Z",
-          "value": 0.641
-        },
-        {
-          "timestamp": "2024-01-25T15:30:00.000Z",
-          "value": 0.641
-        },
-        {
-          "timestamp": "2024-01-25T15:45:00.000Z",
+          "timestamp": "2024-12-13T00:15:00.000Z",
           "value": 0.635
         },
         {
-          "timestamp": "2024-01-25T16:00:00.000Z",
-          "value": 0.63
-        },
-        {
-          "timestamp": "2024-01-25T16:15:00.000Z",
-          "value": 0.626
-        },
-        {
-          "timestamp": "2024-01-25T16:30:00.000Z",
+          "timestamp": "2024-12-13T00:30:00.000Z",
           "value": 0.624
         },
         {
-          "timestamp": "2024-01-25T16:45:00.000Z",
-          "value": 0.624
+          "timestamp": "2024-12-13T00:45:00.000Z",
+          "value": 0.632
         },
         {
-          "timestamp": "2024-01-25T17:00:00.000Z",
-          "value": 0.62
+          "timestamp": "2024-12-13T01:00:00.000Z",
+          "value": 0.635
         },
         {
-          "timestamp": "2024-01-25T17:15:00.000Z",
-          "value": 0.638
+          "timestamp": "2024-12-13T01:15:00.000Z",
+          "value": 0.637
         },
         {
-          "timestamp": "2024-01-25T17:30:00.000Z",
-          "value": 0.627
+          "timestamp": "2024-12-13T01:30:00.000Z",
+          "value": 0.639
         },
         {
-          "timestamp": "2024-01-25T17:45:00.000Z",
-          "value": 0.611
+          "timestamp": "2024-12-13T01:45:00.000Z",
+          "value": 0.64
         },
         {
-          "timestamp": "2024-01-25T18:00:00.000Z",
-          "value": 0.595
+          "timestamp": "2024-12-13T02:00:00.000Z",
+          "value": 0.64
         },
         {
-          "timestamp": "2024-01-25T18:15:00.000Z",
-          "value": 0.584
+          "timestamp": "2024-12-13T02:15:00.000Z",
+          "value": 0.64
         },
         {
-          "timestamp": "2024-01-25T18:30:00.000Z",
-          "value": 0.577
+          "timestamp": "2024-12-13T02:30:00.000Z",
+          "value": 0.64
         },
         {
-          "timestamp": "2024-01-25T18:45:00.000Z",
-          "value": 0.577
+          "timestamp": "2024-12-13T02:45:00.000Z",
+          "value": 0.641
         },
         {
-          "timestamp": "2024-01-25T19:00:00.000Z",
-          "value": 0.587
+          "timestamp": "2024-12-13T03:00:00.000Z",
+          "value": 0.641
         },
         {
-          "timestamp": "2024-01-25T19:15:00.000Z",
-          "value": 0.599
+          "timestamp": "2024-12-13T03:15:00.000Z",
+          "value": 0.643
         },
         {
-          "timestamp": "2024-01-25T19:30:00.000Z",
-          "value": 0.623
-        },
-        {
-          "timestamp": "2024-01-25T19:45:00.000Z",
-          "value": 0.636
-        },
-        {
-          "timestamp": "2024-01-25T20:00:00.000Z",
+          "timestamp": "2024-12-13T03:30:00.000Z",
           "value": 0.642
         },
         {
-          "timestamp": "2024-01-25T20:15:00.000Z",
-          "value": 0.655
+          "timestamp": "2024-12-13T03:45:00.000Z",
+          "value": 0.642
         },
         {
-          "timestamp": "2024-01-25T20:30:00.000Z",
-          "value": 0.649
+          "timestamp": "2024-12-13T04:00:00.000Z",
+          "value": 0.642
         },
         {
-          "timestamp": "2024-01-25T20:45:00.000Z",
-          "value": 0.647
+          "timestamp": "2024-12-13T04:15:00.000Z",
+          "value": 0.642
         },
         {
-          "timestamp": "2024-01-25T21:00:00.000Z",
-          "value": 0.636
+          "timestamp": "2024-12-13T04:30:00.000Z",
+          "value": 0.643
         },
         {
-          "timestamp": "2024-01-25T21:15:00.000Z",
+          "timestamp": "2024-12-13T04:45:00.000Z",
+          "value": 0.643
+        },
+        {
+          "timestamp": "2024-12-13T05:00:00.000Z",
+          "value": 0.643
+        },
+        {
+          "timestamp": "2024-12-13T05:15:00.000Z",
+          "value": 0.643
+        },
+        {
+          "timestamp": "2024-12-13T05:30:00.000Z",
+          "value": 0.641
+        },
+        {
+          "timestamp": "2024-12-13T05:45:00.000Z",
+          "value": 0.641
+        },
+        {
+          "timestamp": "2024-12-13T06:00:00.000Z",
+          "value": 0.642
+        },
+        {
+          "timestamp": "2024-12-13T06:15:00.000Z",
+          "value": 0.64
+        },
+        {
+          "timestamp": "2024-12-13T06:30:00.000Z",
+          "value": 0.639
+        },
+        {
+          "timestamp": "2024-12-13T06:45:00.000Z",
+          "value": 0.64
+        },
+        {
+          "timestamp": "2024-12-13T07:00:00.000Z",
+          "value": 0.642
+        },
+        {
+          "timestamp": "2024-12-13T07:15:00.000Z",
+          "value": 0.643
+        },
+        {
+          "timestamp": "2024-12-13T07:30:00.000Z",
+          "value": 0.643
+        },
+        {
+          "timestamp": "2024-12-13T07:45:00.000Z",
+          "value": 0.643
+        },
+        {
+          "timestamp": "2024-12-13T08:00:00.000Z",
+          "value": 0.639
+        },
+        {
+          "timestamp": "2024-12-13T08:15:00.000Z",
+          "value": 0.635
+        },
+        {
+          "timestamp": "2024-12-13T08:30:00.000Z",
           "value": 0.63
         },
         {
-          "timestamp": "2024-01-25T21:30:00.000Z",
+          "timestamp": "2024-12-13T08:45:00.000Z",
           "value": 0.63
         },
         {
-          "timestamp": "2024-01-25T21:45:00.000Z",
+          "timestamp": "2024-12-13T09:00:00.000Z",
+          "value": 0.628
+        },
+        {
+          "timestamp": "2024-12-13T09:15:00.000Z",
           "value": 0.627
         },
         {
-          "timestamp": "2024-01-25T22:00:00.000Z",
-          "value": 0.624
+          "timestamp": "2024-12-13T09:30:00.000Z",
+          "value": 0.629
         },
         {
-          "timestamp": "2024-01-25T22:15:00.000Z",
-          "value": 0.62
+          "timestamp": "2024-12-13T09:45:00.000Z",
+          "value": 0.627
         },
         {
-          "timestamp": "2024-01-25T22:30:00.000Z",
+          "timestamp": "2024-12-13T10:00:00.000Z",
+          "value": 0.625
+        },
+        {
+          "timestamp": "2024-12-13T10:15:00.000Z",
+          "value": 0.625
+        },
+        {
+          "timestamp": "2024-12-13T10:30:00.000Z",
+          "value": 0.635
+        },
+        {
+          "timestamp": "2024-12-13T10:45:00.000Z",
+          "value": 0.656
+        },
+        {
+          "timestamp": "2024-12-13T11:00:00.000Z",
+          "value": 0.628
+        },
+        {
+          "timestamp": "2024-12-13T11:15:00.000Z",
+          "value": 0.637
+        },
+        {
+          "timestamp": "2024-12-13T11:30:00.000Z",
+          "value": 0.651
+        },
+        {
+          "timestamp": "2024-12-13T11:45:00.000Z",
+          "value": 0.661
+        },
+        {
+          "timestamp": "2024-12-13T12:00:00.000Z",
+          "value": 0.675
+        },
+        {
+          "timestamp": "2024-12-13T12:15:00.000Z",
+          "value": 0.672
+        },
+        {
+          "timestamp": "2024-12-13T12:30:00.000Z",
+          "value": 0.678
+        },
+        {
+          "timestamp": "2024-12-13T12:45:00.000Z",
+          "value": 0.676
+        },
+        {
+          "timestamp": "2024-12-13T13:00:00.000Z",
+          "value": 0.676
+        },
+        {
+          "timestamp": "2024-12-13T13:15:00.000Z",
+          "value": 0.666
+        },
+        {
+          "timestamp": "2024-12-13T13:30:00.000Z",
+          "value": 0.668
+        },
+        {
+          "timestamp": "2024-12-13T13:45:00.000Z",
+          "value": 0.669
+        },
+        {
+          "timestamp": "2024-12-13T14:00:00.000Z",
+          "value": 0.661
+        },
+        {
+          "timestamp": "2024-12-13T14:15:00.000Z",
+          "value": 0.658
+        },
+        {
+          "timestamp": "2024-12-13T14:30:00.000Z",
+          "value": 0.652
+        },
+        {
+          "timestamp": "2024-12-13T14:45:00.000Z",
+          "value": 0.647
+        },
+        {
+          "timestamp": "2024-12-13T15:00:00.000Z",
+          "value": 0.647
+        },
+        {
+          "timestamp": "2024-12-13T15:15:00.000Z",
+          "value": 0.646
+        },
+        {
+          "timestamp": "2024-12-13T15:30:00.000Z",
+          "value": 0.644
+        },
+        {
+          "timestamp": "2024-12-13T15:45:00.000Z",
+          "value": 0.643
+        },
+        {
+          "timestamp": "2024-12-13T16:00:00.000Z",
+          "value": 0.643
+        },
+        {
+          "timestamp": "2024-12-13T16:15:00.000Z",
+          "value": 0.646
+        },
+        {
+          "timestamp": "2024-12-13T16:30:00.000Z",
+          "value": 0.637
+        },
+        {
+          "timestamp": "2024-12-13T16:45:00.000Z",
+          "value": 0.628
+        },
+        {
+          "timestamp": "2024-12-13T17:00:00.000Z",
+          "value": 0.63
+        },
+        {
+          "timestamp": "2024-12-13T17:15:00.000Z",
+          "value": 0.631
+        },
+        {
+          "timestamp": "2024-12-13T17:30:00.000Z",
+          "value": 0.627
+        },
+        {
+          "timestamp": "2024-12-13T17:45:00.000Z",
+          "value": 0.629
+        },
+        {
+          "timestamp": "2024-12-13T18:00:00.000Z",
+          "value": 0.635
+        },
+        {
+          "timestamp": "2024-12-13T18:15:00.000Z",
+          "value": 0.635
+        },
+        {
+          "timestamp": "2024-12-13T18:30:00.000Z",
+          "value": 0.634
+        },
+        {
+          "timestamp": "2024-12-13T18:45:00.000Z",
+          "value": 0.633
+        },
+        {
+          "timestamp": "2024-12-13T19:00:00.000Z",
+          "value": 0.622
+        },
+        {
+          "timestamp": "2024-12-13T19:15:00.000Z",
+          "value": 0.611
+        },
+        {
+          "timestamp": "2024-12-13T19:30:00.000Z",
+          "value": 0.606
+        },
+        {
+          "timestamp": "2024-12-13T19:45:00.000Z",
           "value": 0.615
         },
         {
-          "timestamp": "2024-01-25T22:45:00.000Z",
-          "value": 0.611
+          "timestamp": "2024-12-13T20:00:00.000Z",
+          "value": 0.6
         },
         {
-          "timestamp": "2024-01-25T23:00:00.000Z",
-          "value": 0.614
+          "timestamp": "2024-12-13T20:15:00.000Z",
+          "value": 0.579
         },
         {
-          "timestamp": "2024-01-25T23:15:00.000Z",
-          "value": 0.616
+          "timestamp": "2024-12-13T20:30:00.000Z",
+          "value": 0.589
         },
         {
-          "timestamp": "2024-01-25T23:30:00.000Z",
-          "value": 0.617
+          "timestamp": "2024-12-13T20:45:00.000Z",
+          "value": 0.595
         },
         {
-          "timestamp": "2024-01-25T23:45:00.000Z",
-          "value": 0.614
+          "timestamp": "2024-12-13T21:00:00.000Z",
+          "value": 0.598
         },
         {
-          "timestamp": "2024-01-26T00:00:00.000Z",
-          "value": 0.611
+          "timestamp": "2024-12-13T21:15:00.000Z",
+          "value": 0.603
         },
         {
-          "timestamp": "2024-01-26T00:15:00.000Z",
-          "value": 0.611
+          "timestamp": "2024-12-13T21:30:00.000Z",
+          "value": 0.606
+        },
+        {
+          "timestamp": "2024-12-13T21:45:00.000Z",
+          "value": 0.608
+        },
+        {
+          "timestamp": "2024-12-13T22:00:00.000Z",
+          "value": 0.61
+        },
+        {
+          "timestamp": "2024-12-13T22:15:00.000Z",
+          "value": 0.61
+        },
+        {
+          "timestamp": "2024-12-13T22:30:00.000Z",
+          "value": 0.609
+        },
+        {
+          "timestamp": "2024-12-13T22:45:00.000Z",
+          "value": 0.605
+        },
+        {
+          "timestamp": "2024-12-13T23:00:00.000Z",
+          "value": 0.627
+        },
+        {
+          "timestamp": "2024-12-13T23:15:00.000Z",
+          "value": 0.625
+        },
+        {
+          "timestamp": "2024-12-13T23:30:00.000Z",
+          "value": 0.626
+        },
+        {
+          "timestamp": "2024-12-13T23:45:00.000Z",
+          "value": 0.626
+        },
+        {
+          "timestamp": "2024-12-14T00:00:00.000Z",
+          "value": 0.626
+        },
+        {
+          "timestamp": "2024-12-14T00:15:00.000Z",
+          "value": 0.625
         }
       ]
     }
@@ -1135,8 +1135,8 @@
     "valueType": "stripes",
     "dataIntervals": [
       {
-        "from": "2024-01-24T23:45:00.000Z",
-        "to": "2024-01-25T00:00:00.000Z",
+        "from": "2024-12-12T23:45:00.000Z",
+        "to": "2024-12-13T00:00:00.000Z",
         "value": {
           "stripeType": "HOME",
           "setting": {
@@ -1150,8 +1150,8 @@
         }
       },
       {
-        "from": "2024-01-25T00:00:00.000Z",
-        "to": "2024-01-25T07:31:16.324Z",
+        "from": "2024-12-13T00:00:00.000Z",
+        "to": "2024-12-13T07:21:09.000Z",
         "value": {
           "stripeType": "HOME",
           "setting": {
@@ -1165,8 +1165,8 @@
         }
       },
       {
-        "from": "2024-01-25T07:31:16.324Z",
-        "to": "2024-01-25T09:30:00.000Z",
+        "from": "2024-12-13T07:21:09.000Z",
+        "to": "2024-12-13T09:30:00.000Z",
         "value": {
           "stripeType": "HOME",
           "setting": {
@@ -1180,8 +1180,8 @@
         }
       },
       {
-        "from": "2024-01-25T09:30:00.000Z",
-        "to": "2024-01-25T11:56:42.727Z",
+        "from": "2024-12-13T09:30:00.000Z",
+        "to": "2024-12-13T12:00:00.000Z",
         "value": {
           "stripeType": "HOME",
           "setting": {
@@ -1195,8 +1195,8 @@
         }
       },
       {
-        "from": "2024-01-25T11:56:42.727Z",
-        "to": "2024-01-25T12:30:00.000Z",
+        "from": "2024-12-13T12:00:00.000Z",
+        "to": "2024-12-13T13:00:00.000Z",
         "value": {
           "stripeType": "HOME",
           "setting": {
@@ -1210,8 +1210,8 @@
         }
       },
       {
-        "from": "2024-01-25T12:30:00.000Z",
-        "to": "2024-01-25T17:24:07.209Z",
+        "from": "2024-12-13T13:00:00.000Z",
+        "to": "2024-12-13T16:17:30.000Z",
         "value": {
           "stripeType": "HOME",
           "setting": {
@@ -1225,45 +1225,23 @@
         }
       },
       {
-        "from": "2024-01-25T17:24:07.209Z",
-        "to": "2024-01-25T21:05:27.665Z",
+        "from": "2024-12-13T16:17:30.000Z",
+        "to": "2024-12-13T16:47:31.000Z",
         "value": {
-          "stripeType": "HOME",
+          "stripeType": "OVERLAY_ACTIVE",
           "setting": {
             "type": "HEATING",
             "power": "ON",
             "temperature": {
-              "celsius": 19.50,
-              "fahrenheit": 67.10
+              "celsius": 19.00,
+              "fahrenheit": 66.20
             }
           }
         }
       },
       {
-        "from": "2024-01-25T21:05:27.665Z",
-        "to": "2024-01-25T22:04:05.555Z",
-        "value": {
-          "stripeType": "AWAY"
-        }
-      },
-      {
-        "from": "2024-01-25T22:04:05.555Z",
-        "to": "2024-01-25T22:30:00.000Z",
-        "value": {
-          "stripeType": "HOME",
-          "setting": {
-            "type": "HEATING",
-            "power": "ON",
-            "temperature": {
-              "celsius": 19.50,
-              "fahrenheit": 67.10
-            }
-          }
-        }
-      },
-      {
-        "from": "2024-01-25T22:30:00.000Z",
-        "to": "2024-01-26T00:00:00.000Z",
+        "from": "2024-12-13T16:47:31.000Z",
+        "to": "2024-12-13T18:04:21.000Z",
         "value": {
           "stripeType": "HOME",
           "setting": {
@@ -1277,8 +1255,68 @@
         }
       },
       {
-        "from": "2024-01-26T00:00:00.000Z",
-        "to": "2024-01-26T00:15:00.000Z",
+        "from": "2024-12-13T18:04:21.000Z",
+        "to": "2024-12-13T22:30:00.000Z",
+        "value": {
+          "stripeType": "HOME",
+          "setting": {
+            "type": "HEATING",
+            "power": "ON",
+            "temperature": {
+              "celsius": 19.50,
+              "fahrenheit": 67.10
+            }
+          }
+        }
+      },
+      {
+        "from": "2024-12-13T22:30:00.000Z",
+        "to": "2024-12-13T22:51:45.000Z",
+        "value": {
+          "stripeType": "HOME",
+          "setting": {
+            "type": "HEATING",
+            "power": "ON",
+            "temperature": {
+              "celsius": 18.00,
+              "fahrenheit": 64.40
+            }
+          }
+        }
+      },
+      {
+        "from": "2024-12-13T22:51:45.000Z",
+        "to": "2024-12-13T23:06:46.000Z",
+        "value": {
+          "stripeType": "OPEN_WINDOW_DETECTED",
+          "setting": {
+            "type": "HEATING",
+            "power": "ON",
+            "temperature": {
+              "celsius": 18.00,
+              "fahrenheit": 64.40
+            }
+          }
+        }
+      },
+      {
+        "from": "2024-12-13T23:06:46.000Z",
+        "to": "2024-12-14T00:00:00.000Z",
+        "value": {
+          "stripeType": "HOME",
+          "setting": {
+            "type": "HEATING",
+            "power": "ON",
+            "temperature": {
+              "celsius": 18.00,
+              "fahrenheit": 64.40
+            }
+          }
+        }
+      },
+      {
+        "from": "2024-12-14T00:00:00.000Z",
+        "to": "2024-12-14T00:15:00.000Z",
         "value": {
           "stripeType": "HOME",
           "setting": {
@@ -1298,8 +1336,8 @@
     "valueType": "heatingSetting",
     "dataIntervals": [
       {
-        "from": "2024-01-24T23:45:00.000Z",
-        "to": "2024-01-25T00:00:00.000Z",
+        "from": "2024-12-12T23:45:00.000Z",
+        "to": "2024-12-13T00:00:00.000Z",
         "value": {
           "type": "HEATING",
           "power": "ON",
@@ -1310,8 +1348,8 @@
         }
       },
       {
-        "from": "2024-01-25T00:00:00.000Z",
-        "to": "2024-01-25T07:31:16.324Z",
+        "from": "2024-12-13T00:00:00.000Z",
+        "to": "2024-12-13T07:21:09.000Z",
         "value": {
           "type": "HEATING",
           "power": "ON",
@@ -1322,8 +1360,8 @@
         }
       },
       {
-        "from": "2024-01-25T07:31:16.324Z",
-        "to": "2024-01-25T09:30:00.000Z",
+        "from": "2024-12-13T07:21:09.000Z",
+        "to": "2024-12-13T09:30:00.000Z",
         "value": {
           "type": "HEATING",
           "power": "ON",
@@ -1334,8 +1372,8 @@
         }
       },
       {
-        "from": "2024-01-25T09:30:00.000Z",
-        "to": "2024-01-25T11:56:42.727Z",
+        "from": "2024-12-13T09:30:00.000Z",
+        "to": "2024-12-13T12:00:00.000Z",
         "value": {
           "type": "HEATING",
           "power": "ON",
@@ -1346,8 +1384,8 @@
         }
       },
       {
-        "from": "2024-01-25T11:56:42.727Z",
-        "to": "2024-01-25T12:30:00.000Z",
+        "from": "2024-12-13T12:00:00.000Z",
+        "to": "2024-12-13T13:00:00.000Z",
         "value": {
           "type": "HEATING",
           "power": "ON",
@@ -1358,8 +1396,8 @@
         }
       },
       {
-        "from": "2024-01-25T12:30:00.000Z",
-        "to": "2024-01-25T17:24:07.209Z",
+        "from": "2024-12-13T13:00:00.000Z",
+        "to": "2024-12-13T16:17:30.000Z",
         "value": {
           "type": "HEATING",
           "power": "ON",
@@ -1370,44 +1408,20 @@
         }
       },
       {
-        "from": "2024-01-25T17:24:07.209Z",
-        "to": "2024-01-25T21:05:27.665Z",
+        "from": "2024-12-13T16:17:30.000Z",
+        "to": "2024-12-13T16:47:31.000Z",
         "value": {
           "type": "HEATING",
           "power": "ON",
           "temperature": {
-            "celsius": 19.50,
-            "fahrenheit": 67.10
+            "celsius": 19.00,
+            "fahrenheit": 66.20
           }
         }
       },
       {
-        "from": "2024-01-25T21:05:27.665Z",
-        "to": "2024-01-25T22:04:05.555Z",
-        "value": {
-          "type": "HEATING",
-          "power": "ON",
-          "temperature": {
-            "celsius": 17.69,
-            "fahrenheit": 63.84
-          }
-        }
-      },
-      {
-        "from": "2024-01-25T22:04:05.555Z",
-        "to": "2024-01-25T22:30:00.000Z",
-        "value": {
-          "type": "HEATING",
-          "power": "ON",
-          "temperature": {
-            "celsius": 19.50,
-            "fahrenheit": 67.10
-          }
-        }
-      },
-      {
-        "from": "2024-01-25T22:30:00.000Z",
-        "to": "2024-01-26T00:00:00.000Z",
+        "from": "2024-12-13T16:47:31.000Z",
+        "to": "2024-12-13T18:04:21.000Z",
         "value": {
           "type": "HEATING",
           "power": "ON",
@@ -1418,8 +1432,32 @@
         }
       },
       {
-        "from": "2024-01-26T00:00:00.000Z",
-        "to": "2024-01-26T00:15:00.000Z",
+        "from": "2024-12-13T18:04:21.000Z",
+        "to": "2024-12-13T22:30:00.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": {
+            "celsius": 19.50,
+            "fahrenheit": 67.10
+          }
+        }
+      },
+      {
+        "from": "2024-12-13T22:30:00.000Z",
+        "to": "2024-12-14T00:00:00.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": {
+            "celsius": 18.00,
+            "fahrenheit": 64.40
+          }
+        }
+      },
+      {
+        "from": "2024-12-14T00:00:00.000Z",
+        "to": "2024-12-14T00:15:00.000Z",
         "value": {
           "type": "HEATING",
           "power": "ON",
@@ -1436,103 +1474,108 @@
     "valueType": "callForHeat",
     "dataIntervals": [
       {
-        "from": "2024-01-24T23:45:00.000Z",
-        "to": "2024-01-25T04:15:54.334Z",
+        "from": "2024-12-12T23:45:00.000Z",
+        "to": "2024-12-13T04:10:40.000Z",
         "value": "NONE"
       },
       {
-        "from": "2024-01-25T04:15:54.334Z",
-        "to": "2024-01-25T07:31:29.296Z",
+        "from": "2024-12-13T04:10:40.000Z",
+        "to": "2024-12-13T07:21:13.000Z",
         "value": "LOW"
       },
       {
-        "from": "2024-01-25T07:31:29.296Z",
-        "to": "2024-01-25T08:05:56.723Z",
+        "from": "2024-12-13T07:21:13.000Z",
+        "to": "2024-12-13T08:57:19.000Z",
         "value": "HIGH"
       },
       {
-        "from": "2024-01-25T08:05:56.723Z",
-        "to": "2024-01-25T08:45:58.495Z",
+        "from": "2024-12-13T08:57:19.000Z",
+        "to": "2024-12-13T09:19:21.000Z",
         "value": "MEDIUM"
       },
       {
-        "from": "2024-01-25T08:45:58.495Z",
-        "to": "2024-01-25T09:12:56.518Z",
+        "from": "2024-12-13T09:19:21.000Z",
+        "to": "2024-12-13T09:29:57.000Z",
         "value": "LOW"
       },
       {
-        "from": "2024-01-25T09:12:56.518Z",
-        "to": "2024-01-25T11:56:46.732Z",
+        "from": "2024-12-13T09:29:57.000Z",
+        "to": "2024-12-13T14:15:36.000Z",
         "value": "NONE"
       },
       {
-        "from": "2024-01-25T11:56:46.732Z",
-        "to": "2024-01-25T12:30:02.105Z",
+        "from": "2024-12-13T14:15:36.000Z",
+        "to": "2024-12-13T14:25:37.000Z",
         "value": "LOW"
       },
       {
-        "from": "2024-01-25T12:30:02.105Z",
-        "to": "2024-01-25T15:50:13.138Z",
+        "from": "2024-12-13T14:25:37.000Z",
+        "to": "2024-12-13T15:25:41.000Z",
         "value": "NONE"
       },
       {
-        "from": "2024-01-25T15:50:13.138Z",
-        "to": "2024-01-25T17:24:11.203Z",
+        "from": "2024-12-13T15:25:41.000Z",
+        "to": "2024-12-13T16:17:31.000Z",
         "value": "LOW"
       },
       {
-        "from": "2024-01-25T17:24:11.203Z",
-        "to": "2024-01-25T18:15:07.296Z",
+        "from": "2024-12-13T16:17:31.000Z",
+        "to": "2024-12-13T16:19:22.000Z",
         "value": "HIGH"
       },
       {
-        "from": "2024-01-25T18:15:07.296Z",
-        "to": "2024-01-25T18:36:06.338Z",
+        "from": "2024-12-13T16:19:22.000Z",
+        "to": "2024-12-13T16:28:21.000Z",
         "value": "MEDIUM"
       },
       {
-        "from": "2024-01-25T18:36:06.338Z",
-        "to": "2024-01-25T18:56:06.496Z",
-        "value": "LOW"
+        "from": "2024-12-13T16:28:21.000Z",
+        "to": "2024-12-13T16:39:37.000Z",
+        "value": "HIGH"
       },
       {
-        "from": "2024-01-25T18:56:06.496Z",
-        "to": "2024-01-25T19:09:07.366Z",
-        "value": "NONE"
-      },
-      {
-        "from": "2024-01-25T19:09:07.366Z",
-        "to": "2024-01-25T19:17:13.127Z",
-        "value": "LOW"
-      },
-      {
-        "from": "2024-01-25T19:17:13.127Z",
-        "to": "2024-01-25T20:57:15.478Z",
-        "value": "NONE"
-      },
-      {
-        "from": "2024-01-25T20:57:15.478Z",
-        "to": "2024-01-25T21:05:43.642Z",
-        "value": "LOW"
-      },
-      {
-        "from": "2024-01-25T21:05:43.642Z",
-        "to": "2024-01-25T22:04:10.964Z",
-        "value": "NONE"
-      },
-      {
-        "from": "2024-01-25T22:04:10.964Z",
-        "to": "2024-01-25T22:16:10.582Z",
+        "from": "2024-12-13T16:39:37.000Z",
+        "to": "2024-12-13T16:47:33.000Z",
         "value": "MEDIUM"
       },
       {
-        "from": "2024-01-25T22:16:10.582Z",
-        "to": "2024-01-25T22:30:12.885Z",
+        "from": "2024-12-13T16:47:33.000Z",
+        "to": "2024-12-13T16:48:23.000Z",
         "value": "LOW"
       },
       {
-        "from": "2024-01-25T22:30:12.885Z",
-        "to": "2024-01-26T00:15:00.000Z",
+        "from": "2024-12-13T16:48:23.000Z",
+        "to": "2024-12-13T18:04:25.000Z",
+        "value": "NONE"
+      },
+      {
+        "from": "2024-12-13T18:04:25.000Z",
+        "to": "2024-12-13T20:16:22.000Z",
+        "value": "MEDIUM"
+      },
+      {
+        "from": "2024-12-13T20:16:22.000Z",
+        "to": "2024-12-13T20:24:21.000Z",
+        "value": "LOW"
+      },
+      {
+        "from": "2024-12-13T20:24:21.000Z",
+        "to": "2024-12-13T20:52:41.000Z",
+        "value": "NONE"
+      },
+      {
+        "from": "2024-12-13T20:52:41.000Z",
+        "to": "2024-12-13T22:24:46.000Z",
+        "value": "LOW"
+      },
+      {
+        "from": "2024-12-13T22:24:46.000Z",
+        "to": "2024-12-13T22:30:07.000Z",
+        "value": "MEDIUM"
+      },
+      {
+        "from": "2024-12-13T22:30:07.000Z",
+        "to": "2024-12-14T00:15:00.000Z",
         "value": "NONE"
       }
     ]
@@ -1542,8 +1585,8 @@
     "valueType": "boolean",
     "dataIntervals": [
       {
-        "from": "2024-01-24T23:45:00.000Z",
-        "to": "2024-01-26T00:15:00.000Z",
+        "from": "2024-12-12T23:45:00.000Z",
+        "to": "2024-12-14T00:15:00.000Z",
         "value": false
       }
     ]
@@ -1554,1091 +1597,1080 @@
       "valueType": "weatherCondition",
       "dataIntervals": [
         {
-          "from": "2024-01-24T23:45:00.000Z",
-          "to": "2024-01-24T23:58:42.224Z",
+          "from": "2024-12-12T23:45:00.000Z",
+          "to": "2024-12-12T23:51:23.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 5.27,
-              "fahrenheit": 41.49
+              "celsius": 6.38,
+              "fahrenheit": 43.48
             }
           }
         },
         {
-          "from": "2024-01-24T23:58:42.224Z",
-          "to": "2024-01-25T00:13:40.286Z",
+          "from": "2024-12-12T23:51:23.000Z",
+          "to": "2024-12-12T23:59:12.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 5.27,
-              "fahrenheit": 41.49
+              "celsius": 6.38,
+              "fahrenheit": 43.48
             }
           }
         },
         {
-          "from": "2024-01-25T00:13:40.286Z",
-          "to": "2024-01-25T00:28:42.192Z",
+          "from": "2024-12-12T23:59:12.000Z",
+          "to": "2024-12-13T00:17:50.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 5.27,
-              "fahrenheit": 41.49
+              "celsius": 6.38,
+              "fahrenheit": 43.48
             }
           }
         },
         {
-          "from": "2024-01-25T00:28:42.192Z",
-          "to": "2024-01-25T00:43:40.495Z",
+          "from": "2024-12-13T00:17:50.000Z",
+          "to": "2024-12-13T00:35:07.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 4.79,
-              "fahrenheit": 40.62
+              "celsius": 6.38,
+              "fahrenheit": 43.48
             }
           }
         },
         {
-          "from": "2024-01-25T00:43:40.495Z",
-          "to": "2024-01-25T00:58:40.277Z",
+          "from": "2024-12-13T00:35:07.000Z",
+          "to": "2024-12-13T00:44:17.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 4.79,
-              "fahrenheit": 40.62
+              "celsius": 6.38,
+              "fahrenheit": 43.48
             }
           }
         },
         {
-          "from": "2024-01-25T00:58:40.277Z",
-          "to": "2024-01-25T01:13:40.450Z",
+          "from": "2024-12-13T00:44:17.000Z",
+          "to": "2024-12-13T01:00:28.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 4.79,
-              "fahrenheit": 40.62
+              "celsius": 6.38,
+              "fahrenheit": 43.48
             }
           }
         },
         {
-          "from": "2024-01-25T01:13:40.450Z",
-          "to": "2024-01-25T01:28:41.293Z",
+          "from": "2024-12-13T01:00:28.000Z",
+          "to": "2024-12-13T01:19:48.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 4.79,
-              "fahrenheit": 40.62
+              "celsius": 6.38,
+              "fahrenheit": 43.48
             }
           }
         },
         {
-          "from": "2024-01-25T01:28:41.293Z",
-          "to": "2024-01-25T01:43:40.455Z",
+          "from": "2024-12-13T01:19:48.000Z",
+          "to": "2024-12-13T01:35:14.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 3.98,
-              "fahrenheit": 39.16
+              "celsius": 6.38,
+              "fahrenheit": 43.48
             }
           }
         },
         {
-          "from": "2024-01-25T01:43:40.455Z",
-          "to": "2024-01-25T01:58:41.107Z",
+          "from": "2024-12-13T01:35:14.000Z",
+          "to": "2024-12-13T01:53:05.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 3.98,
-              "fahrenheit": 39.16
+              "celsius": 6.36,
+              "fahrenheit": 43.45
             }
           }
         },
         {
-          "from": "2024-01-25T01:58:41.107Z",
-          "to": "2024-01-25T02:13:40.627Z",
+          "from": "2024-12-13T01:53:05.000Z",
+          "to": "2024-12-13T02:05:30.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 3.98,
-              "fahrenheit": 39.16
+              "celsius": 6.36,
+              "fahrenheit": 43.45
             }
           }
         },
         {
-          "from": "2024-01-25T02:13:40.627Z",
-          "to": "2024-01-25T02:28:40.297Z",
+          "from": "2024-12-13T02:05:30.000Z",
+          "to": "2024-12-13T02:20:06.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 3.98,
-              "fahrenheit": 39.16
+              "celsius": 6.36,
+              "fahrenheit": 43.45
             }
           }
         },
         {
-          "from": "2024-01-25T02:28:40.297Z",
-          "to": "2024-01-25T02:43:40.672Z",
+          "from": "2024-12-13T02:20:06.000Z",
+          "to": "2024-12-13T02:31:13.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 4.00,
-              "fahrenheit": 39.20
+              "celsius": 6.36,
+              "fahrenheit": 43.45
             }
           }
         },
         {
-          "from": "2024-01-25T02:43:40.672Z",
-          "to": "2024-01-25T02:58:40.598Z",
+          "from": "2024-12-13T02:31:13.000Z",
+          "to": "2024-12-13T02:48:39.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 4.00,
-              "fahrenheit": 39.20
+              "celsius": 6.17,
+              "fahrenheit": 43.11
             }
           }
         },
         {
-          "from": "2024-01-25T02:58:40.598Z",
-          "to": "2024-01-25T03:13:44.008Z",
+          "from": "2024-12-13T02:48:39.000Z",
+          "to": "2024-12-13T03:03:48.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 4.00,
-              "fahrenheit": 39.20
+              "celsius": 6.17,
+              "fahrenheit": 43.11
             }
           }
         },
         {
-          "from": "2024-01-25T03:13:44.008Z",
-          "to": "2024-01-25T03:28:41.176Z",
+          "from": "2024-12-13T03:03:48.000Z",
+          "to": "2024-12-13T03:15:36.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 4.00,
-              "fahrenheit": 39.20
+              "celsius": 6.17,
+              "fahrenheit": 43.11
             }
           }
         },
         {
-          "from": "2024-01-25T03:28:41.176Z",
-          "to": "2024-01-25T03:43:41.384Z",
+          "from": "2024-12-13T03:15:36.000Z",
+          "to": "2024-12-13T03:29:10.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 4.05,
-              "fahrenheit": 39.29
+              "celsius": 6.17,
+              "fahrenheit": 43.11
             }
           }
         },
         {
-          "from": "2024-01-25T03:43:41.384Z",
-          "to": "2024-01-25T03:58:41.306Z",
+          "from": "2024-12-13T03:29:10.000Z",
+          "to": "2024-12-13T03:49:47.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 4.05,
-              "fahrenheit": 39.29
+              "celsius": 5.90,
+              "fahrenheit": 42.62
             }
           }
         },
         {
-          "from": "2024-01-25T03:58:41.306Z",
-          "to": "2024-01-25T04:13:40.824Z",
+          "from": "2024-12-13T03:49:47.000Z",
+          "to": "2024-12-13T04:00:59.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 4.05,
-              "fahrenheit": 39.29
+              "celsius": 5.90,
+              "fahrenheit": 42.62
             }
           }
         },
         {
-          "from": "2024-01-25T04:13:40.824Z",
-          "to": "2024-01-25T04:28:40.826Z",
+          "from": "2024-12-13T04:00:59.000Z",
+          "to": "2024-12-13T04:22:06.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 4.05,
-              "fahrenheit": 39.29
+              "celsius": 5.90,
+              "fahrenheit": 42.62
             }
           }
         },
         {
-          "from": "2024-01-25T04:28:40.826Z",
-          "to": "2024-01-25T04:43:40.812Z",
+          "from": "2024-12-13T04:22:06.000Z",
+          "to": "2024-12-13T04:29:29.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 3.86,
-              "fahrenheit": 38.95
+              "celsius": 5.90,
+              "fahrenheit": 42.62
             }
           }
         },
         {
-          "from": "2024-01-25T04:43:40.812Z",
-          "to": "2024-01-25T04:58:40.974Z",
+          "from": "2024-12-13T04:29:29.000Z",
+          "to": "2024-12-13T04:46:14.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 3.86,
-              "fahrenheit": 38.95
+              "celsius": 5.89,
+              "fahrenheit": 42.60
             }
           }
         },
         {
-          "from": "2024-01-25T04:58:40.974Z",
-          "to": "2024-01-25T05:13:40.599Z",
+          "from": "2024-12-13T04:46:14.000Z",
+          "to": "2024-12-13T04:59:09.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 3.86,
-              "fahrenheit": 38.95
+              "celsius": 5.89,
+              "fahrenheit": 42.60
             }
           }
         },
         {
-          "from": "2024-01-25T05:13:40.599Z",
-          "to": "2024-01-25T05:28:41.337Z",
+          "from": "2024-12-13T04:59:09.000Z",
+          "to": "2024-12-13T05:16:37.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 3.86,
-              "fahrenheit": 38.95
+              "celsius": 5.89,
+              "fahrenheit": 42.60
             }
           }
         },
         {
-          "from": "2024-01-25T05:28:41.337Z",
-          "to": "2024-01-25T05:43:40.761Z",
+          "from": "2024-12-13T05:16:37.000Z",
+          "to": "2024-12-13T05:34:30.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 4.47,
-              "fahrenheit": 40.05
+              "celsius": 5.89,
+              "fahrenheit": 42.60
             }
           }
         },
         {
-          "from": "2024-01-25T05:43:40.761Z",
-          "to": "2024-01-25T05:58:41.646Z",
+          "from": "2024-12-13T05:34:30.000Z",
+          "to": "2024-12-13T05:51:33.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 4.47,
-              "fahrenheit": 40.05
+              "celsius": 5.86,
+              "fahrenheit": 42.55
             }
           }
         },
         {
-          "from": "2024-01-25T05:58:41.646Z",
-          "to": "2024-01-25T06:13:42.180Z",
+          "from": "2024-12-13T05:51:33.000Z",
+          "to": "2024-12-13T06:08:29.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 4.47,
-              "fahrenheit": 40.05
+              "celsius": 5.86,
+              "fahrenheit": 42.55
             }
           }
         },
         {
-          "from": "2024-01-25T06:13:42.180Z",
-          "to": "2024-01-25T06:28:42.088Z",
+          "from": "2024-12-13T06:08:29.000Z",
+          "to": "2024-12-13T06:21:57.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 4.47,
-              "fahrenheit": 40.05
+              "celsius": 5.86,
+              "fahrenheit": 42.55
             }
           }
         },
         {
-          "from": "2024-01-25T06:28:42.088Z",
-          "to": "2024-01-25T06:43:41.797Z",
+          "from": "2024-12-13T06:21:57.000Z",
+          "to": "2024-12-13T06:38:18.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 4.47,
-              "fahrenheit": 40.05
+              "celsius": 5.86,
+              "fahrenheit": 42.55
             }
           }
         },
         {
-          "from": "2024-01-25T06:43:41.797Z",
-          "to": "2024-01-25T06:58:42.199Z",
+          "from": "2024-12-13T06:38:18.000Z",
+          "to": "2024-12-13T06:46:39.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 5.08,
-              "fahrenheit": 41.14
+              "celsius": 5.80,
+              "fahrenheit": 42.44
             }
           }
         },
         {
-          "from": "2024-01-25T06:58:42.199Z",
-          "to": "2024-01-25T07:13:41.944Z",
+          "from": "2024-12-13T06:46:39.000Z",
+          "to": "2024-12-13T07:07:14.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 5.08,
-              "fahrenheit": 41.14
+              "celsius": 5.80,
+              "fahrenheit": 42.44
             }
           }
         },
         {
-          "from": "2024-01-25T07:13:41.944Z",
-          "to": "2024-01-25T07:28:41.720Z",
+          "from": "2024-12-13T07:07:14.000Z",
+          "to": "2024-12-13T07:19:36.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 5.08,
-              "fahrenheit": 41.14
+              "celsius": 5.80,
+              "fahrenheit": 42.44
             }
           }
         },
         {
-          "from": "2024-01-25T07:28:41.720Z",
-          "to": "2024-01-25T07:43:40.334Z",
+          "from": "2024-12-13T07:19:36.000Z",
+          "to": "2024-12-13T07:29:13.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 6.14,
-              "fahrenheit": 43.05
+              "celsius": 5.80,
+              "fahrenheit": 42.44
             }
           }
         },
         {
-          "from": "2024-01-25T07:43:40.334Z",
-          "to": "2024-01-25T07:58:41.047Z",
+          "from": "2024-12-13T07:29:13.000Z",
+          "to": "2024-12-13T08:07:31.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 6.14,
-              "fahrenheit": 43.05
+              "celsius": 5.65,
+              "fahrenheit": 42.17
             }
           }
         },
         {
-          "from": "2024-01-25T07:58:41.047Z",
-          "to": "2024-01-25T08:13:43.472Z",
+          "from": "2024-12-13T08:07:31.000Z",
+          "to": "2024-12-13T08:20:40.000Z",
           "value": {
-            "state": "SCATTERED_RAIN",
+            "state": "CLOUDY",
             "temperature": {
-              "celsius": 6.14,
-              "fahrenheit": 43.05
+              "celsius": 5.65,
+              "fahrenheit": 42.17
             }
           }
         },
         {
-          "from": "2024-01-25T08:13:43.472Z",
-          "to": "2024-01-25T08:28:51.257Z",
+          "from": "2024-12-13T08:20:40.000Z",
+          "to": "2024-12-13T08:31:23.000Z",
           "value": {
-            "state": "SCATTERED_RAIN",
+            "state": "CLOUDY",
             "temperature": {
-              "celsius": 6.14,
-              "fahrenheit": 43.05
+              "celsius": 5.65,
+              "fahrenheit": 42.17
             }
           }
         },
         {
-          "from": "2024-01-25T08:28:51.257Z",
-          "to": "2024-01-25T08:43:41.556Z",
+          "from": "2024-12-13T08:31:23.000Z",
+          "to": "2024-12-13T08:53:05.000Z",
           "value": {
-            "state": "FOGGY",
+            "state": "CLOUDY",
             "temperature": {
-              "celsius": 6.45,
-              "fahrenheit": 43.61
+              "celsius": 5.67,
+              "fahrenheit": 42.21
             }
           }
         },
         {
-          "from": "2024-01-25T08:43:41.556Z",
-          "to": "2024-01-25T08:58:40.928Z",
+          "from": "2024-12-13T08:53:05.000Z",
+          "to": "2024-12-13T09:06:51.000Z",
           "value": {
-            "state": "FOGGY",
+            "state": "CLOUDY",
             "temperature": {
-              "celsius": 6.45,
-              "fahrenheit": 43.61
+              "celsius": 5.67,
+              "fahrenheit": 42.21
             }
           }
         },
         {
-          "from": "2024-01-25T08:58:40.928Z",
-          "to": "2024-01-25T09:13:42.141Z",
+          "from": "2024-12-13T09:06:51.000Z",
+          "to": "2024-12-13T09:17:50.000Z",
           "value": {
-            "state": "FOGGY",
+            "state": "CLOUDY",
             "temperature": {
-              "celsius": 6.45,
-              "fahrenheit": 43.61
+              "celsius": 5.67,
+              "fahrenheit": 42.21
             }
           }
         },
         {
-          "from": "2024-01-25T09:13:42.141Z",
-          "to": "2024-01-25T09:28:40.326Z",
+          "from": "2024-12-13T09:17:50.000Z",
+          "to": "2024-12-13T09:30:56.000Z",
           "value": {
-            "state": "FOGGY",
+            "state": "CLOUDY",
             "temperature": {
-              "celsius": 6.45,
-              "fahrenheit": 43.61
+              "celsius": 5.67,
+              "fahrenheit": 42.21
             }
           }
         },
         {
-          "from": "2024-01-25T09:28:40.326Z",
-          "to": "2024-01-25T09:43:41.130Z",
+          "from": "2024-12-13T09:30:56.000Z",
+          "to": "2024-12-13T09:47:47.000Z",
           "value": {
-            "state": "FOGGY",
+            "state": "CLOUDY",
             "temperature": {
-              "celsius": 7.13,
-              "fahrenheit": 44.83
+              "celsius": 5.57,
+              "fahrenheit": 42.03
             }
           }
         },
         {
-          "from": "2024-01-25T09:43:41.130Z",
-          "to": "2024-01-25T09:58:40.508Z",
+          "from": "2024-12-13T09:47:47.000Z",
+          "to": "2024-12-13T10:02:39.000Z",
           "value": {
-            "state": "FOGGY",
+            "state": "CLOUDY",
             "temperature": {
-              "celsius": 7.13,
-              "fahrenheit": 44.83
+              "celsius": 5.57,
+              "fahrenheit": 42.03
             }
           }
         },
         {
-          "from": "2024-01-25T09:58:40.508Z",
-          "to": "2024-01-25T10:13:41.205Z",
+          "from": "2024-12-13T10:02:39.000Z",
+          "to": "2024-12-13T10:16:57.000Z",
           "value": {
-            "state": "FOGGY",
+            "state": "CLOUDY",
             "temperature": {
-              "celsius": 7.13,
-              "fahrenheit": 44.83
+              "celsius": 5.57,
+              "fahrenheit": 42.03
             }
           }
         },
         {
-          "from": "2024-01-25T10:13:41.205Z",
-          "to": "2024-01-25T10:28:40.746Z",
+          "from": "2024-12-13T10:16:57.000Z",
+          "to": "2024-12-13T10:35:52.000Z",
           "value": {
-            "state": "FOGGY",
+            "state": "CLOUDY",
             "temperature": {
-              "celsius": 7.13,
-              "fahrenheit": 44.83
+              "celsius": 5.57,
+              "fahrenheit": 42.03
             }
           }
         },
         {
-          "from": "2024-01-25T10:28:40.746Z",
-          "to": "2024-01-25T10:43:41.497Z",
+          "from": "2024-12-13T10:35:52.000Z",
+          "to": "2024-12-13T10:49:40.000Z",
           "value": {
-            "state": "CLOUDY_PARTLY",
+            "state": "CLOUDY",
             "temperature": {
-              "celsius": 8.20,
-              "fahrenheit": 46.76
+              "celsius": 5.49,
+              "fahrenheit": 41.88
             }
           }
         },
         {
-          "from": "2024-01-25T10:43:41.497Z",
-          "to": "2024-01-25T10:58:40.585Z",
+          "from": "2024-12-13T10:49:40.000Z",
+          "to": "2024-12-13T11:06:30.000Z",
           "value": {
-            "state": "CLOUDY_PARTLY",
+            "state": "CLOUDY",
             "temperature": {
-              "celsius": 8.20,
-              "fahrenheit": 46.76
+              "celsius": 5.49,
+              "fahrenheit": 41.88
             }
           }
         },
         {
-          "from": "2024-01-25T10:58:40.585Z",
-          "to": "2024-01-25T11:13:41.165Z",
+          "from": "2024-12-13T11:06:30.000Z",
+          "to": "2024-12-13T11:20:07.000Z",
           "value": {
-            "state": "CLOUDY_PARTLY",
+            "state": "CLOUDY",
             "temperature": {
-              "celsius": 8.20,
-              "fahrenheit": 46.76
+              "celsius": 5.49,
+              "fahrenheit": 41.88
             }
           }
         },
         {
-          "from": "2024-01-25T11:13:41.165Z",
-          "to": "2024-01-25T11:28:40.792Z",
+          "from": "2024-12-13T11:20:07.000Z",
+          "to": "2024-12-13T11:35:36.000Z",
           "value": {
-            "state": "CLOUDY_PARTLY",
+            "state": "CLOUDY",
             "temperature": {
-              "celsius": 8.20,
-              "fahrenheit": 46.76
+              "celsius": 5.49,
+              "fahrenheit": 41.88
             }
           }
         },
         {
-          "from": "2024-01-25T11:28:40.792Z",
-          "to": "2024-01-25T11:43:41.568Z",
+          "from": "2024-12-13T11:35:36.000Z",
+          "to": "2024-12-13T11:48:50.000Z",
           "value": {
-            "state": "CLOUDY_PARTLY",
+            "state": "CLOUDY",
             "temperature": {
-              "celsius": 9.40,
-              "fahrenheit": 48.92
+              "celsius": 5.63,
+              "fahrenheit": 42.13
             }
           }
         },
         {
-          "from": "2024-01-25T11:43:41.568Z",
-          "to": "2024-01-25T11:58:41.369Z",
+          "from": "2024-12-13T11:48:50.000Z",
+          "to": "2024-12-13T11:58:38.000Z",
           "value": {
-            "state": "CLOUDY_PARTLY",
+            "state": "CLOUDY",
             "temperature": {
-              "celsius": 9.40,
-              "fahrenheit": 48.92
+              "celsius": 5.63,
+              "fahrenheit": 42.13
             }
           }
         },
         {
-          "from": "2024-01-25T11:58:41.369Z",
-          "to": "2024-01-25T12:13:40.930Z",
+          "from": "2024-12-13T11:58:38.000Z",
+          "to": "2024-12-13T12:14:14.000Z",
           "value": {
-            "state": "CLOUDY_PARTLY",
+            "state": "CLOUDY",
             "temperature": {
-              "celsius": 9.40,
-              "fahrenheit": 48.92
+              "celsius": 5.63,
+              "fahrenheit": 42.13
             }
           }
         },
         {
-          "from": "2024-01-25T12:13:40.930Z",
-          "to": "2024-01-25T12:28:40.721Z",
+          "from": "2024-12-13T12:14:14.000Z",
+          "to": "2024-12-13T12:37:08.000Z",
           "value": {
-            "state": "CLOUDY_PARTLY",
+            "state": "CLOUDY",
             "temperature": {
-              "celsius": 9.40,
-              "fahrenheit": 48.92
+              "celsius": 5.63,
+              "fahrenheit": 42.13
             }
           }
         },
         {
-          "from": "2024-01-25T12:28:40.721Z",
-          "to": "2024-01-25T12:43:40.914Z",
+          "from": "2024-12-13T12:37:08.000Z",
+          "to": "2024-12-13T12:47:10.000Z",
           "value": {
-            "state": "CLOUDY_PARTLY",
+            "state": "CLOUDY",
             "temperature": {
-              "celsius": 10.36,
-              "fahrenheit": 50.65
+              "celsius": 5.50,
+              "fahrenheit": 41.90
             }
           }
         },
         {
-          "from": "2024-01-25T12:43:40.914Z",
-          "to": "2024-01-25T12:58:40.743Z",
+          "from": "2024-12-13T12:47:10.000Z",
+          "to": "2024-12-13T13:03:19.000Z",
           "value": {
-            "state": "CLOUDY_PARTLY",
+            "state": "CLOUDY",
             "temperature": {
-              "celsius": 10.36,
-              "fahrenheit": 50.65
+              "celsius": 5.50,
+              "fahrenheit": 41.90
             }
           }
         },
         {
-          "from": "2024-01-25T12:58:40.743Z",
-          "to": "2024-01-25T13:13:41.409Z",
+          "from": "2024-12-13T13:03:19.000Z",
+          "to": "2024-12-13T13:19:01.000Z",
           "value": {
-            "state": "CLOUDY_PARTLY",
+            "state": "CLOUDY",
             "temperature": {
-              "celsius": 10.36,
-              "fahrenheit": 50.65
+              "celsius": 5.50,
+              "fahrenheit": 41.90
             }
           }
         },
         {
-          "from": "2024-01-25T13:13:41.409Z",
-          "to": "2024-01-25T13:28:44.996Z",
+          "from": "2024-12-13T13:19:01.000Z",
+          "to": "2024-12-13T13:28:54.000Z",
           "value": {
-            "state": "CLOUDY_PARTLY",
+            "state": "CLOUDY",
             "temperature": {
-              "celsius": 10.36,
-              "fahrenheit": 50.65
+              "celsius": 5.50,
+              "fahrenheit": 41.90
             }
           }
         },
         {
-          "from": "2024-01-25T13:28:44.996Z",
-          "to": "2024-01-25T13:43:41.350Z",
+          "from": "2024-12-13T13:28:54.000Z",
+          "to": "2024-12-13T13:44:13.000Z",
           "value": {
-            "state": "CLOUDY_PARTLY",
+            "state": "CLOUDY",
             "temperature": {
-              "celsius": 11.42,
-              "fahrenheit": 52.56
+              "celsius": 5.50,
+              "fahrenheit": 41.90
             }
           }
         },
         {
-          "from": "2024-01-25T13:43:41.350Z",
-          "to": "2024-01-25T13:58:40.688Z",
+          "from": "2024-12-13T13:44:13.000Z",
+          "to": "2024-12-13T14:03:31.000Z",
           "value": {
-            "state": "CLOUDY_PARTLY",
+            "state": "CLOUDY",
             "temperature": {
-              "celsius": 11.42,
-              "fahrenheit": 52.56
+              "celsius": 5.56,
+              "fahrenheit": 42.01
             }
           }
         },
         {
-          "from": "2024-01-25T13:58:40.688Z",
-          "to": "2024-01-25T14:13:40.202Z",
+          "from": "2024-12-13T14:03:31.000Z",
+          "to": "2024-12-13T14:17:25.000Z",
           "value": {
-            "state": "CLOUDY_PARTLY",
+            "state": "CLOUDY",
             "temperature": {
-              "celsius": 11.42,
-              "fahrenheit": 52.56
+              "celsius": 5.56,
+              "fahrenheit": 42.01
             }
           }
         },
         {
-          "from": "2024-01-25T14:13:40.202Z",
-          "to": "2024-01-25T14:28:40.656Z",
+          "from": "2024-12-13T14:17:25.000Z",
+          "to": "2024-12-13T14:33:21.000Z",
           "value": {
-            "state": "CLOUDY_PARTLY",
+            "state": "CLOUDY",
             "temperature": {
-              "celsius": 11.42,
-              "fahrenheit": 52.56
+              "celsius": 5.56,
+              "fahrenheit": 42.01
             }
           }
         },
         {
-          "from": "2024-01-25T14:28:40.656Z",
-          "to": "2024-01-25T14:43:40.356Z",
+          "from": "2024-12-13T14:33:21.000Z",
+          "to": "2024-12-13T14:49:26.000Z",
           "value": {
-            "state": "CLOUDY_PARTLY",
+            "state": "CLOUDY",
             "temperature": {
-              "celsius": 12.09,
-              "fahrenheit": 53.76
+              "celsius": 5.56,
+              "fahrenheit": 42.01
             }
           }
         },
         {
-          "from": "2024-01-25T14:43:40.356Z",
-          "to": "2024-01-25T14:58:40.764Z",
+          "from": "2024-12-13T14:49:26.000Z",
+          "to": "2024-12-13T15:05:54.000Z",
           "value": {
-            "state": "CLOUDY_PARTLY",
+            "state": "CLOUDY",
             "temperature": {
-              "celsius": 12.09,
-              "fahrenheit": 53.76
+              "celsius": 5.26,
+              "fahrenheit": 41.47
             }
           }
         },
         {
-          "from": "2024-01-25T14:58:40.764Z",
-          "to": "2024-01-25T15:13:44.789Z",
+          "from": "2024-12-13T15:05:54.000Z",
+          "to": "2024-12-13T15:22:04.000Z",
           "value": {
-            "state": "CLOUDY_PARTLY",
+            "state": "CLOUDY",
             "temperature": {
-              "celsius": 12.09,
-              "fahrenheit": 53.76
+              "celsius": 5.26,
+              "fahrenheit": 41.47
             }
           }
         },
         {
-          "from": "2024-01-25T15:13:44.789Z",
-          "to": "2024-01-25T15:28:40.806Z",
+          "from": "2024-12-13T15:22:04.000Z",
+          "to": "2024-12-13T15:37:02.000Z",
           "value": {
-            "state": "CLOUDY_PARTLY",
+            "state": "CLOUDY",
             "temperature": {
-              "celsius": 12.09,
-              "fahrenheit": 53.76
+              "celsius": 5.26,
+              "fahrenheit": 41.47
             }
           }
         },
         {
-          "from": "2024-01-25T15:28:40.806Z",
-          "to": "2024-01-25T15:43:41.191Z",
+          "from": "2024-12-13T15:37:02.000Z",
+          "to": "2024-12-13T15:45:10.000Z",
           "value": {
-            "state": "CLOUDY_PARTLY",
+            "state": "CLOUDY",
             "temperature": {
-              "celsius": 12.40,
-              "fahrenheit": 54.32
+              "celsius": 5.00,
+              "fahrenheit": 41.00
             }
           }
         },
         {
-          "from": "2024-01-25T15:43:41.191Z",
-          "to": "2024-01-25T15:58:42.327Z",
+          "from": "2024-12-13T15:45:10.000Z",
+          "to": "2024-12-13T16:04:07.000Z",
           "value": {
-            "state": "CLOUDY_PARTLY",
+            "state": "CLOUDY",
             "temperature": {
-              "celsius": 12.40,
-              "fahrenheit": 54.32
+              "celsius": 5.00,
+              "fahrenheit": 41.00
             }
           }
         },
         {
-          "from": "2024-01-25T15:58:42.327Z",
-          "to": "2024-01-25T16:13:42.039Z",
+          "from": "2024-12-13T16:04:07.000Z",
+          "to": "2024-12-13T16:18:33.000Z",
           "value": {
-            "state": "CLOUDY_PARTLY",
-            "temperature": {
-              "celsius": 12.40,
-              "fahrenheit": 54.32
-            }
-          }
-        },
-        {
-          "from": "2024-01-25T16:13:42.039Z",
-          "to": "2024-01-25T16:28:41.134Z",
-          "value": {
-            "state": "CLOUDY_PARTLY",
+            "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 12.40,
-              "fahrenheit": 54.32
+              "celsius": 5.00,
+              "fahrenheit": 41.00
             }
           }
         },
         {
-          "from": "2024-01-25T16:28:41.134Z",
-          "to": "2024-01-25T16:43:40.893Z",
+          "from": "2024-12-13T16:18:33.000Z",
+          "to": "2024-12-13T16:36:33.000Z",
           "value": {
-            "state": "CLOUDY_PARTLY",
+            "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 11.86,
-              "fahrenheit": 53.35
+              "celsius": 5.00,
+              "fahrenheit": 41.00
             }
           }
         },
         {
-          "from": "2024-01-25T16:43:40.893Z",
-          "to": "2024-01-25T16:58:40.694Z",
+          "from": "2024-12-13T16:36:33.000Z",
+          "to": "2024-12-13T16:50:46.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 11.86,
-              "fahrenheit": 53.35
+              "celsius": 4.69,
+              "fahrenheit": 40.44
             }
           }
         },
         {
-          "from": "2024-01-25T16:58:40.694Z",
-          "to": "2024-01-25T17:13:41.776Z",
+          "from": "2024-12-13T16:50:46.000Z",
+          "to": "2024-12-13T17:05:57.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 11.86,
-              "fahrenheit": 53.35
+              "celsius": 4.69,
+              "fahrenheit": 40.44
             }
           }
         },
         {
-          "from": "2024-01-25T17:13:41.776Z",
-          "to": "2024-01-25T17:28:45.216Z",
+          "from": "2024-12-13T17:05:57.000Z",
+          "to": "2024-12-13T17:18:18.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 11.86,
-              "fahrenheit": 53.35
+              "celsius": 4.69,
+              "fahrenheit": 40.44
             }
           }
         },
         {
-          "from": "2024-01-25T17:28:45.216Z",
-          "to": "2024-01-25T17:43:41.715Z",
+          "from": "2024-12-13T17:18:18.000Z",
+          "to": "2024-12-13T17:30:07.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 11.15,
-              "fahrenheit": 52.07
+              "celsius": 4.69,
+              "fahrenheit": 40.44
             }
           }
         },
         {
-          "from": "2024-01-25T17:43:41.715Z",
-          "to": "2024-01-25T17:58:46.837Z",
+          "from": "2024-12-13T17:30:07.000Z",
+          "to": "2024-12-13T17:48:51.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 11.15,
-              "fahrenheit": 52.07
+              "celsius": 4.59,
+              "fahrenheit": 40.26
             }
           }
         },
         {
-          "from": "2024-01-25T17:58:46.837Z",
-          "to": "2024-01-25T18:13:41.364Z",
+          "from": "2024-12-13T17:48:51.000Z",
+          "to": "2024-12-13T18:02:25.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 11.15,
-              "fahrenheit": 52.07
+              "celsius": 4.59,
+              "fahrenheit": 40.26
             }
           }
         },
         {
-          "from": "2024-01-25T18:13:41.364Z",
-          "to": "2024-01-25T18:28:41.419Z",
+          "from": "2024-12-13T18:02:25.000Z",
+          "to": "2024-12-13T18:13:49.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 11.15,
-              "fahrenheit": 52.07
+              "celsius": 4.59,
+              "fahrenheit": 40.26
             }
           }
         },
         {
-          "from": "2024-01-25T18:28:41.419Z",
-          "to": "2024-01-25T18:43:42.048Z",
+          "from": "2024-12-13T18:13:49.000Z",
+          "to": "2024-12-13T18:33:28.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 11.18,
-              "fahrenheit": 52.12
+              "celsius": 4.59,
+              "fahrenheit": 40.26
             }
           }
         },
         {
-          "from": "2024-01-25T18:43:42.048Z",
-          "to": "2024-01-25T18:58:41.890Z",
+          "from": "2024-12-13T18:33:28.000Z",
+          "to": "2024-12-13T18:49:05.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 11.18,
-              "fahrenheit": 52.12
+              "celsius": 4.59,
+              "fahrenheit": 40.26
             }
           }
         },
         {
-          "from": "2024-01-25T18:58:41.890Z",
-          "to": "2024-01-25T19:13:40.644Z",
+          "from": "2024-12-13T18:49:05.000Z",
+          "to": "2024-12-13T18:58:37.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 11.18,
-              "fahrenheit": 52.12
+              "celsius": 4.57,
+              "fahrenheit": 40.23
             }
           }
         },
         {
-          "from": "2024-01-25T19:13:40.644Z",
-          "to": "2024-01-25T19:28:41.397Z",
+          "from": "2024-12-13T18:58:37.000Z",
+          "to": "2024-12-13T19:14:23.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 11.18,
-              "fahrenheit": 52.12
+              "celsius": 4.57,
+              "fahrenheit": 40.23
             }
           }
         },
         {
-          "from": "2024-01-25T19:28:41.397Z",
-          "to": "2024-01-25T19:43:42.056Z",
+          "from": "2024-12-13T19:14:23.000Z",
+          "to": "2024-12-13T19:29:07.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 10.98,
-              "fahrenheit": 51.76
+              "celsius": 4.57,
+              "fahrenheit": 40.23
             }
           }
         },
         {
-          "from": "2024-01-25T19:43:42.056Z",
-          "to": "2024-01-25T19:58:41.928Z",
+          "from": "2024-12-13T19:29:07.000Z",
+          "to": "2024-12-13T19:46:45.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 10.98,
-              "fahrenheit": 51.76
+              "celsius": 4.57,
+              "fahrenheit": 40.23
             }
           }
         },
         {
-          "from": "2024-01-25T19:58:41.928Z",
-          "to": "2024-01-25T20:13:40.518Z",
+          "from": "2024-12-13T19:46:45.000Z",
+          "to": "2024-12-13T20:02:06.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 10.98,
-              "fahrenheit": 51.76
+              "celsius": 4.59,
+              "fahrenheit": 40.26
             }
           }
         },
         {
-          "from": "2024-01-25T20:13:40.518Z",
-          "to": "2024-01-25T20:28:41.314Z",
+          "from": "2024-12-13T20:02:06.000Z",
+          "to": "2024-12-13T20:22:44.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 10.98,
-              "fahrenheit": 51.76
+              "celsius": 4.59,
+              "fahrenheit": 40.26
             }
           }
         },
         {
-          "from": "2024-01-25T20:28:41.314Z",
-          "to": "2024-01-25T20:43:49.397Z",
+          "from": "2024-12-13T20:22:44.000Z",
+          "to": "2024-12-13T20:32:46.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 11.52,
-              "fahrenheit": 52.74
+              "celsius": 4.59,
+              "fahrenheit": 40.26
             }
           }
         },
         {
-          "from": "2024-01-25T20:43:49.397Z",
-          "to": "2024-01-25T20:58:40.452Z",
+          "from": "2024-12-13T20:32:46.000Z",
+          "to": "2024-12-13T20:47:57.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 11.52,
-              "fahrenheit": 52.74
+              "celsius": 4.59,
+              "fahrenheit": 40.26
             }
           }
         },
         {
-          "from": "2024-01-25T20:58:40.452Z",
-          "to": "2024-01-25T21:13:41.621Z",
+          "from": "2024-12-13T20:47:57.000Z",
+          "to": "2024-12-13T21:03:15.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 11.52,
-              "fahrenheit": 52.74
+              "celsius": 4.54,
+              "fahrenheit": 40.17
             }
           }
         },
         {
-          "from": "2024-01-25T21:13:41.621Z",
-          "to": "2024-01-25T21:28:41.551Z",
+          "from": "2024-12-13T21:03:15.000Z",
+          "to": "2024-12-13T21:22:54.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 11.52,
-              "fahrenheit": 52.74
+              "celsius": 4.54,
+              "fahrenheit": 40.17
             }
           }
         },
         {
-          "from": "2024-01-25T21:28:41.551Z",
-          "to": "2024-01-25T21:43:40.796Z",
+          "from": "2024-12-13T21:22:54.000Z",
+          "to": "2024-12-13T21:36:40.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 11.30,
-              "fahrenheit": 52.34
+              "celsius": 4.54,
+              "fahrenheit": 40.17
             }
           }
         },
         {
-          "from": "2024-01-25T21:43:40.796Z",
-          "to": "2024-01-25T21:58:41.014Z",
+          "from": "2024-12-13T21:36:40.000Z",
+          "to": "2024-12-13T21:45:45.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 11.30,
-              "fahrenheit": 52.34
+              "celsius": 4.46,
+              "fahrenheit": 40.03
             }
           }
         },
         {
-          "from": "2024-01-25T21:58:41.014Z",
-          "to": "2024-01-25T22:13:40.231Z",
+          "from": "2024-12-13T21:45:45.000Z",
+          "to": "2024-12-13T22:00:06.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 11.30,
-              "fahrenheit": 52.34
+              "celsius": 4.46,
+              "fahrenheit": 40.03
             }
           }
         },
         {
-          "from": "2024-01-25T22:13:40.231Z",
-          "to": "2024-01-25T22:28:40.482Z",
+          "from": "2024-12-13T22:00:06.000Z",
+          "to": "2024-12-13T22:21:16.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 11.30,
-              "fahrenheit": 52.34
+              "celsius": 4.46,
+              "fahrenheit": 40.03
             }
           }
         },
         {
-          "from": "2024-01-25T22:28:40.482Z",
-          "to": "2024-01-25T22:43:41.104Z",
+          "from": "2024-12-13T22:21:16.000Z",
+          "to": "2024-12-13T22:38:03.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 11.74,
-              "fahrenheit": 53.13
+              "celsius": 4.46,
+              "fahrenheit": 40.03
             }
           }
         },
         {
-          "from": "2024-01-25T22:43:41.104Z",
-          "to": "2024-01-25T22:58:40.494Z",
+          "from": "2024-12-13T22:38:03.000Z",
+          "to": "2024-12-13T22:49:07.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 11.74,
-              "fahrenheit": 53.13
+              "celsius": 4.58,
+              "fahrenheit": 40.24
             }
           }
         },
         {
-          "from": "2024-01-25T22:58:40.494Z",
-          "to": "2024-01-25T23:13:49.265Z",
+          "from": "2024-12-13T22:49:07.000Z",
+          "to": "2024-12-13T23:02:27.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 11.74,
-              "fahrenheit": 53.13
+              "celsius": 4.58,
+              "fahrenheit": 40.24
             }
           }
         },
         {
-          "from": "2024-01-25T23:13:49.265Z",
-          "to": "2024-01-25T23:28:40.358Z",
+          "from": "2024-12-13T23:02:27.000Z",
+          "to": "2024-12-13T23:17:09.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 11.74,
-              "fahrenheit": 53.13
+              "celsius": 4.58,
+              "fahrenheit": 40.24
             }
           }
         },
         {
-          "from": "2024-01-25T23:28:40.358Z",
-          "to": "2024-01-25T23:43:40.606Z",
+          "from": "2024-12-13T23:17:09.000Z",
+          "to": "2024-12-13T23:36:18.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 11.85,
-              "fahrenheit": 53.33
+              "celsius": 4.58,
+              "fahrenheit": 40.24
             }
           }
         },
         {
-          "from": "2024-01-25T23:43:40.606Z",
-          "to": "2024-01-25T23:58:40.186Z",
+          "from": "2024-12-13T23:36:18.000Z",
+          "to": "2024-12-13T23:43:50.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 11.85,
-              "fahrenheit": 53.33
+              "celsius": 4.51,
+              "fahrenheit": 40.12
             }
           }
         },
         {
-          "from": "2024-01-25T23:58:40.186Z",
-          "to": "2024-01-26T00:13:40.249Z",
+          "from": "2024-12-13T23:43:50.000Z",
+          "to": "2024-12-14T00:05:47.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 11.85,
-              "fahrenheit": 53.33
+              "celsius": 4.51,
+              "fahrenheit": 40.12
             }
           }
         },
         {
-          "from": "2024-01-26T00:13:40.249Z",
-          "to": "2024-01-26T00:15:00.000Z",
+          "from": "2024-12-14T00:05:47.000Z",
+          "to": "2024-12-14T00:15:00.000Z",
           "value": {
             "state": "NIGHT_CLOUDY",
             "temperature": {
-              "celsius": 11.85,
-              "fahrenheit": 53.33
+              "celsius": 4.51,
+              "fahrenheit": 40.12
             }
           }
         }
@@ -2649,18 +2681,8 @@
       "valueType": "boolean",
       "dataIntervals": [
         {
-          "from": "2024-01-24T23:45:00.000Z",
-          "to": "2024-01-25T10:43:41.497Z",
-          "value": false
-        },
-        {
-          "from": "2024-01-25T10:43:41.497Z",
-          "to": "2024-01-25T13:58:40.688Z",
-          "value": true
-        },
-        {
-          "from": "2024-01-25T13:58:40.688Z",
-          "to": "2024-01-26T00:15:00.000Z",
+          "from": "2024-12-12T23:45:00.000Z",
+          "to": "2024-12-14T00:15:00.000Z",
           "value": false
         }
       ]
@@ -2672,36 +2694,36 @@
         "04:00": {
           "state": "NIGHT_CLOUDY",
           "temperature": {
-            "celsius": 4.05,
-            "fahrenheit": 39.29
+            "celsius": 5.90,
+            "fahrenheit": 42.62
           }
         },
         "08:00": {
-          "state": "SCATTERED_RAIN",
+          "state": "CLOUDY",
           "temperature": {
-            "celsius": 6.14,
-            "fahrenheit": 43.05
+            "celsius": 5.65,
+            "fahrenheit": 42.17
           }
         },
         "12:00": {
-          "state": "CLOUDY_PARTLY",
+          "state": "CLOUDY",
           "temperature": {
-            "celsius": 9.40,
-            "fahrenheit": 48.92
+            "celsius": 5.63,
+            "fahrenheit": 42.13
           }
         },
         "16:00": {
-          "state": "CLOUDY_PARTLY",
+          "state": "NIGHT_CLOUDY",
           "temperature": {
-            "celsius": 12.40,
-            "fahrenheit": 54.32
+            "celsius": 5.00,
+            "fahrenheit": 41.00
           }
         },
         "20:00": {
           "state": "NIGHT_CLOUDY",
           "temperature": {
-            "celsius": 10.98,
-            "fahrenheit": 51.76
+            "celsius": 4.59,
+            "fahrenheit": 40.26
           }
         }
       }

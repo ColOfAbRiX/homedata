@@ -110,9 +110,10 @@ final class TimefluxClient[F[_]: Async] private (
    */
   def writeData[A: TimefluxSerializable](request: WriteRequest, values: StreamF[A]): F[Unit] =
     for
-      _       <- logger.debug("Write Data")
-      measures = values.through(TimefluxSerializable.fs2ToMeasure)
-      result  <- writeStream(request, measures)
+      _        <- logger.debug("Write Data")
+      precision = request.precision.getOrElse(TimePrecision.Microseconds)
+      measures  = values.through(TimefluxSerializable.toApiMeasureStream(precision))
+      result   <- writeStream(request, measures)
     yield result
 
   /**

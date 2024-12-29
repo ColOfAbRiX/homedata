@@ -5,12 +5,12 @@ import io.circe.*
 import io.circe.derivation.*
 import java.time.*
 
-enum TimePrecision(val value: String):
+enum TimePrecision(val value: String, val multiplier: Long):
 
-  case Seconds      extends TimePrecision("s")
-  case Milliseconds extends TimePrecision("ms")
-  case Microseconds extends TimePrecision("us")
-  case Nanoseconds  extends TimePrecision("ns")
+  case Seconds      extends TimePrecision("s", 1)
+  case Milliseconds extends TimePrecision("ms", 1000)
+  case Microseconds extends TimePrecision("us", 1000000)
+  case Nanoseconds  extends TimePrecision("ns", 1000000000)
 
 object TimePrecision:
 

@@ -37,13 +37,9 @@ object ReportConverter:
             reading.copy(room = Some(room), time = Some(time))
           }
       }
-      .flatTap { reading =>
-        reading.traverse(r => IO.println(s"${r.time} - atHome=${r.atHome}")) >>
-        IO.raiseError(new RuntimeException("dd"))
-      }
 
   private def getInsideTemperatures(insideTemperature: Measure.DataPoints[ValueType.Temperature]): IO[TadoDataStore] =
-    IO.pure {
+    IO {
       insideTemperature
         .dataPoints
         .foldMap {
@@ -53,7 +49,7 @@ object ReportConverter:
     }
 
   private def getHumidity(humidity: Measure.DataPoints[ValueType.Percentage]): IO[TadoDataStore] =
-    IO.pure {
+    IO {
       humidity
         .dataPoints
         .foldMap {
@@ -63,7 +59,7 @@ object ReportConverter:
     }
 
   private def getSetTemperature(settings: Measure.DataIntervals[ValueType.HeatingSetting]): IO[TadoDataStore] =
-    IO.pure {
+    IO {
       settings
         .dataIntervals
         .foldMap {
@@ -75,7 +71,7 @@ object ReportConverter:
     }
 
   private def getWeatherCondition(condition: Measure.DataIntervals[ValueType.WeatherCondition]): IO[TadoDataStore] =
-    IO.pure {
+    IO {
       condition
         .dataIntervals
         .foldMap {
@@ -91,7 +87,7 @@ object ReportConverter:
     }
 
   private def getOutsideSun(sunny: Measure.DataIntervals[ValueType.Bool]): IO[TadoDataStore] =
-    IO.pure {
+    IO {
       sunny
         .dataIntervals
         .foldMap {
@@ -101,7 +97,7 @@ object ReportConverter:
     }
 
   private def getHeatingModulation(callForHeat: Measure.DataIntervals[ValueType.CallForHeat]): IO[TadoDataStore] =
-    IO.pure {
+    IO {
       callForHeat
         .dataIntervals
         .foldMap {
@@ -111,11 +107,11 @@ object ReportConverter:
     }
 
   private def getInfoFromStripes(stripes: Measure.DataIntervals[ValueType.Stripes]): IO[TadoDataStore] =
-    IO.pure {
+    IO {
       stripes
         .dataIntervals
         .foldMap {
-          case TimeSeriesType.DataIntervals(from, to, ValueType.Stripes(stripeType, _)) =>
+          case dataInterval @ TimeSeriesType.DataIntervals(from, to, ValueType.Stripes(stripeType, _)) =>
             val reading =
               stripeType.toUpperCase match {
                 case "AWAY" =>
@@ -131,7 +127,6 @@ object ReportConverter:
                   TadoReading.build()
               }
 
-            println(s"TadoDataStore($from, $to, $reading)")
             TadoDataStore(from, to, reading)
         }
     }

@@ -110,8 +110,24 @@ class TimeSlotsSpecs extends AnyFlatSpecLike with Matchers:
     actual shouldBe expected
   }
 
-  it should "add a ime Span value to multiple Time Slots, including the from-time" in {
-    val value1 = (odt"2024-02-02T11:16:21Z", odt"2024-02-02T11:30:00Z", 3)
+  it should "add a time Span value to a single Time Slots, including the from-time and excluding the to-time" in {
+    val value1 = (odt"2024-02-02T11:15:00Z", odt"2024-02-02T11:20:00Z", 3)
+
+    val actual =
+      TimeSlots[Int](5.minutes)
+        .add.tupled(value1)
+        .toRawMap
+
+    val expected =
+      TreeMap(
+        odt"2024-02-02T11:15:00Z" -> timeSpanValues(value1),
+      )
+
+    actual shouldBe expected
+  }
+
+  it should "add a time Span value to multiple Time Slots, including the from-time and excluding the to-time" in {
+    val value1 = (odt"2024-02-02T11:15:00Z", odt"2024-02-02T11:25:00Z", 3)
 
     val actual =
       TimeSlots[Int](5.minutes)
@@ -122,8 +138,26 @@ class TimeSlotsSpecs extends AnyFlatSpecLike with Matchers:
       TreeMap(
         odt"2024-02-02T11:15:00Z" -> timeSpanValues(value1),
         odt"2024-02-02T11:20:00Z" -> timeSpanValues(value1),
-        odt"2024-02-02T11:25:00Z" -> timeSpanValues(value1),
-        odt"2024-02-02T11:30:00Z" -> timeSpanValues(value1),
+      )
+
+    actual shouldBe expected
+  }
+
+  it should "add a time Span value to multiple Time Slots, including the from-time and excluding the to-time, on disconnected time slots" in {
+    val value1 = (odt"2024-02-02T11:15:00Z", odt"2024-02-02T11:25:00Z", 3)
+    val value2 = (odt"2024-02-02T11:30:00Z", odt"2024-02-02T11:35:00Z", 3)
+
+    val actual =
+      TimeSlots[Int](5.minutes)
+        .add.tupled(value1)
+        .add.tupled(value2)
+        .toRawMap
+
+    val expected =
+      TreeMap(
+        odt"2024-02-02T11:15:00Z" -> timeSpanValues(value1),
+        odt"2024-02-02T11:20:00Z" -> timeSpanValues(value1),
+        odt"2024-02-02T11:30:00Z" -> timeSpanValues(value2),
       )
 
     actual shouldBe expected
