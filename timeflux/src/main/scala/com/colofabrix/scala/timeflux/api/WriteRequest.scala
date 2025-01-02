@@ -9,4 +9,5 @@ final case class WriteRequest(
   bucket: String,
   orgID: Option[String],
   precision: TimePrecision,
+  batchWrites: Option[Int]
 ) derives UrlParamsEncoder

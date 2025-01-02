@@ -11,8 +11,13 @@ import com.colofabrix.scala.tado4s.api.DayReportResponse
 import com.colofabrix.scala.tado4s.api.DayReportResponse.*
 import com.colofabrix.scala.tado4s.api.DayReportResponse.ValueType.*
 import java.time.OffsetDateTime
+import org.typelevel.log4cats.Logger
+import org.typelevel.log4cats.slf4j.Slf4jLogger
 
 object ReportConverter:
+
+  implicit private val logger: Logger[IO] =
+    Slf4jLogger.getLogger[IO]
 
   def convert(room: String, report: DayReportResponse): IO[Vector[TadoReading]] =
     val getters =
@@ -107,26 +112,40 @@ object ReportConverter:
     }
 
   private def getInfoFromStripes(stripes: Measure.DataIntervals[ValueType.Stripes]): IO[TadoDataStore] =
-    IO {
-      stripes
-        .dataIntervals
-        .foldMap {
-          case dataInterval @ TimeSeriesType.DataIntervals(from, to, ValueType.Stripes(stripeType, _)) =>
-            val reading =
-              stripeType.toUpperCase match {
-                case "AWAY" =>
-                  TadoReading.build(atHome = Some(false), windowOpen = Some(false), manualSet = Some(false))
-                case "HOME" =>
-                  TadoReading.build(atHome = Some(true), windowOpen = Some(false), manualSet = Some(false))
-                case "OPEN_WINDOW_DETECTED" =>
-                  TadoReading.build(atHome = Some(true), windowOpen = Some(true), manualSet = Some(false))
-                case "OVERLAY_ACTIVE" =>
-                  TadoReading.build(atHome = Some(true), windowOpen = Some(false), manualSet = Some(true))
-                case unknown =>
-                  println(s" *** Unknown stripe type: '$unknown'")
-                  TadoReading.build()
+    stripes
+      .dataIntervals
+      .foldMap {
+        case dataInterval @ TimeSeriesType.DataIntervals(from, to, ValueType.Stripes(stripeType, _)) =>
+          stripeType.toUpperCase match {
+            case "AWAY" =>
+              IO {
+                val reading = TadoReading.build(atHome = Some(false), windowOpen = Some(false), manualSet = Some(false))
+                TadoDataStore(from, to, reading)
               }
-
-            TadoDataStore(from, to, reading)
-        }
-    }
+            case "HOME" =>
+              IO {
+                val reading = TadoReading.build(atHome = Some(true), windowOpen = Some(false), manualSet = Some(false))
+                TadoDataStore(from, to, reading)
+              }
+            case "OPEN_WINDOW_DETECTED" =>
+              IO {
+                val reading = TadoReading.build(atHome = Some(true), windowOpen = Some(true), manualSet = Some(false))
+                TadoDataStore(from, to, reading)
+              }
+            case "OVERLAY_ACTIVE" =>
+              IO {
+                val reading = TadoReading.build(atHome = Some(true), windowOpen = Some(false), manualSet = Some(true))
+                TadoDataStore(from, to, reading)
+              }
+            case "MEASURING_DEVICE_DISCONNECTED" =>
+              IO {
+                val reading = TadoReading.build(atHome = Some(true), windowOpen = Some(false), manualSet = Some(true))
+                TadoDataStore(from, to, reading)
+              }
+            case unknown =>
+              logger.warn(s" *** Unknown stripe type: '$unknown'") >>
+              IO {
+                TadoDataStore(from, to, TadoReading.build())
+              }
+          }
+      }

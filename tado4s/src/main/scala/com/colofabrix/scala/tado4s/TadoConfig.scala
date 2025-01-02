@@ -1,34 +1,35 @@
 package com.colofabrix.scala.tado4s
 
-import io.github.arainko.ducktape.*
 import org.http4s.Uri
 import pureconfig.*
 import pureconfig.generic.derivation.default.*
+import scala.concurrent.duration.*
 
 final case class TadoConfig(
   apiBase: Uri,
   apiAuth: Uri,
-  clientSecret: String
-)
+  clientSecret: String,
+  maxRetries: Int,
+  maxRetryTime: FiniteDuration,
+) derives ConfigReader
 
 /**
  * Tado4s configuration
  */
 object TadoConfig:
 
-  private case class TadoReaderConfig(
-    apiBase: String,
-    apiAuth: String,
-    clientSecret: String
-  ) derives ConfigReader
+  given ConfigReader[FiniteDuration] =
+    ConfigReader.fromString:
+      ConvertHelpers.optF: str =>
+        Some(Duration(str)).collect { case fd: FiniteDuration => fd }
+
+  given ConfigReader[Uri] =
+    ConfigReader.fromString:
+      ConvertHelpers.tryF: str =>
+        Uri.fromString(str).toTry
 
   val config: TadoConfig =
     ConfigSource
       .default
       .at("tado")
-      .loadOrThrow[TadoReaderConfig]
-      .into[TadoConfig]
-      .transform(
-        Field.computed(_.apiBase, c => Uri.unsafeFromString(c.apiBase)),
-        Field.computed(_.apiAuth, c => Uri.unsafeFromString(c.apiAuth))
-      )
+      .loadOrThrow[TadoConfig]

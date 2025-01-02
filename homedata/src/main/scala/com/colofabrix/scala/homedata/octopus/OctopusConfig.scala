@@ -25,7 +25,7 @@ object OctopusConfig:
       .loadOrThrow[OctopusConfig]
 
   val PageSize: Int =
-    500
+    100
 
   val ElectricityConsumptionUrl: Uri =
     uri"${config.baseUrl}/v1/electricity-meter-points/${config.electricityMpan}/meters/${config.electricitySerial}/consumption/"

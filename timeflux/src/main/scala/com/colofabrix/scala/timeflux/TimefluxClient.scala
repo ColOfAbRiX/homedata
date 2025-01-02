@@ -14,7 +14,7 @@ import org.http4s.circe.CirceEntityDecoder.*
 import org.http4s.circe.CirceEntityEncoder.*
 import org.http4s.client.Client
 import org.http4s.client.dsl.Http4sClientDsl
-import org.http4s.client.middleware.Logger
+import org.http4s.client.middleware.*
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.Method.*
 import org.typelevel.log4cats.SelfAwareStructuredLogger
@@ -130,10 +130,25 @@ final class TimefluxClient[F[_]: Async] private (
       baseApiUrl     <- getApiUrl()
       client         <- getLoggedClient()
       requestWithOrg <- request.withOrgId(_.orgID, x => request.copy(orgID = x))
-      result         <- sendWriteRequest(baseApiUrl, client, requestWithOrg, values)
+      result         <- batchedWrite(baseApiUrl, client, requestWithOrg, values)
     yield result
 
-  private def sendWriteRequest(url: Uri, client: Client[F], request: WriteRequest, values: StreamF[Measure]): F[Unit] =
+  private def batchedWrite(url: Uri, client: Client[F], request: WriteRequest, values: StreamF[Measure]): F[Unit] =
+    request.batchWrites match {
+      case Some(batchSize) =>
+        logger.debug(s"Batching $batchSize InfluxDB measuers into ${config.concurrentWrites} parallel writes") >>
+        values
+          .chunkN(batchSize, allowFewer = true)
+          .parEvalMapUnordered(config.concurrentWrites) { chunk =>
+            sendWriteRequest(url, client, request, fs2.Stream.chunk(chunk))
+          }
+          .compile
+          .drain
+      case None =>
+        sendWriteRequest(url, client, request, values)
+    }
+
+  private def sendWriteRequest(url: Uri, client: Client[F], request: WriteRequest, values: => StreamF[Measure]): F[Unit] =
     val headers =
       Headers(
         "Content-Type" -> "text/plain; charset=utf-8",
@@ -145,9 +160,7 @@ final class TimefluxClient[F[_]: Async] private (
     val body =
       values
         .map(_.toLineProtocol(request.precision).value.trim + "\n")
-        .evalTap { line =>
-          logger.trace(line.dropRight(1))
-        }
+        .evalTap(line => logger.trace(line.dropRight(1)))
         .through(fs2.text.utf8.encode)
 
     val postRequest =
@@ -158,6 +171,7 @@ final class TimefluxClient[F[_]: Async] private (
         headers = headers,
       )
 
+    logger.debug(s"Sending InfluxDB request $request") >>
     client
       .stream(postRequest)
       .flatMap(handleClientStreamError)
@@ -196,9 +210,15 @@ final class TimefluxClient[F[_]: Async] private (
       }
 
   private def buildHttpClient(creds: TimefluxCredentials): Client[F] =
-    Logger.colored[F](logBody = true, logHeaders = true):
-      TimefluxAuthenticatedClient[F](creds.token, creds.orgId):
-        httpClient
+    val retryPolicy =
+      RetryPolicy[F](
+        backoff = RetryPolicy.exponentialBackoff(config.maxRetryTime, config.maxRetries)
+      )
+
+    Retry(retryPolicy):
+      Logger.colored[F](logBody = true, logHeaders = true):
+        TimefluxAuthenticatedClient[F](creds.token, creds.orgId):
+          httpClient
 
   //  Error handlers  //
 

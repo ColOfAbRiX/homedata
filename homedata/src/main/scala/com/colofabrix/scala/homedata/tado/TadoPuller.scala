@@ -1,6 +1,6 @@
 package com.colofabrix.scala.homedata.tado
 
-import cats.effect.IO
+import cats.effect.{ IO, Temporal }
 import cats.implicits.given
 import com.colofabrix.scala.homedata.tado.readings.*
 import com.colofabrix.scala.tado4s.api.HomeZonesResponse
@@ -21,9 +21,14 @@ class TadoPuller private (tadoClient: Tado4sClient[IO], state: TadoPuller.TadoSt
     fs2.Stream
       .unfold(from.toLocalDate)(generateNextDate(to))
       .flatMap(collectRoomIds)
-      .through(Throttler.throttle(TadoConfig.config.maxSpamPerSecond, 1.second, Throttler.Shaping))
+      .through(throttle)
       .map(pullRoom)
       .parJoinUnbounded
+
+  private def throttle[F[_]: Temporal, A] =
+    val elements = Math.max(TadoConfig.config.requestsPerSec, 1).toInt
+    val duration = Math.max(1.0 / TadoConfig.config.requestsPerSec, 1).toInt
+    Throttler.throttle[F, A](elements, duration.second, Throttler.Shaping)
 
   private def generateNextDate(to: OffsetDateTime)(current: LocalDate): Option[(LocalDate, LocalDate)] =
     if (current.isBefore(to.toLocalDate)) then

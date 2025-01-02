@@ -6,7 +6,7 @@ import pureconfig.generic.derivation.default.*
 final case class TadoConfig(
   username: String,
   password: String,
-  maxSpamPerSecond: Int
+  requestsPerSec: Double,
 ) derives ConfigReader
 
 object TadoConfig:

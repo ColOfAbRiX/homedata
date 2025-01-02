@@ -16,9 +16,9 @@ object Octopus:
   implicit private val logger: Logger[IO] =
     Slf4jLogger.getLogger[IO]
 
-  def pullReadings(from: OffsetDateTime): Stream[IO, OctopusReading] =
-    val electricityReadings = pullPaged(OctopusElectricity.pullPage(from))
-    val gasReadings         = pullPaged(OctopusGas.pullPage(from))
+  def pullReadings(from: OffsetDateTime, to: OffsetDateTime): Stream[IO, OctopusReading] =
+    val electricityReadings = pullPaged(OctopusElectricity.pull(Some(from), Some(to), _, OctopusConfig.PageSize))
+    val gasReadings         = pullPaged(OctopusGas.pull(Some(from), Some(to), _, OctopusConfig.PageSize))
 
     (electricityReadings merge gasReadings)
 
@@ -30,6 +30,6 @@ object Octopus:
           case (readings, false) => (readings, None)
         }
       }
-      .through(Throttler.throttle(1, 1.second, Throttler.Shaping))
+      .through(Throttler.throttle(1, 2.second, Throttler.Shaping))
       .flatMap(Stream.chunk)
-      .evalTap(reading => logger.debug(s"Octopus reading: $reading"))
+      .evalTap(reading => logger.trace(s"Octopus reading: $reading"))

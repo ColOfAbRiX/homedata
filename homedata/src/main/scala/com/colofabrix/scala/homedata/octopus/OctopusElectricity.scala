@@ -5,13 +5,15 @@ import fs2.Chunk
 import java.time.*
 import org.json4s.*
 import org.json4s.native.JsonMethods.*
+import org.typelevel.log4cats.Logger
+import org.typelevel.log4cats.slf4j.Slf4jLogger
 import sttp.client4.*
 import sttp.client4.httpclient.HttpClientSyncBackend
 
 object OctopusElectricity:
 
-  def pullPage(fromDate: OffsetDateTime)(pageNumber: Int): IO[(Chunk[ElectricityReading], Boolean)] =
-    pull(Some(fromDate), None, pageNumber, OctopusConfig.PageSize)
+  implicit private val logger: Logger[IO] =
+    Slf4jLogger.getLogger[IO]
 
   def pull(
     fromDate: Option[OffsetDateTime],
@@ -26,7 +28,8 @@ object OctopusElectricity:
         .addParam("page", pageNumber.toString)
         .addParam("page_size", pageSize.toString)
 
-    IO {
+    logger.debug(s"Requesting Octpus ELECTRICITY page $pageNumber") >>
+    IO.blocking {
       basicRequest
         .get(endpointUrl)
         .auth
