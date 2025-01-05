@@ -6,9 +6,7 @@ import cats.implicits.given
 import com.colofabrix.scala.cuttlefish.api.*
 import com.colofabrix.scala.cuttlefish.CuttlefishClient.*
 import fs2.io.net.Network
-import java.time.LocalDate
 import java.time.OffsetDateTime
-import java.time.temporal.ChronoUnit
 import org.http4s.*
 import org.http4s.circe.CirceEntityDecoder.*
 import org.http4s.client.Client
@@ -21,7 +19,9 @@ import org.typelevel.log4cats.slf4j.Slf4jLogger
 import scala.concurrent.duration.*
 
 /**
- * Cuttlefish Client for Scala
+ * Octopus Client for Scala
+ *
+ * Reference: https://www.guylipman.com/octopus/api_guide.html
  */
 final class CuttlefishClient[F[_]: Async] private (
   httpClient: Client[F],
@@ -35,157 +35,74 @@ final class CuttlefishClient[F[_]: Async] private (
   /**
    * Logs into the Octopus service
    */
-  def login(username: String, password: String): F[Unit] =
-    logger.debug(s"Login") >>
-    setCredentials(username, password) >>
-    loginRequest()
+  def login(apiKey: String): F[Unit] =
+    logger.debug("Login") >>
+    setApiKey(apiKey)
 
   /**
-   * Logs out the Octopus service
+   * Logs out the Tado service
    */
   def logout(): F[Unit] =
-    logger.debug(s"Logout") >>
-    clearCredentials() >>
-    clearAuthToken() >>
+    logger.debug("Logout") >>
+    clearApiKey() >>
     clearAuthenticatedClient()
 
-  /**
-   * Information about the Octopus account
-   */
-  def getAccountInfo(): F[AccountResponse] =
-    for
-      _      <- logger.debug(s"Get Account Info")
-      client <- withAuthClient()
-      request = GET(config.apiBase / "me")
-      result <- client.expect[AccountResponse](request)
-    yield result
+  def meterConsumption(request: MeterConsumptionRequest): F[MeterConsumptionResponse] =
+    logger.debug(s"Called meterConsumption() with $request") >>
+    withAuthClient().flatMap: client =>
+      val url =
+        (config.apiBase / s"${request.product.value}-meter-points" / request.meterPointNumber / "meters" / request.serial / "consumption")
+          .withOptionQueryParam("period_from", request.from)
+          .withOptionQueryParam("period_to", request.to)
+          .withOptionQueryParam("page_size", request.pageSize)
+          .withOptionQueryParam("order_by", request.orderBy)
 
-  //  Internal operations  //
+      client
+        .expectOr[MeterConsumptionResponse](GET(url))(handleClientExpectError)
+        .flatTap: result =>
+          logger.trace(s"Response for meterConsumption(): $result")
 
-  private def loginRequest(): F[Unit] =
-    getCredentials().flatMap: credentials =>
-      val requestBody =
-        UrlForm(
-          "client_id"     -> "Cuttlefish-web-app",
-          "grant_type"    -> "password",
-          "scope"         -> "home.user",
-          "username"      -> credentials.username,
-          "password"      -> credentials.password,
-          "client_secret" -> config.clientSecret,
-        )
-
-      val postRequest = POST(requestBody, config.apiAuth / "oauth" / "token")
-
-      httpClient
-        .expect[AuthResponse](postRequest)
-        .flatMap { authResponse =>
-          val expiry    = OffsetDateTime.now().plus(authResponse.expires_in.toLong, ChronoUnit.SECONDS)
-          val authToken = CuttlefishAuthToken(authResponse.access_token, expiry)
-          setAuthToken(authToken)
-        }
-        .adaptError { error =>
-          CuttlefishError("Error while logging in", Some(error))
-        }
-
-  private def refreshTokenRequest(): F[Unit] =
-    val requestBody =
-      UrlForm(
-        "grant_type"    -> "refresh_token",
-        "refresh_token" -> "def",
-        "client_id"     -> "Cuttlefish-web-app",
-        "scope"         -> "home.user",
-        "client_secret" -> config.clientSecret,
-      )
-
-    val postRequest = POST(requestBody, config.apiAuth)
-
-    httpClient
-      .expect[AuthResponse](postRequest)
-      .flatMap { authResponse =>
-        val expiry    = OffsetDateTime.now().plus(authResponse.expires_in.toLong, ChronoUnit.SECONDS)
-        val authToken = CuttlefishAuthToken(authResponse.access_token, expiry)
-        setAuthToken(authToken)
-      }
-      .handleErrorWith { error =>
-        logger.debug(error)("Refresh token failed with error") >>
-        logger.warn("Unauthenticated, trying to login...") >>
-        loginRequest()
-      }
-      .onError { error =>
-        logger.error(error)("Error while logging in")
-      }
-      .adaptError { error =>
-        CuttlefishError("Error while refreshing API token", Some(error))
-      }
-
-  private def withAuthClient[A](retries: Int = 1): F[Client[F]] =
+  private def withAuthClient[A](): F[Client[F]] =
     logger.trace("Getting Authenticated Client") >>
-    getAuthToken().flatMap:
-      case None if retries <= 0 =>
-        Async[F].raiseError(CuttlefishError("Cuttlefish could not log in"))
-      case None =>
-        Async[F].raiseError(CuttlefishError("Cuttlefish is not logged in"))
-      case Some(authToken) if isTokenExpired(authToken) =>
-        logger.info("Cuttlefish token expired, getting a new one") >>
-        refreshTokenRequest() >> withAuthClient(retries - 1)
-      case Some(authToken) =>
-        getAuthenticatedClient().flatMap:
-          case Some(client) =>
-            Async[F].pure(client)
-          case None =>
-            for
-              _      <- setAuthenticatedClient(buildHttpClient(authToken))
-              _      <- logger.debug("New Octopus authenticated client")
-              result <- withAuthClient(retries - 1)
-            yield result
+    ???
 
-  private def buildHttpClient(authToken: CuttlefishAuthToken): Client[F] =
-    Logger.colored[F](logBody = true, logHeaders = true):
-      CuttlefishAuthenticatedClient[F](authToken.bearerToken):
-        httpClient
+  // private def buildHttpClient(): Client[F] =
+  //   Logger.colored[F](logBody = true, logHeaders = true):
+  //     CuttlefishAuthenticatedClient[F](config.account):
+  //       httpClient
 
-  private def isTokenExpired(authToken: CuttlefishAuthToken): Boolean =
-    authToken.expiry.minus(5, ChronoUnit.SECONDS).isBefore(OffsetDateTime.now())
+  //  Error handlers  //
+
+  private def handleClientExpectError(response: Response[F]): F[Throwable] =
+    response
+      .as[String]
+      .map { body =>
+        CuttlefishRequestError("Octopus Request Error", body)
+      }
 
   //  State management  //
 
-  private def getCredentials(): F[CuttlefishCredentials] =
-    atomicState.get.flatMap: state =>
-      state.credentials match
-        case Some(credentials) => Async[F].pure(credentials)
-        case None              => Async[F].raiseError(CuttlefishError("No Octopus credentials provided"))
+  // private def getApiKey(): F[Option[String]] =
+  //   atomicState.get.map:
+  //     _.apiKey
 
-  private def getAuthenticatedClient(): F[Option[Client[F]]] =
-    atomicState.get.map:
-      _.authenticatedClient
-
-  private def setAuthenticatedClient(client: Client[F]): F[Unit] =
+  private def setApiKey(apiKey: String): F[Unit] =
     atomicState.update:
-      _.copy(authenticatedClient = Some(client))
+      _.copy(apiKey = Some(apiKey))
+
+  private def clearApiKey(): F[Unit] =
+    atomicState.update:
+      _.copy(apiKey = None)
 
   private def clearAuthenticatedClient(): F[Unit] =
     atomicState.update:
       _.copy(authenticatedClient = None)
 
-  private def setAuthToken(authToken: CuttlefishAuthToken): F[Unit] =
-    atomicState.update:
-      _.copy(authToken = Some(authToken))
+  //  Givens  //
 
-  private def getAuthToken(): F[Option[CuttlefishAuthToken]] =
-    atomicState.get.map:
-      _.authToken
-
-  private def clearAuthToken(): F[Unit] =
-    atomicState.update:
-      _.copy(authToken = None)
-
-  private def setCredentials(username: String, password: String): F[Unit] =
-    atomicState.update:
-      _.copy(credentials = Some(CuttlefishCredentials(username = username, password = password)))
-
-  private def clearCredentials(): F[Unit] =
-    atomicState.update:
-      _.copy(credentials = None)
+  private given QueryParamEncoder[OffsetDateTime] with
+    def encode(value: OffsetDateTime): QueryParameterValue =
+      QueryParameterValue(value.toString)
 
 /**
  * Cuttlefish Client for Scala
@@ -193,30 +110,26 @@ final class CuttlefishClient[F[_]: Async] private (
 object CuttlefishClient:
 
   final private case class CuttlefishClientState[F[_]](
-    credentials: Option[CuttlefishCredentials] = None,
+    apiKey: Option[String],
     authenticatedClient: Option[Client[F]] = None,
   )
 
-  final private case class CuttlefishCredentials(
-    username: String,
-    password: String,
-  )
-
-  /** Creates a new instance of Cuttlefish client using the given client */
-  def apply[F[_]: Async](maybeConfig: Option[CuttlefishConfig], httpClient: Client[F]): F[CuttlefishClient[F]] =
-    for
-      initialState <- AtomicCell[F].of(CuttlefishClientState[F](None, None, None))
-      config        = maybeConfig.getOrElse(CuttlefishConfig.config)
-      client        = new CuttlefishClient[F](httpClient, config, initialState)
-    yield client
-
   /** Creates a new instance of Cuttlefish client using http4s Ember Client */
-  def apply[F[_]: Async: Network](maybeConfig: Option[CuttlefishConfig]): F[CuttlefishClient[F]] =
+  def apply[F[_]: Async: Network](maybeConfig: Option[CuttlefishConfig] = None): F[CuttlefishClient[F]] =
     EmberClientBuilder
       .default[F]
       .withTimeout(30.seconds)
       .build
       .allocated
       .flatMap {
-        case (httpClient, _) => CuttlefishClient(maybeConfig, httpClient)
+        case (httpClient, _) =>
+          val config = maybeConfig.getOrElse(CuttlefishConfig.config)
+          CuttlefishClient(config, httpClient)
       }
+
+  private def apply[F[_]: Async](config: CuttlefishConfig, httpClient: Client[F]): F[CuttlefishClient[F]] =
+    for
+      initialState    <- AtomicCell[F].of(CuttlefishClientState[F](None))
+      loggedHttpClient = Logger.colored[F](logBody = true, logHeaders = true)(httpClient)
+      client           = new CuttlefishClient[F](loggedHttpClient, config, initialState)
+    yield client

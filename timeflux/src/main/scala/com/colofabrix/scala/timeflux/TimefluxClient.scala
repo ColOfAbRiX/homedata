@@ -44,7 +44,7 @@ final class TimefluxClient[F[_]: Async] private (
     setCredentials(orgId, token)
 
   /**
-   * Logs out the Tado service
+   * Logs out the Timeflux service
    */
   def logout(): F[Unit] =
     logger.debug("Logout") >>
@@ -56,11 +56,12 @@ final class TimefluxClient[F[_]: Async] private (
    */
   def listBuckets(request: ListBucketRequest): F[ListBucketsResponse] =
     for
-      _          <- logger.debug("List Buckets")
+      _          <- logger.debug(s"Called listBuckets() with $request")
       baseApiUrl <- getApiUrl()
-      client     <- getLoggedClient()
+      client     <- withAuthClient()
       requestUri  = (baseApiUrl / "buckets").withQueryParams(request.toQueryParams)
       result     <- client.expectOr[ListBucketsResponse](GET(requestUri))(handleClientExpectError)
+      _          <- logger.trace(s"Response for listBuckets(): $result")
     yield result
 
   /**
@@ -68,12 +69,13 @@ final class TimefluxClient[F[_]: Async] private (
    */
   def createBucket(request: CreateBucketRequest): F[CreateBucketResponse] =
     for
-      _          <- logger.debug("Create Bucket")
+      _          <- logger.debug(s"Called createBucket() with $request")
       baseApiUrl <- getApiUrl()
-      client     <- getLoggedClient()
+      client     <- withAuthClient()
       reqWithId  <- request.withOrgId(_.orgID, x => request.copy(orgID = x))
       requestUri  = baseApiUrl / "buckets"
       result     <- client.expectOr[CreateBucketResponse](POST(reqWithId, requestUri))(handleClientExpectError)
+      _          <- logger.trace(s"Response for createBucket(): $result")
     yield result
 
   /**
@@ -81,18 +83,19 @@ final class TimefluxClient[F[_]: Async] private (
    */
   def deleteBucket(request: DeleteBucketRequest): F[Unit] =
     for
-      _          <- logger.debug("Delete Bucket")
+      _          <- logger.debug(s"Called deleteBucket() with $request")
       baseApiUrl <- getApiUrl()
-      client     <- getLoggedClient()
+      client     <- withAuthClient()
       requestUri  = baseApiUrl / "buckets" / request.bucketID
       result     <- client.run(DELETE(requestUri)).use(handleClientRunError)
+      _          <- logger.trace(s"Response for deleteBucket(): $result")
     yield result
 
   /**
    * Checks if a bucket exists and, if it doesn't, it creates it
    */
   def createBucketIfMissing(request: CreateBucketRequest): F[Option[CreateBucketResponse]] =
-    logger.debug("Create Bucket If Missing") >>
+    logger.debug(s"Called createBucketIfMissing() with $request") >>
     listBuckets(ListBucketRequest(name = Some(request.name)))
       .attempt
       .flatMap {
@@ -111,16 +114,17 @@ final class TimefluxClient[F[_]: Async] private (
    */
   def writeData[A: TimefluxSerializable](request: WriteRequest, values: StreamF[A]): F[Unit] =
     for
-      _       <- logger.debug("Write Data")
+      _       <- logger.debug(s"Called writeData() with $request")
       measures = values.through(TimefluxSerializable.toApiMeasureStream)
       result  <- writeStream(request, measures)
+      _       <- logger.trace(s"Response for writeData(): $result")
     yield result
 
   /**
    * Writes a stream of TimefluxSerializable values in a bucket
    */
   def writeMeasures(request: WriteRequest, values: StreamF[Measure]): F[Unit] =
-    logger.debug("Write Measures") >>
+    logger.debug(s"Called writeMeasures() with $request") >>
     writeStream(request, values)
 
   //  Internal operations  //
@@ -128,7 +132,7 @@ final class TimefluxClient[F[_]: Async] private (
   private def writeStream(request: WriteRequest, values: StreamF[Measure]): F[Unit] =
     for
       baseApiUrl     <- getApiUrl()
-      client         <- getLoggedClient()
+      client         <- withAuthClient()
       requestWithOrg <- request.withOrgId(_.orgID, x => request.copy(orgID = x))
       result         <- batchedWrite(baseApiUrl, client, requestWithOrg, values)
     yield result
@@ -136,12 +140,11 @@ final class TimefluxClient[F[_]: Async] private (
   private def batchedWrite(url: Uri, client: Client[F], request: WriteRequest, values: StreamF[Measure]): F[Unit] =
     request.batchWrites match {
       case Some(batchSize) =>
-        logger.debug(s"Batching $batchSize InfluxDB measuers into ${config.concurrentWrites} parallel writes") >>
+        logger.debug(s"Batching $batchSize InfluxDB measures into ${config.concurrentWrites} parallel writes") >>
         values
           .chunkN(batchSize, allowFewer = true)
-          .parEvalMapUnordered(config.concurrentWrites) { chunk =>
+          .parEvalMapUnordered(config.concurrentWrites): chunk =>
             sendWriteRequest(url, client, request, fs2.Stream.chunk(chunk))
-          }
           .compile
           .drain
       case None =>
@@ -178,7 +181,7 @@ final class TimefluxClient[F[_]: Async] private (
       .compile
       .drain
 
-  private def getLoggedClient[A](): F[Client[F]] =
+  private def withAuthClient[A](): F[Client[F]] =
     getAuthenticatedClient().flatMap {
       case None =>
         getCredentials().flatMap {
@@ -187,11 +190,12 @@ final class TimefluxClient[F[_]: Async] private (
           case Some(creds) =>
             for
               _      <- setAuthenticatedClient(buildHttpClient(creds))
-              _      <- logger.debug("New Timeflux authenticated client")
-              result <- getLoggedClient()
+              _      <- logger.debug("Creating new Timeflux authenticated client")
+              result <- withAuthClient()
             yield result
         }
       case Some(client) =>
+        logger.trace(s"Returning Timeflux authenticated client") >>
         Async[F].pure(client)
     }
 
@@ -212,7 +216,7 @@ final class TimefluxClient[F[_]: Async] private (
   private def buildHttpClient(creds: TimefluxCredentials): Client[F] =
     val retryPolicy =
       RetryPolicy[F](
-        backoff = RetryPolicy.exponentialBackoff(config.maxRetryTime, config.maxRetries)
+        backoff = RetryPolicy.exponentialBackoff(config.maxRetryTime, config.maxRetries),
       )
 
     Retry(retryPolicy):
@@ -253,15 +257,15 @@ final class TimefluxClient[F[_]: Async] private (
 
   private def getAuthenticatedClient(): F[Option[Client[F]]] =
     atomicState.get.map:
-      _.useAuthClient
+      _.authenticatedClient
 
   private def setAuthenticatedClient(client: Client[F]): F[Unit] =
     atomicState.update:
-      _.copy(useAuthClient = Some(client))
+      _.copy(authenticatedClient = Some(client))
 
   private def clearAuthenticatedClient(): F[Unit] =
     atomicState.update:
-      _.copy(useAuthClient = None)
+      _.copy(authenticatedClient = None)
 
   private def getApiUrl(): F[Uri] =
     atomicState.get.flatMap:
@@ -279,7 +283,7 @@ object TimefluxClient:
 
   final private case class TimefluxClientState[F[_]](
     credentials: Option[TimefluxCredentials] = None,
-    useAuthClient: Option[Client[F]] = None,
+    authenticatedClient: Option[Client[F]] = None,
     serverUrl: Option[Uri] = None,
   )
 
@@ -289,29 +293,36 @@ object TimefluxClient:
   )
 
   /**
-   * Creates a new instance of TimefluxClient client using the given client
-   */
-  def apply[F[_]: Async](clientConfig: TimefluxClientConfig, httpClient: Client[F]): F[TimefluxClient[F]] =
-    AtomicCell[F]
-      .of {
-        TimefluxClientState[F](
-          serverUrl = Some(clientConfig.serverUrl),
-          credentials = Some(TimefluxCredentials(clientConfig.authToken, clientConfig.orgId)),
-        )
-      }
-      .map { initialAtomicState =>
-        new TimefluxClient[F](httpClient, TimefluxConfig.config, initialAtomicState)
-      }
-
-  /**
    * Creates a new instance of TimefluxClient client using http4s Ember Client
    */
-  def apply[F[_]: Async: Network](clientConfig: TimefluxClientConfig): F[TimefluxClient[F]] =
+  def apply[F[_]: Async: Network](
+    clientConfig: TimefluxClientConfig,
+    maybeConfig: Option[TimefluxConfig] = None,
+  ): F[TimefluxClient[F]] =
     EmberClientBuilder
       .default[F]
       .withTimeout(30.seconds)
       .build
       .allocated
       .flatMap {
-        case (httpClient, _) => TimefluxClient(clientConfig, httpClient)
+        case (httpClient, _) =>
+          val config = maybeConfig.getOrElse(TimefluxConfig.config)
+          TimefluxClient(config, clientConfig, httpClient)
       }
+
+  private def apply[F[_]: Async](
+    config: TimefluxConfig,
+    clientConfig: TimefluxClientConfig,
+    httpClient: Client[F],
+  ): F[TimefluxClient[F]] =
+    for
+      atomicState     <- AtomicCell[F].of(initialState[F](clientConfig))
+      loggedHttpClient = Logger.colored[F](logBody = true, logHeaders = true)(httpClient)
+      client           = new TimefluxClient[F](loggedHttpClient, config, atomicState)
+    yield client
+
+  private def initialState[F[_]](clientConfig: TimefluxClientConfig): TimefluxClientState[F] =
+    TimefluxClientState[F](
+      serverUrl = Some(clientConfig.serverUrl),
+      credentials = Some(TimefluxCredentials(clientConfig.authToken, clientConfig.orgId)),
+    )

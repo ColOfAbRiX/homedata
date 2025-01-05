@@ -9,7 +9,6 @@ import scala.concurrent.duration.*
  */
 final case class TimefluxConfig(
   apiBase: String,
-  devMode: Boolean,
   concurrentWrites: Int,
   maxRetries: Int,
   maxRetryTime: FiniteDuration,

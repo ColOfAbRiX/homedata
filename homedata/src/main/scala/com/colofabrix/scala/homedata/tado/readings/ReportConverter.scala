@@ -69,9 +69,17 @@ object ReportConverter:
         .dataIntervals
         .foldMap {
           case TimeSeriesType.DataIntervals(from, to, ValueType.HeatingSetting(_, _, Some(Temperature(temp, _)))) =>
-            TadoDataStore(from, to, TadoReading.build(setTemperature = Some(temp)))
-          case TimeSeriesType.DataIntervals(_, _, ValueType.HeatingSetting(_, _, None)) =>
-            TadoDataStore()
+            TadoDataStore(
+              from = from,
+              to = to,
+              reading = TadoReading.build(setTemperature = Some(temp), isOff = Some(false))
+            )
+          case TimeSeriesType.DataIntervals(from, to, ValueType.HeatingSetting(_, _, None)) =>
+            TadoDataStore(
+              from = from,
+              to = to,
+              reading = TadoReading.build(isOff = Some(true))
+            )
         }
     }
 
@@ -116,36 +124,24 @@ object ReportConverter:
       .dataIntervals
       .foldMap {
         case dataInterval @ TimeSeriesType.DataIntervals(from, to, ValueType.Stripes(stripeType, _)) =>
-          stripeType.toUpperCase match {
-            case "AWAY" =>
-              IO {
-                val reading = TadoReading.build(atHome = Some(false), windowOpen = Some(false), manualSet = Some(false))
-                TadoDataStore(from, to, reading)
-              }
-            case "HOME" =>
-              IO {
-                val reading = TadoReading.build(atHome = Some(true), windowOpen = Some(false), manualSet = Some(false))
-                TadoDataStore(from, to, reading)
-              }
-            case "OPEN_WINDOW_DETECTED" =>
-              IO {
-                val reading = TadoReading.build(atHome = Some(true), windowOpen = Some(true), manualSet = Some(false))
-                TadoDataStore(from, to, reading)
-              }
-            case "OVERLAY_ACTIVE" =>
-              IO {
-                val reading = TadoReading.build(atHome = Some(true), windowOpen = Some(false), manualSet = Some(true))
-                TadoDataStore(from, to, reading)
-              }
-            case "MEASURING_DEVICE_DISCONNECTED" =>
-              IO {
-                val reading = TadoReading.build(atHome = Some(true), windowOpen = Some(false), manualSet = Some(true))
-                TadoDataStore(from, to, reading)
-              }
-            case unknown =>
-              logger.warn(s" *** Unknown stripe type: '$unknown'") >>
-              IO {
-                TadoDataStore(from, to, TadoReading.build())
-              }
-          }
+          IO
+            .pure(stripeType.toUpperCase)
+            .flatMap {
+              case "AWAY" =>
+                IO(TadoReading.build(atHome = Some(false), windowOpen = Some(false), manualSet = Some(false)))
+              case "HOME" =>
+                IO(TadoReading.build(atHome = Some(true), windowOpen = Some(false), manualSet = Some(false)))
+              case "OPEN_WINDOW_DETECTED" =>
+                IO(TadoReading.build(atHome = Some(true), windowOpen = Some(true), manualSet = Some(false)))
+              case "OVERLAY_ACTIVE" =>
+                IO(TadoReading.build(atHome = Some(true), windowOpen = Some(false), manualSet = Some(true)))
+              case "MEASURING_DEVICE_DISCONNECTED" =>
+                IO(TadoReading.build(atHome = Some(true), windowOpen = Some(false), manualSet = Some(true)))
+              case unknown =>
+                logger.warn(s" *** Unknown stripe type: '$unknown'") >>
+                IO(TadoReading.build())
+            }
+            .map {
+              TadoDataStore(from, to, _)
+            }
       }

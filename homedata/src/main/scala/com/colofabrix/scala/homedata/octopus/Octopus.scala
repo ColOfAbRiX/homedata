@@ -1,6 +1,6 @@
 package com.colofabrix.scala.homedata.octopus
 
-import cats.effect.IO
+import cats.effect.{ IO, Temporal }
 import dev.kovstas.fs2throttler.Throttler
 import fs2.{ Chunk, Stream }
 import java.time.OffsetDateTime
@@ -30,6 +30,11 @@ object Octopus:
           case (readings, false) => (readings, None)
         }
       }
-      .through(Throttler.throttle(1, 2.second, Throttler.Shaping))
+      .through(throttle)
       .flatMap(Stream.chunk)
       .evalTap(reading => logger.trace(s"Octopus reading: $reading"))
+
+  private def throttle[F[_]: Temporal, A] =
+    val elements = Math.max(OctopusConfig.config.requestsPerSec, 1).toInt
+    val duration = Math.max(1.0 / OctopusConfig.config.requestsPerSec, 1).toInt
+    Throttler.throttle[F, A](elements, duration.second, Throttler.Shaping)

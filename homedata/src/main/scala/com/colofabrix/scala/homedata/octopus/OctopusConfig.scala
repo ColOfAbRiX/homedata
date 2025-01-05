@@ -12,7 +12,8 @@ final case class OctopusConfig(
   electricityMpan: String,
   electricitySerial: String,
   gasMprn: String,
-  gasSerial: String
+  gasSerial: String,
+  requestsPerSec: Double,
 ) derives ConfigReader
 
 object OctopusConfig:
