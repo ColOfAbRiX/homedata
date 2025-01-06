@@ -5,18 +5,22 @@ import cats.effect.std.AtomicCell
 import cats.implicits.given
 import com.colofabrix.scala.cuttlefish.api.*
 import com.colofabrix.scala.cuttlefish.CuttlefishClient.*
+import com.colofabrix.scala.cuttlefish.model.*
 import fs2.io.net.Network
 import java.time.OffsetDateTime
+import java.time.temporal.ChronoUnit
 import org.http4s.*
 import org.http4s.circe.CirceEntityDecoder.*
 import org.http4s.client.Client
 import org.http4s.client.dsl.Http4sClientDsl
+import org.http4s.client.middleware.*
 import org.http4s.client.middleware.Logger
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.Method.*
 import org.typelevel.log4cats.SelfAwareStructuredLogger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 import scala.concurrent.duration.*
+import org.http4s.Uri.Path.SegmentEncoder
 
 /**
  * Octopus Client for Scala
@@ -40,7 +44,7 @@ final class CuttlefishClient[F[_]: Async] private (
     setApiKey(apiKey)
 
   /**
-   * Logs out the Tado service
+   * Logs out the Octopus service
    */
   def logout(): F[Unit] =
     logger.debug("Logout") >>
@@ -51,7 +55,7 @@ final class CuttlefishClient[F[_]: Async] private (
     logger.debug(s"Called meterConsumption() with $request") >>
     withAuthClient().flatMap: client =>
       val url =
-        (config.apiBase / s"${request.product.value}-meter-points" / request.meterPointNumber / "meters" / request.serial / "consumption")
+        (config.apiBase / s"${request.product.value}-meter-points" / request.meterPointNumber / "meters" / request.serial / "consumption" / "")
           .withOptionQueryParam("period_from", request.from)
           .withOptionQueryParam("period_to", request.to)
           .withOptionQueryParam("page_size", request.pageSize)
@@ -64,27 +68,44 @@ final class CuttlefishClient[F[_]: Async] private (
 
   private def withAuthClient[A](): F[Client[F]] =
     logger.trace("Getting Authenticated Client") >>
-    ???
+    getAuthenticatedClient().flatMap:
+      case Some(client) =>
+        logger.debug(s"Returning Cuttlefish authenticated client") >>
+        Async[F].pure(client)
+      case None =>
+        for
+          _      <- logger.debug(s"Creating Cuttlefish authenticated client")
+          apiKey <- getApiKey()
+          client  = buildHttpClient(apiKey)
+          _      <- setAuthenticatedClient(client)
+        yield client
 
-  // private def buildHttpClient(): Client[F] =
-  //   Logger.colored[F](logBody = true, logHeaders = true):
-  //     CuttlefishAuthenticatedClient[F](config.account):
-  //       httpClient
+  private def buildHttpClient(apiKey: String): Client[F] =
+    val retryPolicy =
+      RetryPolicy[F](
+        backoff = RetryPolicy.exponentialBackoff(config.maxRetryTime, config.maxRetries),
+      )
+
+    Retry(retryPolicy):
+      CuttlefishAuthenticatedClient[F](apiKey):
+        httpClient
 
   //  Error handlers  //
 
   private def handleClientExpectError(response: Response[F]): F[Throwable] =
     response
-      .as[String]
-      .map { body =>
-        CuttlefishRequestError("Octopus Request Error", body)
+      .as[CuttlefishRequestError]
+      .map { error =>
+        CuttlefishError("Octopus Request Error", Some(error))
       }
 
   //  State management  //
 
-  // private def getApiKey(): F[Option[String]] =
-  //   atomicState.get.map:
-  //     _.apiKey
+  private def getApiKey(): F[String] =
+    atomicState.get.flatMap: state =>
+      state.apiKey match
+        case Some(apiKey) => Async[F].pure(apiKey)
+        case None         => Async[F].raiseError(CuttlefishError("No Octopus apiKey provided"))
 
   private def setApiKey(apiKey: String): F[Unit] =
     atomicState.update:
@@ -94,15 +115,28 @@ final class CuttlefishClient[F[_]: Async] private (
     atomicState.update:
       _.copy(apiKey = None)
 
+  private def getAuthenticatedClient(): F[Option[Client[F]]] =
+    atomicState.get.map:
+      _.authenticatedClient
+
+  private def setAuthenticatedClient(client: Client[F]): F[Unit] =
+    atomicState.update:
+      _.copy(authenticatedClient = Some(client))
+
   private def clearAuthenticatedClient(): F[Unit] =
     atomicState.update:
       _.copy(authenticatedClient = None)
 
   //  Givens  //
 
-  private given QueryParamEncoder[OffsetDateTime] with
-    def encode(value: OffsetDateTime): QueryParameterValue =
-      QueryParameterValue(value.toString)
+  private given QueryParamEncoder[OffsetDateTime] =
+    QueryParamEncoder[String].contramap(_.truncatedTo(ChronoUnit.SECONDS).toString)
+
+  private given SegmentEncoder[MeterPointNumber] =
+    SegmentEncoder[String].contramap(_.value)
+
+  private given SegmentEncoder[SerialNumber] =
+    SegmentEncoder[String].contramap(_.value)
 
 /**
  * Cuttlefish Client for Scala
@@ -130,6 +164,6 @@ object CuttlefishClient:
   private def apply[F[_]: Async](config: CuttlefishConfig, httpClient: Client[F]): F[CuttlefishClient[F]] =
     for
       initialState    <- AtomicCell[F].of(CuttlefishClientState[F](None))
-      loggedHttpClient = Logger.colored[F](logBody = true, logHeaders = true)(httpClient)
+      loggedHttpClient = Logger.colored[F](logBody = true, logHeaders = true, redactHeadersWhen=_ => false)(httpClient)
       client           = new CuttlefishClient[F](loggedHttpClient, config, initialState)
     yield client

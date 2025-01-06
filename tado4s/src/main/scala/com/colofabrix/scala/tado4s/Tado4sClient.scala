@@ -161,13 +161,12 @@ final class Tado4sClient[F[_]: Async] private (
             val expiry    = OffsetDateTime.now().plus(authResponse.expires_in.toLong, ChronoUnit.SECONDS)
             val authToken = TadoAuthToken(authResponse.access_token, authResponse.refresh_token, expiry)
             logger.trace(s"Login authentication response: $authResponse}") >>
-            logger.debug(s"Logged in") >>
+            logger.debug(s"Logged in with token $authToken") >>
             Async[F].pure(Some(authToken))
       .adaptError: error =>
         Tado4sError("Error while logging in", Some(error))
 
   private def refreshTokenRequest(): F[Unit] =
-    // See https://www.oauth.com/oauth2-servers/making-authenticated-requests/refreshing-an-access-token/
     getAuthToken().flatMap:
       case None =>
         logger.warn("Cannot refresh token because unauthenticated, trying to login...") >>
@@ -184,7 +183,7 @@ final class Tado4sClient[F[_]: Async] private (
 
         val postRequest = POST(requestBody, config.apiAuth / "oauth" / "token")
 
-        logger.debug("Sending refresh token request") >>
+        logger.info("Refreshing authentication token") >>
         atomicallyModifyAuthToken: _ =>
           httpClient
             .expect[AuthResponse](postRequest)
@@ -192,7 +191,7 @@ final class Tado4sClient[F[_]: Async] private (
               val expiry       = OffsetDateTime.now().plus(authResponse.expires_in.toLong, ChronoUnit.SECONDS)
               val newAuthToken = TadoAuthToken(authResponse.access_token, authResponse.refresh_token, expiry)
               logger.trace(s"Refresh authentication response: $authResponse}") >>
-              logger.info("Auth token refreshed") >>
+              logger.debug(s"Auth token refreshed $newAuthToken") >>
               Async[F].pure(Some(newAuthToken))
         .handleErrorWith: error =>
           logger.debug(error)("Refresh token failed with error") >>
@@ -211,28 +210,27 @@ final class Tado4sClient[F[_]: Async] private (
       case None =>
         Async[F].raiseError(Tado4sError("Tado4s is not logged in"))
       case Some(authToken) if isTokenExpired(authToken) =>
-        logger.info("Tado token expired, getting a new one") >>
-        logger.trace(s"Expired token: $authToken") >>
+        logger.info("Tado token expired") >>
+        logger.debug(s"Expired token: $authToken") >>
         clearAuthenticatedClient() >>
         refreshTokenRequest() >>
         withAuthClient(retries - 1)
       case Some(authToken) =>
         getAuthenticatedClient().flatMap:
           case Some(client) =>
-            logger.trace(s"Returning Tado authenticated client with token $authToken") >>
+            logger.debug(s"Returning Tado authenticated client with token $authToken") >>
             Async[F].pure(client)
           case None =>
             for
               _      <- setAuthenticatedClient(buildHttpClient(authToken))
-              _      <- logger.debug("Creating new Tado authenticated client")
+              _      <- logger.debug(s"Creating Tado authenticated client with token $authToken")
               result <- withAuthClient(retries - 1)
             yield result
 
   private def buildHttpClient(authToken: TadoAuthToken): Client[F] =
     val retryPolicy =
       RetryPolicy[F](
-        backoff = RetryPolicy.exponentialBackoff(config.maxRetryTime, config.maxRetries),
-        retriable = (_, _) => true,
+        backoff = RetryPolicy.exponentialBackoff(config.maxRetryTime, config.maxRetries)
       )
 
     Retry(retryPolicy):
@@ -248,8 +246,8 @@ final class Tado4sClient[F[_]: Async] private (
   private def handleClientExpectError(response: Response[F]): F[Throwable] =
     response
       .as[TadoErrorResponse]
-      .map { body =>
-        Tado4sRequestError("Tado Request Error", body)
+      .map { error =>
+        Tado4sError("Tado Request Error", Some(error))
       }
 
   //  State management  //

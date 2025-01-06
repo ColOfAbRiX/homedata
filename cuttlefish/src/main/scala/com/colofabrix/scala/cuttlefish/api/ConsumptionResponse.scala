@@ -4,8 +4,8 @@ import io.circe.Decoder
 
 final case class MeterConsumptionResponse (
   count: Int,
-  next: String,
-  previous: String,
+  next: Option[String],
+  previous: Option[String],
   results: List[Results]
 ) derives Decoder
 

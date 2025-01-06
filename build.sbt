@@ -45,7 +45,7 @@ lazy val root =
 lazy val homedata =
   project
     .in(file("homedata"))
-    .dependsOn(timeflux, tado4s)
+    .dependsOn(timeflux, tado4s, cuttlefish)
     .settings(
       name         := "homedata",
       version      := "0.1.0",
@@ -140,15 +140,20 @@ lazy val cuttlefish =
       organization := "com.colofabrix.scala.cuttlefish",
       scalaVersion := scala3Version,
       libraryDependencies ++= List(
-        "co.fs2"                        %% "fs2-core"        % fs2Version,
-        "co.fs2"                        %% "fs2-io"          % fs2Version,
-        "com.github.pureconfig"         %% "pureconfig-core" % pureconfigVersion,
-        "com.softwaremill.sttp.client4" %% "core"            % sttpVersion,
-        "org.http4s"                    %% "http4s-client"   % http4sClientVersion,
-        "org.json4s"                    %% "json4s-native"   % json4sNativeVersion,
-        "org.scalatest"                 %% "scalatest"       % scalatestVersion % Test,
-        "org.typelevel"                 %% "cats-core"       % catsVersion,
-        "org.typelevel"                 %% "cats-effect"     % catsEffectVersion,
-        "org.typelevel"                 %% "log4cats-core"   % log4catsVersion,
+        "co.fs2"                %% "fs2-io"              % fs2Version,
+        "com.github.pureconfig" %% "pureconfig-core"     % pureconfigVersion,
+        "io.circe"              %% "circe-core"          % circeCoreVersion,
+        "org.http4s"            %% "http4s-circe"        % http4sClientVersion,
+        "org.http4s"            %% "http4s-client"       % http4sClientVersion,
+        "org.http4s"            %% "http4s-core"         % http4sClientVersion,
+        "org.http4s"            %% "http4s-ember-client" % http4sClientVersion,
+        "org.scalatest"         %% "scalatest"           % scalatestVersion % Test,
+        "org.typelevel"         %% "case-insensitive"    % caseInsensitiveVersion,
+        "org.typelevel"         %% "cats-core"           % catsVersion,
+        "org.typelevel"         %% "cats-effect-kernel"  % catsEffectVersion,
+        "org.typelevel"         %% "cats-effect-std"     % catsEffectVersion,
+        "org.typelevel"         %% "cats-effect"         % catsEffectVersion,
+        "org.typelevel"         %% "log4cats-core"       % log4catsVersion,
+        "org.typelevel"         %% "log4cats-slf4j"      % log4catsVersion,
       ),
     )
