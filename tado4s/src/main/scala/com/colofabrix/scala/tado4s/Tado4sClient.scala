@@ -137,7 +137,7 @@ final class Tado4sClient[F[_]: Async] private (
       _       <- logger.trace(s"Response for getZoneDayReport response: $result")
     yield result
 
-  //  Internal operations  //
+  //  Http Client Management  //
 
   private def loginRequest(): F[Unit] =
     getCredentials().flatMap: credentials =>

@@ -1,51 +1,39 @@
 package com.colofabrix.scala.homedata
 
 import cats.effect.*
-import com.colofabrix.scala.cuttlefish.*
-import com.colofabrix.scala.cuttlefish.api.*
 import com.colofabrix.scala.homedata.influx.InfluxDbConfig
-import com.colofabrix.scala.homedata.influx.InfluxDbConfig.{ config => InfluxConf }
-import com.colofabrix.scala.homedata.octopus.Octopus
-import com.colofabrix.scala.homedata.octopus.OctopusConfig.{ config => OctoConf }
+import com.colofabrix.scala.homedata.octopus.*
 import com.colofabrix.scala.homedata.tado.*
 import com.colofabrix.scala.timeflux.*
 import com.colofabrix.scala.timeflux.measures.TimefluxSerializable
 import java.time.*
 
-object Main extends IOApp.Simple with TimefluxDSL with CuttlefishDSL:
+object Main extends IOApp.Simple with TimefluxDSL:
 
-  val from = OffsetDateTime.of(2024, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC)
-  val to   = OffsetDateTime.now
+  val from = OffsetDateTime.of(2025, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC)
+  val to = OffsetDateTime.of(2025, 1, 2, 0, 0, 0, 0, ZoneOffset.UTC)
+  //val to   = OffsetDateTime.now
 
   val run =
     for {
-      octoClient <- CuttlefishClient[IO]()
-      _          <- octoClient.login(OctoConf.apiKey)
-      gas        <- octoClient.meterConsumption(OctopusProduct.Gas, OctoConf.gasMprn, OctoConf.gasSerial, Some(from), Some(to))
-      electricity <- octoClient.meterConsumption(
-                       OctopusProduct.Electricity,
-                       OctoConf.electricityMpan,
-                       OctoConf.electricitySerial,
-                       Some(from),
-                       Some(to),
-                     )
-      _ <- IO.println(gas)
-      _ <- IO.println(electricity)
-      _ <- IO.sleep(scala.concurrent.duration.FiniteDuration(15, "seconds"))
+      // Octopus
+      octoPuller    <- OctopusPuller()
+      gasReadings    = octoPuller.pullGasReadings(from, to)
+      electrReadings = octoPuller.pullElectricityReadings(from, to)
+      octoReadings   = gasReadings merge electrReadings
+      octoMeasures   = octoReadings.through(TimefluxSerializable.toApiMeasureStream)
       // Tado
       tadoPuller  <- TadoPuller()
-      tadoReading  = tadoPuller.pullReadings(from, to)
-      tadoMeasures = tadoReading.through(TimefluxSerializable.toApiMeasureStream)
-      // Octopus
-      octopusReadings = Octopus.pullReadings(from, to)
-      octopusMeasures = octopusReadings.through(TimefluxSerializable.toApiMeasureStream)
+      tadoReadings = tadoPuller.pullReadings(from, to)
+      tadoMeasures = tadoReadings.through(TimefluxSerializable.toApiMeasureStream)
       // Timeflux
+      allMeasures     = tadoMeasures merge octoMeasures
+      _              <- allMeasures.evalTap(IO.println).compile.drain
       timefluxClient <- TimefluxClient[IO](InfluxDbConfig.clientConfig)
-      _              <- timefluxClient.createBucketIfMissing(InfluxConf.projectBucket)
-      allMeasures     = tadoMeasures merge octopusMeasures
-      _ <- timefluxClient.writeMeasures(
-             InfluxConf.projectBucket,
-             allMeasures,
-             batchWrites = Some(InfluxConf.batchWrites),
-           )
+      // _              <- timefluxClient.createBucketIfMissing(InfluxDbConfig.config.projectBucket)
+      // _ <- timefluxClient.writeMeasures(
+      //        InfluxDbConfig.config.projectBucket,
+      //        allMeasures,
+      //        batchWrites = Some(InfluxDbConfig.config.batchWrites),
+      //      )
     } yield ()

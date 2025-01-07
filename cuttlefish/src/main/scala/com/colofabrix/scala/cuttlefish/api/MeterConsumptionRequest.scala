@@ -10,5 +10,6 @@ final case class MeterConsumptionRequest(
   from: Option[OffsetDateTime],
   to: Option[OffsetDateTime],
   pageSize: Option[Int],
+  page: Option[Int],
   orderBy: Option[String],
 )

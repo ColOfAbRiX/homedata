@@ -1,16 +1,17 @@
 package com.colofabrix.scala.cuttlefish.api
 
 import io.circe.Decoder
+import java.time.OffsetDateTime
 
-final case class MeterConsumptionResponse (
+final case class MeterConsumptionResponse(
   count: Int,
   next: Option[String],
   previous: Option[String],
-  results: List[Results]
+  results: List[ConsumptionResults],
 ) derives Decoder
 
-final case class Results (
+final case class ConsumptionResults(
   consumption: Double,
-  interval_start: String,
-  interval_end: String
+  interval_start: OffsetDateTime,
+  interval_end: OffsetDateTime,
 ) derives Decoder

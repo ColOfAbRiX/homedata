@@ -181,6 +181,23 @@ final class TimefluxClient[F[_]: Async] private (
       .compile
       .drain
 
+  extension [A](self: A)
+
+    private def withOrgId[B](get: A => Option[String], set: Option[String] => A): F[A] =
+      get(self) match {
+        case Some(_) =>
+          Async[F].pure(self)
+        case None =>
+          getCredentials().flatMap {
+            case Some(TimefluxCredentials(_, orgId)) =>
+              Async[F].pure(set(Some(orgId.value)))
+            case None =>
+              Async[F].raiseError(TimefluxException("Required OrgID parameter is not set.", None))
+          }
+      }
+
+  //  Http Client Management  //
+
   private def withAuthClient[A](): F[Client[F]] =
     getAuthenticatedClient().flatMap {
       case None =>
@@ -198,20 +215,6 @@ final class TimefluxClient[F[_]: Async] private (
         logger.trace(s"Returning Timeflux authenticated client") >>
         Async[F].pure(client)
     }
-
-  extension [A](self: A)
-    private def withOrgId[B](get: A => Option[String], set: Option[String] => A): F[A] =
-      get(self) match {
-        case Some(_) =>
-          Async[F].pure(self)
-        case None =>
-          getCredentials().flatMap {
-            case Some(TimefluxCredentials(_, orgId)) =>
-              Async[F].pure(set(Some(orgId.value)))
-            case None =>
-              Async[F].raiseError(TimefluxException("Required OrgID parameter is not set.", None))
-          }
-      }
 
   private def buildHttpClient(creds: TimefluxCredentials): Client[F] =
     val retryPolicy =

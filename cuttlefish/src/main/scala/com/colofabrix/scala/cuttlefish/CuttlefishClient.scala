@@ -33,6 +33,9 @@ final class CuttlefishClient[F[_]: Async] private (
   atomicState: AtomicCell[F, CuttlefishClientState[F]],
 ) extends Http4sClientDsl[F]:
 
+  private type StreamF[+A] =
+    fs2.Stream[F, A]
+
   implicit private val logger: SelfAwareStructuredLogger[F] =
     Slf4jLogger.getLogger[F]
 
@@ -51,20 +54,37 @@ final class CuttlefishClient[F[_]: Async] private (
     clearApiKey() >>
     clearAuthenticatedClient()
 
-  def meterConsumption(request: MeterConsumptionRequest): F[MeterConsumptionResponse] =
-    logger.debug(s"Called meterConsumption() with $request") >>
+  def pagedMeterConsumption(request: MeterConsumptionRequest): F[MeterConsumptionResponse] =
+    logger.debug(s"Called pagedMeterConsumption() with $request") >>
     withAuthClient().flatMap: client =>
       val url =
         (config.apiBase / s"${request.product.value}-meter-points" / request.meterPointNumber / "meters" / request.serial / "consumption" / "")
+          .withOptionQueryParam("order_by", request.orderBy)
+          .withOptionQueryParam("page_size", request.pageSize)
+          .withOptionQueryParam("page", request.page)
           .withOptionQueryParam("period_from", request.from)
           .withOptionQueryParam("period_to", request.to)
-          .withOptionQueryParam("page_size", request.pageSize)
-          .withOptionQueryParam("order_by", request.orderBy)
 
       client
         .expectOr[MeterConsumptionResponse](GET(url))(handleClientExpectError)
         .flatTap: result =>
-          logger.trace(s"Response for meterConsumption(): $result")
+          logger.trace(s"Response for pagedMeterConsumption(): $result")
+
+  def meterConsumption(request: MeterConsumptionRequest): StreamF[ConsumptionResults] =
+    val pageZeroRequest = request.copy(page = Some(1))
+    fs2.Stream.eval(logger.debug(s"Called meterConsumption() with $request")) >>
+    fs2.Stream
+      .unfoldLoopEval(pageZeroRequest): pageRequest =>
+        pagedMeterConsumption(pageRequest).map:
+          case MeterConsumptionResponse(_, Some(_), _, results) =>
+            val nextPage        = pageRequest.page.map(_ + 1)
+            val nextPageRequest = Some(pageRequest.copy(page = nextPage))
+            (fs2.Stream.emits(results), nextPageRequest)
+          case MeterConsumptionResponse(_, None, _, results) =>
+            (fs2.Stream.emits(results), None)
+      .flatten
+
+  //  Http Client Management  //
 
   private def withAuthClient[A](): F[Client[F]] =
     logger.trace("Getting Authenticated Client") >>
@@ -164,6 +184,6 @@ object CuttlefishClient:
   private def apply[F[_]: Async](config: CuttlefishConfig, httpClient: Client[F]): F[CuttlefishClient[F]] =
     for
       initialState    <- AtomicCell[F].of(CuttlefishClientState[F](None))
-      loggedHttpClient = Logger.colored[F](logBody = true, logHeaders = true, redactHeadersWhen=_ => false)(httpClient)
+      loggedHttpClient = Logger.colored[F](logBody = true, logHeaders = true, redactHeadersWhen = _ => false)(httpClient)
       client           = new CuttlefishClient[F](loggedHttpClient, config, initialState)
     yield client

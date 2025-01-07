@@ -31,7 +31,7 @@ class TadoPuller private (tadoClient: Tado4sClient[IO], state: TadoPuller.TadoSt
     Throttler.throttle[F, A](elements, duration.second, Throttler.Shaping)
 
   private def generateNextDate(to: OffsetDateTime)(current: LocalDate): Option[(LocalDate, LocalDate)] =
-    if (current.isBefore(to.toLocalDate)) then
+    if (current.isBefore(to.toLocalDate) || current.isEqual(to.toLocalDate)) then
       Some(current, current.plusDays(1))
     else
       None
