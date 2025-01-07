@@ -1,8 +1,7 @@
-package com.colofabrix.scala.homedata.tado.readings
+package com.colofabrix.scala.homedata.tado.store
 
 import cats.kernel.Monoid
-import com.colofabrix.scala.homedata.influx.InfluxDbConfig
-import com.colofabrix.scala.tado4s.store.*
+import com.colofabrix.scala.homedata.tado.readings.TadoReading
 import java.time.OffsetDateTime
 import scala.concurrent.duration.*
 
@@ -15,7 +14,7 @@ type TadoDataStore =
 object TadoDataStore:
 
   private def TimeResolution: FiniteDuration =
-    InfluxDbConfig.config.timeResolution
+    15.minutes
 
   def apply(): TadoDataStore =
     TimeSlots[TadoReading](TimeResolution)
@@ -32,4 +31,4 @@ object TadoDataStore:
       TadoDataStore()
 
     def combine(x: TadoDataStore, y: TadoDataStore): TadoDataStore =
-      TimeSlots.given_Semigroup_TimeSlots[TadoReading].combine(x, y)
+      TimeSlots.given_Semigroup_TimeSlots.combine(x, y)

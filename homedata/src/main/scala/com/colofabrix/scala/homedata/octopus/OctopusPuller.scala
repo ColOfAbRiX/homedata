@@ -56,5 +56,4 @@ object OctopusPuller:
       octopusClient <- CuttlefishClient[IO]()
       _             <- octopusClient.login(OctopusConfig.config.apiKey)
       result         = new OctopusPuller(octopusClient)
-      _             <- logger.info(s"Initialized Octopus puller")
     yield result

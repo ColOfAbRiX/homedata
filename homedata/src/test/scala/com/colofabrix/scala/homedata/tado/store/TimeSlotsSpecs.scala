@@ -1,6 +1,6 @@
-package com.colofabrix.scala.tado4s.store
+package com.colofabrix.scala.homedata.tado.store
 
-import com.colofabrix.scala.tado4s.store.TimeSlots.*
+import com.colofabrix.scala.homedata.tado.store.TimeSlots.*
 import java.time.OffsetDateTime
 import org.scalatest.flatspec.AnyFlatSpecLike
 import org.scalatest.matchers.should.Matchers

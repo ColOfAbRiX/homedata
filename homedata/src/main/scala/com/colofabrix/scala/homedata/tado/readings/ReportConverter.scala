@@ -5,7 +5,8 @@ import cats.effect.*
 import cats.effect.implicits.given
 import cats.implicits.given
 import com.colofabrix.scala.homedata.tado.*
-import com.colofabrix.scala.homedata.tado.readings.TadoDataStore.given
+import com.colofabrix.scala.homedata.tado.store.TadoDataStore
+import com.colofabrix.scala.homedata.tado.store.TadoDataStore.given
 import com.colofabrix.scala.tado4s.api.DayReportResponse
 import com.colofabrix.scala.tado4s.api.DayReportResponse.*
 import com.colofabrix.scala.tado4s.api.DayReportResponse.ValueType.*

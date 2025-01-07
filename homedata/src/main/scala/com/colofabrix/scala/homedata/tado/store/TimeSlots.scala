@@ -1,8 +1,8 @@
-package com.colofabrix.scala.tado4s.store
+package com.colofabrix.scala.homedata.tado.store
 
 import cats.*
 import cats.implicits.given
-import com.colofabrix.scala.tado4s.store.TimeSlots.*
+import com.colofabrix.scala.homedata.tado.store.TimeSlots.*
 import java.time.*
 import java.util.concurrent.TimeUnit
 import scala.collection.immutable.TreeMap
