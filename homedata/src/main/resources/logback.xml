@@ -6,11 +6,11 @@
   </appender>
 
   <logger name="com.colofabrix.scala.cuttlefish" level="INFO"/>
-  <logger name="com.colofabrix.scala.homedata" level="INFO"/>
+  <logger name="com.colofabrix.scala.homedata" level="TRACE"/>
   <logger name="com.colofabrix.scala.tado4s" level="INFO"/>
-  <logger name="com.colofabrix.scala.timeflux" level="INFO"/>
+  <logger name="com.colofabrix.scala.timeflux" level="TRACE"/>
   <logger name="com.colofabrix.scala" level="OFF"/>
-  <logger name="org.http4s.client.middleware" level="OFF"/>
+  <logger name="org.http4s.client.middleware" level="INFO"/>
 
   <root level="OFF">
     <appender-ref ref="STDOUT" />
