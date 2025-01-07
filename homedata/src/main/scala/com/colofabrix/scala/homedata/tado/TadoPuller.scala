@@ -47,7 +47,7 @@ class TadoPuller private (tadoClient: Tado4sClient[IO], state: TadoPuller.TadoSt
 
   private def pullRoom(date: LocalDate, roomId: Int): fs2.Stream[IO, TadoReading] =
     fs2.Stream.evals {
-      logger.trace(s"Pulling Tado Room data for date=$date, roomId=$roomId") >>
+      logger.info(s"Pulling Tado Room data for date=$date, roomId=$roomId") >>
       tadoClient
         .getZoneDayReport(state.homeId, roomId, date)
         .flatMap(ReportConverter.convert(state.rooms(roomId), _))

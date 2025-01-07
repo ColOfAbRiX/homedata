@@ -6,9 +6,9 @@
   </appender>
 
   <logger name="com.colofabrix.scala.cuttlefish" level="DEBUG"/>
-  <logger name="com.colofabrix.scala.homedata" level="INFO"/>
+  <logger name="com.colofabrix.scala.homedata" level="DEBUG"/>
   <logger name="com.colofabrix.scala.tado4s" level="DEBUG"/>
-  <logger name="com.colofabrix.scala.timeflux" level="INFO"/>
+  <logger name="com.colofabrix.scala.timeflux" level="DEBUG"/>
   <logger name="com.colofabrix.scala" level="OFF"/>
   <logger name="org.http4s.client.middleware" level="OFF"/>
 
