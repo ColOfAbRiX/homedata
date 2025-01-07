@@ -28,12 +28,11 @@ object Main extends IOApp.Simple with TimefluxDSL:
       tadoMeasures = tadoReadings.through(TimefluxSerializable.toApiMeasureStream)
       // Timeflux
       allMeasures     = tadoMeasures merge octoMeasures
-      _              <- allMeasures.evalTap(IO.println).compile.drain
       timefluxClient <- TimefluxClient[IO](InfluxDbConfig.clientConfig)
-      // _              <- timefluxClient.createBucketIfMissing(InfluxDbConfig.config.projectBucket)
-      // _ <- timefluxClient.writeMeasures(
-      //        InfluxDbConfig.config.projectBucket,
-      //        allMeasures,
-      //        batchWrites = Some(InfluxDbConfig.config.batchWrites),
-      //      )
+      _              <- timefluxClient.createBucketIfMissing(InfluxDbConfig.config.projectBucket)
+      _ <- timefluxClient.writeMeasures(
+             InfluxDbConfig.config.projectBucket,
+             allMeasures,
+             batchWrites = Some(InfluxDbConfig.config.batchWrites),
+           )
     } yield ()

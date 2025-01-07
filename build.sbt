@@ -2,8 +2,8 @@ import org.typelevel.scalacoptions.ScalacOptions
 
 val scala3Version = "3.6.2"
 
-val caseInsensitiveVersion = "1.4.0"
-val catsEffectVersion      = "3.5.4"
+val caseInsensitiveVersion = "1.4.2"
+val catsEffectVersion      = "3.5.7"
 val catsVersion            = "2.12.0"
 val circeCoreVersion       = "0.14.10"
 val circeGenericVersion    = "0.14.10"
@@ -11,15 +11,13 @@ val coreVersion            = "4.0.0-M8"
 val ducktapeVersion        = "0.1.11"
 val enumeratumVersion      = "1.7.5"
 val fs2ThrottlerVersion    = "1.0.12"
-val fs2Version             = "3.9.3"
-val http4sClientVersion    = "0.23.24"
-val json4sNativeVersion    = "4.1.0-M4"
+val fs2Version             = "3.11.0"
+val http4sClientVersion    = "0.23.30"
 val log4catsVersion        = "2.7.0"
 val logbackClassicVersion  = "1.3.4"
 val pureconfigVersion      = "0.17.4"
 val scalatestVersion       = "3.2.17"
-val sttpVersion            = "4.0.0-M8"
-val vaultVersion           = "3.5.0"
+val vaultVersion           = "3.6.0"
 
 Global / run / fork           := true
 Global / onChangedBuildSource := ReloadOnSourceChanges
@@ -52,19 +50,21 @@ lazy val homedata =
       organization := "com.colofabrix.scala.homedata",
       scalaVersion := scala3Version,
       libraryDependencies ++= List(
-        "ch.qos.logback"                 % "logback-classic" % logbackClassicVersion % Runtime,
-        "co.fs2"                        %% "fs2-core"        % fs2Version,
-        "co.fs2"                        %% "fs2-io"          % fs2Version,
-        "com.github.pureconfig"         %% "pureconfig-core" % pureconfigVersion,
-        "com.softwaremill.sttp.client4" %% "core"            % sttpVersion,
-        "dev.kovstas"                   %% "fs2-throttler"   % fs2ThrottlerVersion,
-        "io.github.arainko"             %% "ducktape"        % ducktapeVersion,
-        "org.http4s"                    %% "http4s-client"   % http4sClientVersion,
-        "org.json4s"                    %% "json4s-native"   % json4sNativeVersion,
-        "org.scalatest"                 %% "scalatest"       % scalatestVersion      % Test,
-        "org.typelevel"                 %% "cats-core"       % catsVersion,
-        "org.typelevel"                 %% "cats-effect"     % catsEffectVersion,
-        "org.typelevel"                 %% "log4cats-core"   % log4catsVersion,
+        "ch.qos.logback"                 % "logback-classic"    % logbackClassicVersion % Runtime,
+        "co.fs2"                        %% "fs2-core"           % fs2Version,
+        "co.fs2"                        %% "fs2-io"             % fs2Version,
+        "com.github.pureconfig"         %% "pureconfig-core"    % pureconfigVersion,
+        "dev.kovstas"                   %% "fs2-throttler"      % fs2ThrottlerVersion,
+        "io.github.arainko"             %% "ducktape"           % ducktapeVersion,
+        "org.http4s"                    %% "http4s-client"      % http4sClientVersion % Runtime,
+        "org.http4s"                    %% "http4s-core"        % http4sClientVersion,
+        "org.scalatest"                 %% "scalatest"          % scalatestVersion      % Test,
+        "org.typelevel"                 %% "cats-core"          % catsVersion,
+        "org.typelevel"                 %% "cats-effect-kernel" % catsEffectVersion,
+        "org.typelevel"                 %% "cats-effect"        % catsEffectVersion,
+        "org.typelevel"                 %% "cats-kernel"        % catsVersion,
+        "org.typelevel"                 %% "log4cats-core"      % log4catsVersion,
+        "org.typelevel"                 %% "log4cats-slf4j"     % log4catsVersion,
       ),
     )
 
@@ -140,6 +140,7 @@ lazy val cuttlefish =
       organization := "com.colofabrix.scala.cuttlefish",
       scalaVersion := scala3Version,
       libraryDependencies ++= List(
+        "co.fs2"                %% "fs2-core"            % fs2Version,
         "co.fs2"                %% "fs2-io"              % fs2Version,
         "com.github.pureconfig" %% "pureconfig-core"     % pureconfigVersion,
         "io.circe"              %% "circe-core"          % circeCoreVersion,
