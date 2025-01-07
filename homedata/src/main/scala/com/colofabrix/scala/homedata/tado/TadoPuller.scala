@@ -7,6 +7,7 @@ import com.colofabrix.scala.tado4s.api.HomeZonesResponse
 import com.colofabrix.scala.tado4s.Tado4sClient
 import dev.kovstas.fs2throttler.Throttler
 import java.time.*
+import org.json4s.native.JsonMethods.*
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 import scala.concurrent.duration.*
