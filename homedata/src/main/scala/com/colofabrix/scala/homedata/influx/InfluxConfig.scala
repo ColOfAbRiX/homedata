@@ -1,14 +1,15 @@
 package com.colofabrix.scala.homedata.influx
 
+import com.colofabrix.scala.homedata.utils.commongivens.given
 import com.colofabrix.scala.timeflux.config.TimefluxClientConfig
 import com.colofabrix.scala.timeflux.model.*
 import io.github.arainko.ducktape.*
 import org.http4s.Uri
 import pureconfig.*
 import pureconfig.generic.derivation.default.*
-import scala.concurrent.duration.{ Duration, FiniteDuration }
+import scala.concurrent.duration.*
 
-final case class InfluxDbConfig(
+final case class InfluxConfig(
   serverUrl: Uri,
   orgId: OrgId,
   authToken: AuthToken,
@@ -17,17 +18,7 @@ final case class InfluxDbConfig(
   batchWrites: Int,
 ) derives ConfigReader
 
-object InfluxDbConfig:
-
-  given ConfigReader[FiniteDuration] =
-    ConfigReader.fromString:
-      ConvertHelpers.optF: str =>
-        Some(Duration(str)).collect { case fd: FiniteDuration => fd }
-
-  given ConfigReader[Uri] =
-    ConfigReader.fromString:
-      ConvertHelpers.tryF: str =>
-        Uri.fromString(str).toTry
+object InfluxConfig:
 
   given ConfigReader[OrgId] =
     ConfigReader.fromString: str =>
@@ -37,12 +28,12 @@ object InfluxDbConfig:
     ConfigReader.fromString: str =>
       Right(AuthToken(str))
 
-  val config: InfluxDbConfig =
+  val config: InfluxConfig =
     ConfigSource
       .default
       .withFallback(ConfigSource.resources("secrets.conf"))
       .at("influxdb")
-      .loadOrThrow[InfluxDbConfig]
+      .loadOrThrow[InfluxConfig]
 
   val clientConfig: TimefluxClientConfig =
     config

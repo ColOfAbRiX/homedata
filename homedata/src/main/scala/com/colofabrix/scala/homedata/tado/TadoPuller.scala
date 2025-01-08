@@ -1,16 +1,14 @@
 package com.colofabrix.scala.homedata.tado
 
-import cats.effect.{ IO, Temporal }
+import cats.effect.IO
 import cats.implicits.given
 import com.colofabrix.scala.homedata.tado.readings.*
+import com.colofabrix.scala.homedata.utils.pipes.*
 import com.colofabrix.scala.tado4s.api.HomeZonesResponse
 import com.colofabrix.scala.tado4s.Tado4sClient
-import dev.kovstas.fs2throttler.Throttler
 import java.time.*
-import org.json4s.native.JsonMethods.*
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
-import scala.concurrent.duration.*
 
 class TadoPuller private (tadoClient: Tado4sClient[IO], state: TadoPuller.TadoState):
 
@@ -21,14 +19,9 @@ class TadoPuller private (tadoClient: Tado4sClient[IO], state: TadoPuller.TadoSt
     fs2.Stream
       .unfold(from.toLocalDate)(generateNextDate(to))
       .flatMap(collectRoomIds)
-      .through(throttle)
+      .through(throttle(TadoConfig.config.requestsPerSec))
       .map(pullRoom)
       .parJoinUnbounded
-
-  private def throttle[F[_]: Temporal, A] =
-    val elements = Math.max(TadoConfig.config.requestsPerSec, 1).toInt
-    val duration = Math.max(1.0 / TadoConfig.config.requestsPerSec, 1).toInt
-    Throttler.throttle[F, A](elements, duration.second, Throttler.Shaping)
 
   private def generateNextDate(to: OffsetDateTime)(current: LocalDate): Option[(LocalDate, LocalDate)] =
     if (current.isBefore(to.toLocalDate) || current.isEqual(to.toLocalDate)) then

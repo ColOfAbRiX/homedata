@@ -15,14 +15,12 @@ object Main extends IOApp.Simple with TimefluxDSL:
   // val to   = OffsetDateTime.now
 
   val run =
-    for {
+    for
       octoPuller         <- OctopusPuller()
       gasMeasures         = octoPuller.pullGasReadings(from, to).through(toApiMeasureStream)
       electricityMeasures = octoPuller.pullElectricityReadings(from, to).through(toApiMeasureStream)
       tadoPuller         <- TadoPuller()
       tadoMeasures        = tadoPuller.pullReadings(from, to).through(toApiMeasureStream)
-      tadoPuller2         <- TadoPuller()
-      tadoMeasures2        = tadoPuller2.pullReadings(from, to).through(toApiMeasureStream)
-      writer             <- TimefluxWriter()
-      _                  <- writer.write(tadoMeasures, tadoMeasures2)
-    } yield ()
+      writer             <- InfluxWriter()
+      _                  <- writer.write(tadoMeasures)
+    yield ()

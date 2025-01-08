@@ -1,14 +1,13 @@
 package com.colofabrix.scala.homedata.octopus
 
-import cats.effect.{ IO, Temporal }
+import cats.effect.IO
 import com.colofabrix.scala.cuttlefish.api.*
 import com.colofabrix.scala.cuttlefish.CuttlefishClient
 import com.colofabrix.scala.cuttlefish.CuttlefishDSL
-import dev.kovstas.fs2throttler.Throttler
+import com.colofabrix.scala.homedata.utils.pipes.*
 import java.time.*
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
-import scala.concurrent.duration.*
 
 class OctopusPuller private (octopusClient: CuttlefishClient[IO]) extends CuttlefishDSL:
 
@@ -21,7 +20,7 @@ class OctopusPuller private (octopusClient: CuttlefishClient[IO]) extends Cuttle
         Some(from),
         Some(to),
       )
-      .through(throttle)
+      .through(throttle(OctopusConfig.config.requestsPerSec))
       .map { consumption =>
         OctopusReading.GasReading(consumption.interval_start, consumption.consumption)
       }
@@ -35,15 +34,10 @@ class OctopusPuller private (octopusClient: CuttlefishClient[IO]) extends Cuttle
         Some(from),
         Some(to),
       )
-      .through(throttle)
+      .through(throttle(OctopusConfig.config.requestsPerSec))
       .map { consumption =>
         OctopusReading.ElectricityReading(consumption.interval_start, consumption.consumption)
       }
-
-  private def throttle[F[_]: Temporal, A] =
-    val elements = Math.max(OctopusConfig.config.requestsPerSec, 1).toInt
-    val duration = Math.max(1.0 / OctopusConfig.config.requestsPerSec, 1).toInt
-    Throttler.throttle[F, A](elements, duration.second, Throttler.Shaping)
 
 object OctopusPuller:
 
