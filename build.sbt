@@ -142,6 +142,7 @@ lazy val cuttlefish =
       libraryDependencies ++= List(
         "co.fs2"                %% "fs2-io"              % fs2Version,
         "com.github.pureconfig" %% "pureconfig-core"     % pureconfigVersion,
+        "dev.kovstas"           %% "fs2-throttler"       % fs2ThrottlerVersion,
         "io.circe"              %% "circe-core"          % circeCoreVersion,
         "org.http4s"            %% "http4s-circe"        % http4sClientVersion,
         "org.http4s"            %% "http4s-client"       % http4sClientVersion,

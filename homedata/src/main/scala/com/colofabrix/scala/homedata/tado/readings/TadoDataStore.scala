@@ -7,8 +7,8 @@ import java.time.OffsetDateTime
 import scala.concurrent.duration.*
 
 /**
-  * Store for Tado Readings
-  */
+ * Store for Tado Readings
+ */
 type TadoDataStore =
   TimeSlots[TadoReading]
 

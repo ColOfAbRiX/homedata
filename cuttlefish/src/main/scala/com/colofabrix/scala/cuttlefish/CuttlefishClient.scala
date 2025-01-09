@@ -1,6 +1,6 @@
 package com.colofabrix.scala.cuttlefish
 
-import cats.effect.Async
+import cats.effect.{ Async, Temporal }
 import cats.effect.std.AtomicCell
 import cats.implicits.given
 import com.colofabrix.scala.cuttlefish.api.*
@@ -17,10 +17,11 @@ import org.http4s.client.middleware.*
 import org.http4s.client.middleware.Logger
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.Method.*
+import org.http4s.Uri.Path.SegmentEncoder
 import org.typelevel.log4cats.SelfAwareStructuredLogger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 import scala.concurrent.duration.*
-import org.http4s.Uri.Path.SegmentEncoder
+import dev.kovstas.fs2throttler.Throttler
 
 /**
  * Octopus Client for Scala
@@ -44,18 +45,53 @@ final class CuttlefishClient[F[_]: Async] private (
    */
   def login(apiKey: String): F[Unit] =
     logger.debug("Login") >>
-    setApiKey(apiKey)
+    atomicState.update: state =>
+      state.apiKey match
+        case None =>
+          state.copy(apiKey = Some(apiKey))
+        case Some(oldApiKey) if apiKey =!= oldApiKey =>
+          state.copy(apiKey = Some(apiKey), authenticatedClient = None)
+        case Some(_) =>
+          state
 
   /**
    * Logs out the Octopus service
    */
   def logout(): F[Unit] =
     logger.debug("Logout") >>
-    clearApiKey() >>
-    clearAuthenticatedClient()
+    atomicState.update:
+      _.copy(apiKey = None, authenticatedClient = None)
 
   def pagedMeterConsumption(request: MeterConsumptionRequest): F[MeterConsumptionResponse] =
-    logger.debug(s"Called pagedMeterConsumption() with $request") >>
+    for
+      _      <- logger.debug(s"Called pagedMeterConsumption() with $request")
+      result <- internalMeterConsumption(request)
+      _      <- logger.trace(s"Response for pagedMeterConsumption(): $result")
+    yield result
+
+  def meterConsumption(request: MeterConsumptionRequest, throttle: Option[Throttle]): StreamF[ConsumptionResults] =
+    val pageZero = request.copy(page = Some(1))
+    fs2.Stream.eval(logger.debug(s"Called meterConsumption() with $request")) >>
+    fs2.Stream
+      .unfoldLoopEval(pageZero) {
+        pageLoopMeterConsumption(_).map((results, nextPage) => (fs2.Stream.emits(results), nextPage))
+      }
+      .through(fs2Throttle(throttle))
+      .flatten
+
+  private def pageLoopMeterConsumption(pageRequest: MeterConsumptionRequest) =
+    logger.debug(s"Requesting ${pageRequest.product.value} meter page ${pageRequest.page.getOrElse(0)}") >>
+    logger.trace(s"Requesting meter page $pageRequest") >>
+    internalMeterConsumption(pageRequest).map {
+      case MeterConsumptionResponse(_, Some(_), _, results) =>
+        val nextPage        = pageRequest.page.map(_ + 1)
+        val nextPageRequest = Option(pageRequest.copy(page = nextPage))
+        (results, nextPageRequest)
+      case MeterConsumptionResponse(_, None, _, results) =>
+        (results, None)
+    }
+
+  private def internalMeterConsumption(request: MeterConsumptionRequest): F[MeterConsumptionResponse] =
     withAuthClient().flatMap: client =>
       val url =
         (config.apiBase / s"${request.product.value}-meter-points" / request.meterPointNumber / "meters" / request.serial / "consumption" / "")
@@ -65,30 +101,13 @@ final class CuttlefishClient[F[_]: Async] private (
           .withOptionQueryParam("period_from", request.from)
           .withOptionQueryParam("period_to", request.to)
 
-      client
-        .expectOr[MeterConsumptionResponse](GET(url))(handleClientExpectError)
-        .flatTap: result =>
-          logger.trace(s"Response for pagedMeterConsumption(): $result")
-
-  def meterConsumption(request: MeterConsumptionRequest): StreamF[ConsumptionResults] =
-    val pageZeroRequest = request.copy(page = Some(1))
-    fs2.Stream.eval(logger.debug(s"Called meterConsumption() with $request")) >>
-    fs2.Stream
-      .unfoldLoopEval(pageZeroRequest): pageRequest =>
-        pagedMeterConsumption(pageRequest).map:
-          case MeterConsumptionResponse(_, Some(_), _, results) =>
-            val nextPage        = pageRequest.page.map(_ + 1)
-            val nextPageRequest = Some(pageRequest.copy(page = nextPage))
-            (fs2.Stream.emits(results), nextPageRequest)
-          case MeterConsumptionResponse(_, None, _, results) =>
-            (fs2.Stream.emits(results), None)
-      .flatten
+      client.expectOr[MeterConsumptionResponse](GET(url))(handleClientExpectError)
 
   //  Http Client Management  //
 
   private def withAuthClient[A](): F[Client[F]] =
     logger.trace("Getting Authenticated Client") >>
-    getAuthenticatedClient().flatMap:
+    atomicallyModifyAuthenticatedClient:
       case Some(client) =>
         logger.debug(s"Returning Cuttlefish authenticated client") >>
         Async[F].pure(client)
@@ -97,7 +116,6 @@ final class CuttlefishClient[F[_]: Async] private (
           _      <- logger.debug(s"Creating Cuttlefish authenticated client")
           apiKey <- getApiKey()
           client  = buildHttpClient(apiKey)
-          _      <- setAuthenticatedClient(client)
         yield client
 
   private def buildHttpClient(apiKey: String): Client[F] =
@@ -109,6 +127,18 @@ final class CuttlefishClient[F[_]: Async] private (
     Retry(retryPolicy):
       CuttlefishAuthenticatedClient[F](apiKey):
         httpClient
+
+  //  Internal Methods  //
+
+  private def fs2Throttle[F[_]: Temporal, A](throttle: Option[Throttle]): fs2.Pipe[F, A, A] =
+    throttle match {
+      case None =>
+        identity
+      case Some(requestsPerSecond) =>
+        val elements = Math.max(requestsPerSecond.value, 1.0).toLong
+        val duration = Math.max(1.0 / requestsPerSecond.value, 1.0).toInt
+        Throttler.throttle[F, A](elements, duration.second, Throttler.Shaping)
+    }
 
   //  Error handlers  //
 
@@ -127,25 +157,10 @@ final class CuttlefishClient[F[_]: Async] private (
         case Some(apiKey) => Async[F].pure(apiKey)
         case None         => Async[F].raiseError(CuttlefishError("No Octopus apiKey provided"))
 
-  private def setApiKey(apiKey: String): F[Unit] =
-    atomicState.update:
-      _.copy(apiKey = Some(apiKey))
-
-  private def clearApiKey(): F[Unit] =
-    atomicState.update:
-      _.copy(apiKey = None)
-
-  private def getAuthenticatedClient(): F[Option[Client[F]]] =
-    atomicState.get.map:
-      _.authenticatedClient
-
-  private def setAuthenticatedClient(client: Client[F]): F[Unit] =
-    atomicState.update:
-      _.copy(authenticatedClient = Some(client))
-
-  private def clearAuthenticatedClient(): F[Unit] =
-    atomicState.update:
-      _.copy(authenticatedClient = None)
+  private def atomicallyModifyAuthenticatedClient(f: Option[Client[F]] => F[Client[F]]): F[Client[F]] =
+    atomicState.evalModify: state =>
+      f(state.authenticatedClient).map: newAuthenticatedClient =>
+        (state.copy(authenticatedClient = Some(newAuthenticatedClient)), newAuthenticatedClient)
 
   //  Givens  //
 

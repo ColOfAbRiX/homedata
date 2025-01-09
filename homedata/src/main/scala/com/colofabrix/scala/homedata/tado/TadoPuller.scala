@@ -59,6 +59,7 @@ object TadoPuller:
   def apply(): IO[TadoPuller] =
     for
       _           <- logger.info(s"Initializing Tado puller...")
+      _           <- logger.debug(s"Tado configuration: ${TadoConfig.config}")
       tadoClient  <- Tado4sClient[IO](None)
       _           <- tadoClient.login(TadoConfig.config.username, TadoConfig.config.password)
       account     <- tadoClient.getAccountInfo()

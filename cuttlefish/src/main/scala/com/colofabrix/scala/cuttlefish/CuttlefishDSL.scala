@@ -40,9 +40,10 @@ trait CuttlefishDSL:
       to: Option[OffsetDateTime] = None,
       pageSize: Option[Int] = None,
       orderBy: Option[String] = None,
+      throttle: Option[Throttle] = None,
     ): fs2.Stream[F, ConsumptionResults] =
       cuttlefishClient.meterConsumption(
-        MeterConsumptionRequest(
+        request = MeterConsumptionRequest(
           product = product,
           meterPointNumber = meterPointNumber,
           serial = serial,
@@ -52,4 +53,5 @@ trait CuttlefishDSL:
           page = Some(1),
           orderBy = orderBy,
         ),
+        throttle = throttle,
       )

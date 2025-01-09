@@ -7,12 +7,16 @@ import com.colofabrix.scala.homedata.tado.*
 import com.colofabrix.scala.timeflux.*
 import com.colofabrix.scala.timeflux.measures.TimefluxSerializable.toApiMeasureStream
 import java.time.*
+import java.time.temporal.ChronoUnit
 
-object Main extends IOApp.Simple with TimefluxDSL:
+object Main extends IOApp.Simple:
 
-  val from = OffsetDateTime.of(2025, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC)
-  val to   = OffsetDateTime.of(2025, 1, 2, 0, 0, 0, 0, ZoneOffset.UTC)
-  // val to   = OffsetDateTime.now
+  val (from, to) =
+    TimeSpanPicker()
+      .selectFrom()
+      .otherMinus(days = 2)
+      .roundBoth(ChronoUnit.DAYS)
+      .pick()
 
   val run =
     for
@@ -22,5 +26,5 @@ object Main extends IOApp.Simple with TimefluxDSL:
       tadoPuller         <- TadoPuller()
       tadoMeasures        = tadoPuller.pullReadings(from, to).through(toApiMeasureStream)
       writer             <- InfluxWriter()
-      _                  <- writer.write(tadoMeasures)
+      _                  <- writer.write(gasMeasures, electricityMeasures, tadoMeasures)
     yield ()

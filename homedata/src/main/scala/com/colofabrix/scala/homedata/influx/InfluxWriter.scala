@@ -1,6 +1,7 @@
 package com.colofabrix.scala.homedata.influx
 
 import cats.effect.IO
+import com.colofabrix.scala.homedata.utils.pipes.*
 import com.colofabrix.scala.timeflux.*
 import com.colofabrix.scala.timeflux.measures.Measure
 import org.typelevel.log4cats.Logger
@@ -20,19 +21,16 @@ class InfluxWriter(timefluxClient: TimefluxClient[IO]) extends TimefluxDSL:
     yield result2
 
   def write(values: fs2.Stream[IO, Measure]): IO[Unit] =
+    val loggedValues =
+      values.every(InfluxConfig.config.batchWrites) { _ =>
+        logger.info(s"Submitted ${InfluxConfig.config.batchWrites} measures to InfluxDB")
+      }
+
     timefluxClient.writeMeasures(
       InfluxConfig.config.projectBucket,
-      values,
+      loggedValues,
       batchWrites = Some(InfluxConfig.config.batchWrites),
     )
-
-  // import cats.effect.kernel.Sync
-
-  // def every[F[_]: Sync, A](n: Int)(f: A => F[Unit]): fs2.Pipe[F, A, A] =
-  //   _.zipWithIndex
-  //     .evalTap: (a, i) =>
-  //       if i % n == 0 then f(a) else Sync[F].unit
-  //     .map((a, i) => a)
 
 object InfluxWriter extends TimefluxDSL:
 
@@ -41,9 +39,10 @@ object InfluxWriter extends TimefluxDSL:
 
   def apply(): IO[InfluxWriter] =
     for
-      _              <- logger.info("Initalizing Timeflux writer...")
+      _              <- logger.info("Initializing Influx writer...")
+      _              <- logger.debug(s"Influx configuration: ${InfluxConfig.config}")
       timefluxClient <- TimefluxClient[IO](InfluxConfig.clientConfig)
       _              <- timefluxClient.createBucketIfMissing(InfluxConfig.config.projectBucket)
       result          = new InfluxWriter(timefluxClient)
-      _              <- logger.info(s"Initalized Timeflux writer on bucket ${InfluxConfig.config.projectBucket}")
+      _              <- logger.info(s"Initialized Influx writer on bucket ${InfluxConfig.config.projectBucket}")
     yield result

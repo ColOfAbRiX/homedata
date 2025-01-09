@@ -77,7 +77,7 @@ object TadoReading:
         name = "tado",
         fields = fields.flattenOption,
         tags = Vector(room),
-        time = reading.time.getOrElse(OffsetDateTime.MAX)
+        time = reading.time.getOrElse(OffsetDateTime.MAX),
       )
 
   given Show[TadoReading] with

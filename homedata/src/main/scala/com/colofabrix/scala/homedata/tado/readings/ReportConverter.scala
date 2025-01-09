@@ -71,13 +71,13 @@ object ReportConverter:
             TadoDataStore(
               from = from,
               to = to,
-              reading = TadoReading.build(setTemperature = Some(temp), isOff = Some(false))
+              reading = TadoReading.build(setTemperature = Some(temp), isOff = Some(false)),
             )
           case TimeSeriesType.DataIntervals(from, to, ValueType.HeatingSetting(_, _, None)) =>
             TadoDataStore(
               from = from,
               to = to,
-              reading = TadoReading.build(isOff = Some(true))
+              reading = TadoReading.build(isOff = Some(true)),
             )
         }
     }

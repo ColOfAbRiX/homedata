@@ -39,18 +39,25 @@ final class Tado4sClient[F[_]: Async] private (
    * Logs into the Tado service
    */
   def login(username: String, password: String): F[Unit] =
-    logger.debug(s"Login") >>
-    setCredentials(username, password) >>
-    loginRequest()
+    logger.debug("Login") >>
+    atomicState.update { state =>
+      lazy val credentials = TadoCredentials(username, password)
+      state.credentials match
+        case None =>
+          state.copy(credentials = Some(credentials))
+        case Some(oldCredentials) if credentials != oldCredentials =>
+          state.copy(credentials = Some(credentials), authToken = None, authenticatedClient = None)
+        case Some(_) =>
+          state
+    } >> loginRequest()
 
   /**
    * Logs out the Tado service
    */
   def logout(): F[Unit] =
-    logger.debug(s"Logout") >>
-    clearCredentials() >>
-    clearAuthToken() >>
-    clearAuthenticatedClient()
+    logger.debug("Logout") >>
+    atomicState.update:
+      _.copy(credentials = None, authToken = None, authenticatedClient = None)
 
   /**
    * Information about the Tado account
@@ -140,31 +147,37 @@ final class Tado4sClient[F[_]: Async] private (
   //  Http Client Management  //
 
   private def loginRequest(): F[Unit] =
-    getCredentials().flatMap: credentials =>
-      val requestBody =
-        UrlForm(
-          "client_id"     -> "tado-web-app",
-          "client_secret" -> config.clientSecret,
-          "grant_type"    -> "password",
-          "password"      -> credentials.password,
-          "scope"         -> "home.user",
-          "username"      -> credentials.username,
-        )
+    atomicState
+      .evalUpdate {
+        case TadoClientState(None, _, _) =>
+          Async[F].raiseError(Tado4sError("No Tado credentials provided"))
 
-      val postRequest = POST(requestBody, config.apiAuth / "oauth" / "token")
+        case state @ TadoClientState(Some(credentials), _, _) =>
+          val requestBody =
+            UrlForm(
+              "client_id"     -> "tado-web-app",
+              "client_secret" -> config.clientSecret,
+              "grant_type"    -> "password",
+              "password"      -> credentials.password,
+              "scope"         -> "home.user",
+              "username"      -> credentials.username,
+            )
 
-      logger.info("Sending login request") >>
-      atomicallyModifyAuthToken: _ =>
-        httpClient
-          .expect[AuthResponse](postRequest)
-          .flatMap: authResponse =>
-            val expiry    = OffsetDateTime.now().plus(authResponse.expires_in.toLong, ChronoUnit.SECONDS)
-            val authToken = TadoAuthToken(authResponse.access_token, authResponse.refresh_token, expiry)
-            logger.trace(s"Login authentication response: $authResponse}") >>
-            logger.debug(s"Logged in with token $authToken") >>
-            Async[F].pure(Some(authToken))
-      .adaptError: error =>
+          val postRequest = POST(requestBody, config.apiAuth / "oauth" / "token")
+
+          logger.info("Sending login request") >>
+          httpClient
+            .expect[AuthResponse](postRequest)
+            .flatMap: authResponse =>
+              val expiry    = OffsetDateTime.now().plus(authResponse.expires_in.toLong, ChronoUnit.SECONDS)
+              val authToken = TadoAuthToken(authResponse.access_token, authResponse.refresh_token, expiry)
+              logger.trace(s"Login authentication response: $authResponse}") >>
+              logger.debug(s"Logged in with token $authToken") >>
+              Async[F].pure(state.copy(authToken = Some(authToken)))
+      }
+      .adaptError { error =>
         Tado4sError("Error while logging in", Some(error))
+      }
 
   private def refreshTokenRequest(): F[Unit] =
     getAuthToken().flatMap:
@@ -216,21 +229,20 @@ final class Tado4sClient[F[_]: Async] private (
         refreshTokenRequest() >>
         withAuthClient(retries - 1)
       case Some(authToken) =>
-        getAuthenticatedClient().flatMap:
+        atomicallyModifyAuthenticatedClient:
           case Some(client) =>
             logger.debug(s"Returning Tado authenticated client with token $authToken") >>
             Async[F].pure(client)
           case None =>
             for
-              _      <- setAuthenticatedClient(buildHttpClient(authToken))
+              client <- Async[F].pure(buildHttpClient(authToken))
               _      <- logger.debug(s"Creating Tado authenticated client with token $authToken")
-              result <- withAuthClient(retries - 1)
-            yield result
+            yield client
 
   private def buildHttpClient(authToken: TadoAuthToken): Client[F] =
     val retryPolicy =
       RetryPolicy[F](
-        backoff = RetryPolicy.exponentialBackoff(config.maxRetryTime, config.maxRetries)
+        backoff = RetryPolicy.exponentialBackoff(config.maxRetryTime, config.maxRetries),
       )
 
     Retry(retryPolicy):
@@ -252,19 +264,10 @@ final class Tado4sClient[F[_]: Async] private (
 
   //  State management  //
 
-  private def getCredentials(): F[TadoCredentials] =
-    atomicState.get.flatMap: state =>
-      state.credentials match
-        case Some(credentials) => Async[F].pure(credentials)
-        case None              => Async[F].raiseError(Tado4sError("No Tado credentials provided"))
-
-  private def getAuthenticatedClient(): F[Option[Client[F]]] =
-    atomicState.get.map:
-      _.authenticatedClient
-
-  private def setAuthenticatedClient(client: Client[F]): F[Unit] =
-    atomicState.update:
-      _.copy(authenticatedClient = Some(client))
+  private def atomicallyModifyAuthenticatedClient(f: Option[Client[F]] => F[Client[F]]): F[Client[F]] =
+    atomicState.evalModify: state =>
+      f(state.authenticatedClient).map: newAuthenticatedClient =>
+        (state.copy(authenticatedClient = Some(newAuthenticatedClient)), newAuthenticatedClient)
 
   private def clearAuthenticatedClient(): F[Unit] =
     atomicState.update:
@@ -282,14 +285,6 @@ final class Tado4sClient[F[_]: Async] private (
   private def clearAuthToken(): F[Unit] =
     atomicState.update:
       _.copy(authToken = None)
-
-  private def setCredentials(username: String, password: String): F[Unit] =
-    atomicState.update:
-      _.copy(credentials = Some(TadoCredentials(username = username, password = password)))
-
-  private def clearCredentials(): F[Unit] =
-    atomicState.update:
-      _.copy(credentials = None)
 
 /**
  * Tado Client for Scala
