@@ -151,9 +151,7 @@ final class TimefluxClient[F[_]: Async] private (
         sendWriteRequest(url, client, request, values)
     }
 
-  private def sendWriteRequest(url: Uri, client: Client[F], request: WriteRequest, values: => StreamF[Measure]): F[
-    Unit,
-  ] =
+  private def sendWriteRequest(url: Uri, client: Client[F], request: WriteRequest, values: StreamF[Measure]): F[Unit] =
     val headers =
       Headers(
         "Content-Type" -> "text/plain; charset=utf-8",
@@ -300,7 +298,7 @@ object TimefluxClient:
   ): F[TimefluxClient[F]] =
     EmberClientBuilder
       .default[F]
-      .withTimeout(30.seconds)
+      .withTimeout(maybeConfig.map(_.httpTimeout).getOrElse(30.seconds))
       .build
       .allocated
       .flatMap {

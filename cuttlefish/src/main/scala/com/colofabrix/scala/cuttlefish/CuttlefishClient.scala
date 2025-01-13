@@ -5,7 +5,9 @@ import cats.effect.std.AtomicCell
 import cats.implicits.given
 import com.colofabrix.scala.cuttlefish.api.*
 import com.colofabrix.scala.cuttlefish.CuttlefishClient.*
+import com.colofabrix.scala.cuttlefish.FS2Logging.*
 import com.colofabrix.scala.cuttlefish.model.*
+import dev.kovstas.fs2throttler.Throttler
 import fs2.io.net.Network
 import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
@@ -21,7 +23,6 @@ import org.http4s.Uri.Path.SegmentEncoder
 import org.typelevel.log4cats.SelfAwareStructuredLogger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 import scala.concurrent.duration.*
-import dev.kovstas.fs2throttler.Throttler
 
 /**
  * Octopus Client for Scala
@@ -45,22 +46,15 @@ final class CuttlefishClient[F[_]: Async] private (
    */
   def login(apiKey: String): F[Unit] =
     logger.debug("Login") >>
-    atomicState.update: state =>
-      state.apiKey match
-        case None =>
-          state.copy(apiKey = Some(apiKey))
-        case Some(oldApiKey) if apiKey =!= oldApiKey =>
-          state.copy(apiKey = Some(apiKey), authenticatedClient = None)
-        case Some(_) =>
-          state
+    setApiKey(apiKey)
 
   /**
    * Logs out the Octopus service
    */
   def logout(): F[Unit] =
     logger.debug("Logout") >>
-    atomicState.update:
-      _.copy(apiKey = None, authenticatedClient = None)
+    clearApiKey() >>
+    clearAuthenticatedClient()
 
   def pagedMeterConsumption(request: MeterConsumptionRequest): F[MeterConsumptionResponse] =
     for
@@ -71,7 +65,7 @@ final class CuttlefishClient[F[_]: Async] private (
 
   def meterConsumption(request: MeterConsumptionRequest, throttle: Option[Throttle]): StreamF[ConsumptionResults] =
     val pageZero = request.copy(page = Some(1))
-    fs2.Stream.eval(logger.debug(s"Called meterConsumption() with $request")) >>
+    fs2.Stream.debug(s"Called meterConsumption() with $request") >>
     fs2.Stream
       .unfoldLoopEval(pageZero) {
         pageLoopMeterConsumption(_).map((results, nextPage) => (fs2.Stream.emits(results), nextPage))
@@ -110,7 +104,7 @@ final class CuttlefishClient[F[_]: Async] private (
     atomicallyModifyAuthenticatedClient:
       case Some(client) =>
         logger.debug(s"Returning Cuttlefish authenticated client") >>
-        Async[F].pure(client)
+        client.pure[F]
       case None =>
         for
           _      <- logger.debug(s"Creating Cuttlefish authenticated client")
@@ -154,8 +148,20 @@ final class CuttlefishClient[F[_]: Async] private (
   private def getApiKey(): F[String] =
     atomicState.get.flatMap: state =>
       state.apiKey match
-        case Some(apiKey) => Async[F].pure(apiKey)
-        case None         => Async[F].raiseError(CuttlefishError("No Octopus apiKey provided"))
+        case Some(apiKey) => apiKey.pure[F]
+        case None         => CuttlefishError("No Octopus apiKey provided").raiseError
+
+  private def setApiKey(apiKey: String): F[Unit] =
+    atomicState.update:
+      _.copy(apiKey = Some(apiKey))
+
+  private def clearApiKey(): F[Unit] =
+    atomicState.update:
+      _.copy(apiKey = None)
+
+  private def clearAuthenticatedClient(): F[Unit] =
+    atomicState.update:
+      _.copy(authenticatedClient = None)
 
   private def atomicallyModifyAuthenticatedClient(f: Option[Client[F]] => F[Client[F]]): F[Client[F]] =
     atomicState.evalModify: state =>
@@ -187,7 +193,7 @@ object CuttlefishClient:
   def apply[F[_]: Async: Network](maybeConfig: Option[CuttlefishConfig] = None): F[CuttlefishClient[F]] =
     EmberClientBuilder
       .default[F]
-      .withTimeout(30.seconds)
+      .withTimeout(maybeConfig.map(_.httpTimeout).getOrElse(30.seconds))
       .build
       .allocated
       .flatMap {

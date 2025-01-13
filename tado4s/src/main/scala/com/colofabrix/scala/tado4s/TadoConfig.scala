@@ -5,12 +5,23 @@ import pureconfig.*
 import pureconfig.generic.derivation.default.*
 import scala.concurrent.duration.*
 
+/**
+ * Startup configuration of the Tado4s Client
+ *
+ * @param apiBase Base URL for the API calls
+ * @param apiAuth OAuth2 Authentication code
+ * @param clientSecret OAuth2 Client Secret
+ * @param httpTimeout HTTP Timeout
+ * @param maxRetries Max number of retries for HTTP requests
+ * @param maxRetryTime Maximum retry time
+ */
 final case class TadoConfig(
   apiBase: Uri,
   apiAuth: Uri,
   clientSecret: String,
-  maxRetries: Int,
-  maxRetryTime: FiniteDuration,
+  httpTimeout: FiniteDuration = 30.seconds,
+  maxRetries: Int = 5,
+  maxRetryTime: FiniteDuration = 1.minute,
 ) derives ConfigReader
 
 /**

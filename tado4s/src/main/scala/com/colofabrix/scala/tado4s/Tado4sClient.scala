@@ -328,7 +328,7 @@ object Tado4sClient:
   def apply[F[_]: Async: Network](maybeConfig: Option[TadoConfig]): F[Tado4sClient[F]] =
     EmberClientBuilder
       .default[F]
-      .withTimeout(30.seconds)
+      .withTimeout(maybeConfig.map(_.httpTimeout).getOrElse(30.seconds))
       .build
       .allocated
       .flatMap {
