@@ -48,7 +48,19 @@ class TadoApiDecoders extends AnyFreeSpecLike with Matchers with EitherValues:
 
     "for HomeZonesResponse" in {
       val json   = loadJson("home_zones_response.json")
-      val actual = circeDecode[List[HomeZonesResponse]](json)
+      val actual = circeDecode[List[HomeDeviceResponse]](json)
+      actual should matchPattern { case Right(_) => }
+    }
+
+    "for HomeZonesResponse" in {
+      val json   = loadJson("home_zones_response.json")
+      val actual = circeDecode[List[HomeUserResponse]](json)
+      actual should matchPattern { case Right(_) => }
+    }
+
+    "for HomeZonesResponse" in {
+      val json   = loadJson("home_zones_response.json")
+      val actual = circeDecode[List[HomeZoneResponse]](json)
       actual should matchPattern { case Right(_) => }
     }
 

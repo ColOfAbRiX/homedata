@@ -4,24 +4,24 @@ import io.circe.Decoder
 import java.time.*
 
 /**
- * HomeZonesResponse
+ * HomeZoneResponse
  */
-final case class HomeZonesResponse(
+final case class HomeZoneResponse(
   id: Int,
   name: String,
   `type`: String,
   dateCreated: OffsetDateTime,
   deviceTypes: Vector[String],
-  devices: Vector[HomeZonesResponse.Device],
+  devices: Vector[HomeZoneResponse.Device],
   reportAvailable: Boolean,
   showScheduleSetup: Boolean,
   supportsDazzle: Boolean,
   dazzleEnabled: Boolean,
-  dazzleMode: HomeZonesResponse.DazzleMode,
-  openWindowDetection: HomeZonesResponse.OpenWindowDetection,
+  dazzleMode: HomeZoneResponse.DazzleMode,
+  openWindowDetection: HomeZoneResponse.OpenWindowDetection,
 ) derives Decoder
 
-object HomeZonesResponse:
+object HomeZoneResponse:
 
   final case class DazzleMode(
     supported: Boolean,

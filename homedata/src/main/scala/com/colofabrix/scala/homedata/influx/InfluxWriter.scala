@@ -17,8 +17,8 @@ class InfluxWriter(timefluxClient: TimefluxClient[IO]) extends TimefluxDSL:
       _         <- logger.info("Wiring readings into database...")
       allStreams = values.foldLeft(fs2.Stream.empty[IO])(_ merge _)
       _         <- logger.info("Starting collection of data")
-      result2   <- write(allStreams)
-    yield result2
+      result    <- write(allStreams)
+    yield result
 
   def write(values: fs2.Stream[IO, Measure]): IO[Unit] =
     val loggedValues =

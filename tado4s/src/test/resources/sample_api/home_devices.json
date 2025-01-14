@@ -1,0 +1,169 @@
+[
+  {
+    "deviceType": "BP02",
+    "serialNo": "BP1234567890",
+    "shortSerialNo": "BP1234567890",
+    "currentFwVersion": "94.2",
+    "connectionState": {
+      "value": true,
+      "timestamp": "2025-01-14T08:54:16.720Z"
+    },
+    "characteristics": {
+      "capabilities": []
+    },
+    "isDriverConfigured": true
+  },
+  {
+    "deviceType": "IB01",
+    "serialNo": "IB1234567890",
+    "shortSerialNo": "IB1234567890",
+    "currentFwVersion": "92.1",
+    "connectionState": {
+      "value": true,
+      "timestamp": "2025-01-14T09:01:45.548Z"
+    },
+    "characteristics": {
+      "capabilities": [
+        "RADIO_ENCRYPTION_KEY_ACCESS"
+      ]
+    },
+    "inPairingMode": false
+  },
+  {
+    "deviceType": "SU02",
+    "serialNo": "SU1234567890",
+    "shortSerialNo": "SU1234567890",
+    "currentFwVersion": "215.1",
+    "connectionState": {
+      "value": true,
+      "timestamp": "2025-01-14T08:52:40.929Z"
+    },
+    "characteristics": {
+      "capabilities": [
+        "INSIDE_TEMPERATURE_MEASUREMENT",
+        "IDENTIFY"
+      ]
+    },
+    "batteryState": "NORMAL"
+  },
+  {
+    "deviceType": "VA02",
+    "serialNo": "VA1111111111",
+    "shortSerialNo": "VA1111111111",
+    "currentFwVersion": "215.1",
+    "connectionState": {
+      "value": true,
+      "timestamp": "2025-01-14T09:01:08.685Z"
+    },
+    "characteristics": {
+      "capabilities": [
+        "INSIDE_TEMPERATURE_MEASUREMENT",
+        "IDENTIFY"
+      ]
+    },
+    "mountingState": {
+      "value": "CALIBRATED",
+      "timestamp": "2024-10-24T13:43:40.961Z"
+    },
+    "mountingStateWithError": "CALIBRATED",
+    "batteryState": "NORMAL",
+    "orientation": "VERTICAL",
+    "childLockEnabled": false
+  },
+  {
+    "deviceType": "VA02",
+    "serialNo": "VA2222222222",
+    "shortSerialNo": "VA2222222222",
+    "currentFwVersion": "215.1",
+    "connectionState": {
+      "value": true,
+      "timestamp": "2025-01-14T08:57:50.356Z"
+    },
+    "characteristics": {
+      "capabilities": [
+        "INSIDE_TEMPERATURE_MEASUREMENT",
+        "IDENTIFY"
+      ]
+    },
+    "mountingState": {
+      "value": "CALIBRATED",
+      "timestamp": "2024-10-24T13:46:23.122Z"
+    },
+    "mountingStateWithError": "CALIBRATED",
+    "batteryState": "NORMAL",
+    "orientation": "VERTICAL",
+    "childLockEnabled": false
+  },
+  {
+    "deviceType": "VA02",
+    "serialNo": "VA3333333333",
+    "shortSerialNo": "VA3333333333",
+    "currentFwVersion": "215.1",
+    "connectionState": {
+      "value": true,
+      "timestamp": "2025-01-14T08:59:54.249Z"
+    },
+    "characteristics": {
+      "capabilities": [
+        "INSIDE_TEMPERATURE_MEASUREMENT",
+        "IDENTIFY"
+      ]
+    },
+    "mountingState": {
+      "value": "CALIBRATED",
+      "timestamp": "2024-10-24T16:54:06.490Z"
+    },
+    "mountingStateWithError": "CALIBRATED",
+    "batteryState": "NORMAL",
+    "orientation": "VERTICAL",
+    "childLockEnabled": false
+  },
+  {
+    "deviceType": "VA02",
+    "serialNo": "VA4444444444",
+    "shortSerialNo": "VA4444444444",
+    "currentFwVersion": "215.1",
+    "connectionState": {
+      "value": true,
+      "timestamp": "2025-01-14T08:55:16.111Z"
+    },
+    "characteristics": {
+      "capabilities": [
+        "INSIDE_TEMPERATURE_MEASUREMENT",
+        "IDENTIFY"
+      ]
+    },
+    "mountingState": {
+      "value": "CALIBRATED",
+      "timestamp": "2024-10-25T18:19:15.873Z"
+    },
+    "mountingStateWithError": "CALIBRATED",
+    "batteryState": "NORMAL",
+    "orientation": "HORIZONTAL",
+    "childLockEnabled": false
+  },
+  {
+    "deviceType": "VA02",
+    "serialNo": "VA5555555555",
+    "shortSerialNo": "VA5555555555",
+    "currentFwVersion": "215.1",
+    "connectionState": {
+      "value": true,
+      "timestamp": "2025-01-14T09:01:14.762Z"
+    },
+    "characteristics": {
+      "capabilities": [
+        "INSIDE_TEMPERATURE_MEASUREMENT",
+        "IDENTIFY"
+      ]
+    },
+    "mountingState": {
+      "value": "CALIBRATED",
+      "timestamp": "2024-10-25T18:16:52.040Z"
+    },
+    "mountingStateWithError": "CALIBRATED",
+    "batteryState": "NORMAL",
+    "orientation": "HORIZONTAL",
+    "childLockEnabled": false
+  }
+]

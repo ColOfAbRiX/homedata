@@ -1,0 +1,102 @@
+[
+  {
+    "name": "John Smith",
+    "email": "johnsmith@gmail.com",
+    "username": "johnsmith@gmail.com",
+    "id": "84e18963-5465-83f7-9fe8-b97b47e477ba",
+    "homes": [
+      {
+        "id": 1412408,
+        "name": "The House"
+      }
+    ],
+    "locale": "en",
+    "mobileDevices": [
+      {
+        "name": "John's Phone",
+        "id": 8212757,
+        "settings": {
+          "geoTrackingEnabled": true,
+          "specialOffersEnabled": false,
+          "onDemandLogRetrievalEnabled": false,
+          "pushNotifications": {
+            "lowBatteryReminder": true,
+            "awayModeReminder": true,
+            "homeModeReminder": true,
+            "openWindowReminder": true,
+            "energySavingsReportReminder": true,
+            "incidentDetection": true,
+            "energyIqReminder": false,
+            "tariffHighPriceAlert": true,
+            "tariffLowPriceAlert": true
+          }
+        },
+        "location": {
+          "stale": false,
+          "atHome": true,
+          "bearingFromHome": {
+            "degrees": 81.40675141583215,
+            "radians": 1.5753487707582594
+          },
+          "relativeDistanceFromHomeFence": 0.0
+        },
+        "deviceMetadata": {
+          "platform": "Android",
+          "osVersion": "11",
+          "model": "Phone",
+          "locale": "en"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Joe Joey",
+    "email": "joejoey@gmail.com",
+    "username": "joejoey@gmail.com",
+    "id": "6461c931-44eb-80c8-8b9f-de8e81922ab4",
+    "homes": [
+      {
+        "id": 1461193,
+        "name": "The House"
+      }
+    ],
+    "locale": "en",
+    "mobileDevices": [
+      {
+        "name": "Joe's Phone",
+        "id": 817673,
+        "settings": {
+          "geoTrackingEnabled": true,
+          "specialOffersEnabled": false,
+          "onDemandLogRetrievalEnabled": false,
+          "pushNotifications": {
+            "lowBatteryReminder": true,
+            "awayModeReminder": false,
+            "homeModeReminder": false,
+            "openWindowReminder": true,
+            "energySavingsReportReminder": true,
+            "incidentDetection": true,
+            "energyIqReminder": false,
+            "tariffHighPriceAlert": true,
+            "tariffLowPriceAlert": true
+          }
+        },
+        "location": {
+          "stale": false,
+          "atHome": false,
+          "bearingFromHome": {
+            "degrees": 215.92490546249073,
+            "radians": 3.9461534625773857
+          },
+          "relativeDistanceFromHomeFence": 0.6079794846185549
+        },
+        "deviceMetadata": {
+          "platform": "Android",
+          "osVersion": "11",
+          "model": "Phone",
+          "locale": "en"
+        }
+      }
+    ]
+  }
+]

@@ -15,6 +15,7 @@ object Main extends IOApp.Simple:
     TimeSpanPicker()
       .selectFrom()
       .setDate(2024, 1, 1)
+      .otherMinus(months = 1)
       .roundBoth(ChronoUnit.DAYS)
       .pick()
 
@@ -26,5 +27,5 @@ object Main extends IOApp.Simple:
       tadoPuller         <- TadoPuller()
       tadoMeasures        = tadoPuller.pullReadings(from, to).through(toApiMeasureStream)
       writer             <- InfluxWriter()
-      _                  <- writer.write(tadoMeasures, gasMeasures, electricityMeasures)
+      _                  <- writer.write(tadoMeasures)
     yield ()

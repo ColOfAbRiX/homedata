@@ -102,11 +102,11 @@ final class TimefluxClient[F[_]: Async] private (
         case Left(TimefluxRequestError(_, msg, _, _)) if msg.contains(s"bucket \"${request.name}\" not found") =>
           createBucket(request).map(Some(_))
         case Left(error) =>
-          Async[F].raiseError(error)
+          error.raiseError
         case Right(ListBucketsResponse(Nil, _)) =>
           createBucket(request).map(Some(_))
         case Right(_) =>
-          Async[F].pure(None)
+          None.pure[F]
       }
 
   /**
@@ -186,13 +186,13 @@ final class TimefluxClient[F[_]: Async] private (
     private def withOrgId[B](get: A => Option[String], set: Option[String] => A): F[A] =
       get(self) match {
         case Some(_) =>
-          Async[F].pure(self)
+          self.pure[F]
         case None =>
           getCredentials().flatMap {
             case Some(TimefluxCredentials(_, orgId)) =>
-              Async[F].pure(set(Some(orgId.value)))
+              set(Some(orgId.value)).pure[F]
             case None =>
-              Async[F].raiseError(TimefluxException("Required OrgID parameter is not set.", None))
+              TimefluxException("Required OrgID parameter is not set.", None).raiseError
           }
       }
 
@@ -203,15 +203,15 @@ final class TimefluxClient[F[_]: Async] private (
       case None =>
         getCredentials().flatMap:
           case None =>
-            Async[F].raiseError(TimefluxException("No Influx credentials set.", None))
+            TimefluxException("No Influx credentials set.", None).raiseError
           case Some(credentials) =>
             for
-              client <- Async[F].pure(buildHttpClient(credentials))
+              client <- buildHttpClient(credentials).pure[F]
               _      <- logger.debug("Creating new Timeflux authenticated client")
             yield client
       case Some(client) =>
         logger.trace(s"Returning Timeflux authenticated client") >>
-        Async[F].pure(client)
+        client.pure[F]
 
   private def buildHttpClient(creds: TimefluxCredentials): Client[F] =
     val retryPolicy =
@@ -268,9 +268,9 @@ final class TimefluxClient[F[_]: Async] private (
     atomicState.get.flatMap:
       _.serverUrl match {
         case None =>
-          Async[F].raiseError(TimefluxException("No InfluxDB URL set.", None))
+          TimefluxException("No InfluxDB URL set.", None).raiseError
         case Some(serverUrl) =>
-          Async[F].pure(serverUrl.addPath(config.apiBase))
+          serverUrl.addPath(config.apiBase).pure[F]
       }
 
 /**

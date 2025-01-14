@@ -4,7 +4,7 @@ import cats.effect.IO
 import cats.implicits.given
 import com.colofabrix.scala.homedata.tado.readings.*
 import com.colofabrix.scala.homedata.utils.pipes.*
-import com.colofabrix.scala.tado4s.api.HomeZonesResponse
+import com.colofabrix.scala.tado4s.api.HomeZoneResponse
 import com.colofabrix.scala.tado4s.Tado4sClient
 import java.time.*
 import org.typelevel.log4cats.Logger
@@ -70,7 +70,7 @@ object TadoPuller:
       result       = new TadoPuller(tadoClient, initialState)
     yield result
 
-  private def buildRoomsList(zones: Vector[HomeZonesResponse]): Map[Int, String] =
+  private def buildRoomsList(zones: Vector[HomeZoneResponse]): Map[Int, String] =
     zones
       .filter(_.`type` =!= "HOT_WATER")
       .map(zone => (zone.id, zone.name))
