@@ -16,7 +16,7 @@ import org.http4s.Method.*
 import org.typelevel.log4cats.SelfAwareStructuredLogger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 
-private[tado4s] final class Tado4sAuthentication[F[_]: Async](
+final private[tado4s] class Tado4sAuthentication[F[_]: Async](
   httpClient: Client[F],
   config: TadoConfig,
   atomicState: AtomicCell[F, TadoClientState[F]],

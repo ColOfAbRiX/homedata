@@ -27,5 +27,5 @@ object Main extends IOApp.Simple:
       tadoPuller         <- TadoPuller()
       tadoMeasures        = tadoPuller.pullReadings(from, to).through(toApiMeasureStream)
       writer             <- InfluxWriter()
-      _                  <- writer.write(tadoMeasures)
+      _                  <- writer.write(tadoMeasures, gasMeasures, electricityMeasures)
     yield ()
