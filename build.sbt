@@ -10,6 +10,7 @@ val circeGenericVersion    = "0.14.10"
 val coreVersion            = "4.0.0-M8"
 val ducktapeVersion        = "0.1.11"
 val enumeratumVersion      = "1.7.5"
+val fs2DataVersion         = "1.11.2"
 val fs2ThrottlerVersion    = "1.0.12"
 val fs2Version             = "3.9.3"
 val http4sClientVersion    = "0.23.24"
@@ -77,25 +78,28 @@ lazy val timeflux =
       organization := "com.colofabrix.scala.timeflux",
       scalaVersion := scala3Version,
       libraryDependencies ++= List(
-        "ch.qos.logback"         % "logback-classic"     % logbackClassicVersion % Runtime,
-        "co.fs2"                %% "fs2-core"            % fs2Version,
-        "co.fs2"                %% "fs2-io"              % fs2Version,
-        "com.github.pureconfig" %% "pureconfig-core"     % pureconfigVersion,
-        "io.circe"              %% "circe-core"          % circeCoreVersion,
-        "org.http4s"            %% "http4s-circe"        % http4sClientVersion,
-        "org.http4s"            %% "http4s-client"       % http4sClientVersion,
-        "org.http4s"            %% "http4s-core"         % http4sClientVersion,
-        "org.http4s"            %% "http4s-ember-client" % http4sClientVersion,
-        "org.scalatest"         %% "scalatest"           % scalatestVersion      % Test,
-        "org.typelevel"         %% "case-insensitive"    % caseInsensitiveVersion,
-        "org.typelevel"         %% "cats-core"           % catsVersion,
-        "org.typelevel"         %% "cats-effect-kernel"  % catsEffectVersion,
-        "org.typelevel"         %% "cats-effect-std"     % catsEffectVersion,
-        "org.typelevel"         %% "cats-effect"         % catsEffectVersion,
-        "org.typelevel"         %% "cats-kernel"         % catsVersion,
-        "org.typelevel"         %% "log4cats-core"       % log4catsVersion,
-        "org.typelevel"         %% "log4cats-slf4j"      % log4catsVersion,
-        "org.typelevel"         %% "vault"               % vaultVersion,
+        "ch.qos.logback"         % "logback-classic"      % logbackClassicVersion % Runtime,
+        "co.fs2"                %% "fs2-core"             % fs2Version,
+        "co.fs2"                %% "fs2-io"               % fs2Version,
+        "com.github.pureconfig" %% "pureconfig-core"      % pureconfigVersion,
+        "io.circe"              %% "circe-core"           % circeCoreVersion,
+        "io.github.arainko"     %% "ducktape"             % ducktapeVersion,
+        "org.gnieh"             %% "fs2-data-csv-generic" % fs2DataVersion,
+        "org.gnieh"             %% "fs2-data-csv"         % fs2DataVersion,
+        "org.http4s"            %% "http4s-circe"         % http4sClientVersion,
+        "org.http4s"            %% "http4s-client"        % http4sClientVersion,
+        "org.http4s"            %% "http4s-core"          % http4sClientVersion,
+        "org.http4s"            %% "http4s-ember-client"  % http4sClientVersion,
+        "org.scalatest"         %% "scalatest"            % scalatestVersion      % Test,
+        "org.typelevel"         %% "case-insensitive"     % caseInsensitiveVersion,
+        "org.typelevel"         %% "cats-core"            % catsVersion,
+        "org.typelevel"         %% "cats-effect-kernel"   % catsEffectVersion,
+        "org.typelevel"         %% "cats-effect-std"      % catsEffectVersion,
+        "org.typelevel"         %% "cats-effect"          % catsEffectVersion,
+        "org.typelevel"         %% "cats-kernel"          % catsVersion,
+        "org.typelevel"         %% "log4cats-core"        % log4catsVersion,
+        "org.typelevel"         %% "log4cats-slf4j"       % log4catsVersion,
+        "org.typelevel"         %% "vault"                % vaultVersion,
       ),
     )
 

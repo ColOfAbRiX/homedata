@@ -14,13 +14,28 @@ object Main extends IOApp.Simple:
   val (from, to) =
     TimeSpanPicker()
       .selectFrom()
-      .setDate(2024, 1, 1)
       .otherMinus(months = 1)
       .roundBoth(ChronoUnit.DAYS)
       .pick()
 
+  import cats.implicits.given
+  import com.colofabrix.scala.timeflux.api.QueryRequest
+  val query =
+    """from(bucket: "home_data")
+      ||>  range(start: -7d)
+      ||>  filter(fn: (r) => r["_measurement"] == "gas")
+      ||>  filter(fn: (r) => r["_field"] == "consumption")
+      ||>  aggregateWindow(every: 1h, fn: mean, createEmpty: false)
+      ||>  yield(name: "mean")""".stripMargin
+
   val run =
     for
+      timefluxClient <- TimefluxClient[IO](InfluxConfig.clientConfig)
+      points         <- timefluxClient.query(QueryRequest(query, None))
+      listPoints     <- points.compile.toList
+      _              <- listPoints.traverse(IO.println)
+      _              <- IO.raiseError(new RuntimeException(""))
+      // Real working Tado/Octopus
       octoPuller         <- OctopusPuller()
       gasMeasures         = octoPuller.pullGasReadings(from, to).through(toApiMeasureStream)
       electricityMeasures = octoPuller.pullElectricityReadings(from, to).through(toApiMeasureStream)
