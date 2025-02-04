@@ -34,7 +34,7 @@ object Main extends IOApp.Simple:
       points         <- timefluxClient.query(QueryRequest(query, None))
       listPoints     <- points.compile.toList
       _              <- listPoints.traverse(IO.println)
-      _              <- IO.raiseError(new RuntimeException(""))
+      _              <- IO.raiseError(new RuntimeException("IT'S ALL GOOD, IT WORKED"))
       // Real working Tado/Octopus
       octoPuller         <- OctopusPuller()
       gasMeasures         = octoPuller.pullGasReadings(from, to).through(toApiMeasureStream)

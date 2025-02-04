@@ -17,7 +17,7 @@ import org.typelevel.log4cats.slf4j.Slf4jLogger
 /**
  * InfluxDB Authentication
  */
-private[timeflux] final class TimefluxAuthentication[F[_]: Async](
+final private[timeflux] class TimefluxAuthentication[F[_]: Async](
   httpClient: Client[F],
   config: TimefluxConfig,
   atomicState: AtomicCell[F, TimefluxClientState[F]],
@@ -36,14 +36,11 @@ private[timeflux] final class TimefluxAuthentication[F[_]: Async](
   def withAuthClient[A](): F[Client[F]] =
     atomicallyModifyAuthenticatedClient:
       case None =>
-        getCredentials().flatMap:
-          case None =>
-            TimefluxException("No Influx credentials set.", None).raiseError
-          case Some(credentials) =>
-            for
-              client <- buildHttpClient(credentials).pure[F]
-              _      <- logger.debug("Creating new Timeflux authenticated client")
-            yield client
+        for
+          credentials <- getCredentials()
+          client      <- buildHttpClient(credentials).pure[F]
+          _           <- logger.debug("Creating new Timeflux authenticated client")
+        yield client
       case Some(client) =>
         logger.trace(s"Returning Timeflux authenticated client") >>
         client.pure[F]
@@ -61,9 +58,14 @@ private[timeflux] final class TimefluxAuthentication[F[_]: Async](
 
   //  State management  //
 
-  private def getCredentials(): F[Option[TimefluxCredentials]] =
-    atomicState.get.map:
-      _.credentials
+  private def getCredentials(): F[TimefluxCredentials] =
+    atomicState.get.flatMap:
+      _.credentials match {
+        case None =>
+          TimefluxException("Required OrgID parameter is not set.", None).raiseError
+        case Some(credentials) =>
+          credentials.pure[F]
+      }
 
   private def setCredentials(orgId: OrgId, token: AuthToken): F[Unit] =
     atomicState.update:

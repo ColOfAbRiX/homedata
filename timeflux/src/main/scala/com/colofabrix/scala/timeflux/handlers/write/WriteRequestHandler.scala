@@ -14,8 +14,11 @@ import org.http4s.Method.*
 import org.typelevel.log4cats.SelfAwareStructuredLogger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 
-final class WriteRequestHandler[F[_]: Async](httpClient: Client[F], config: TimefluxConfig, baseApiUrl: Uri)
-  extends Http4sClientDsl[F]:
+final private[timeflux] class WriteRequestHandler[F[_]: Async](
+  httpClient: Client[F],
+  config: TimefluxConfig,
+  baseApiUrl: Uri,
+) extends Http4sClientDsl[F]:
 
   implicit private val logger: SelfAwareStructuredLogger[F] =
     Slf4jLogger.getLogger[F]

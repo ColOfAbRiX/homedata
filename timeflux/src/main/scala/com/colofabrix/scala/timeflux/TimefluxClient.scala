@@ -9,6 +9,7 @@ import com.colofabrix.scala.timeflux.config.*
 import com.colofabrix.scala.timeflux.handlers.buckets.*
 import com.colofabrix.scala.timeflux.handlers.query.*
 import com.colofabrix.scala.timeflux.handlers.write.*
+import com.colofabrix.scala.timeflux.logger.*
 import com.colofabrix.scala.timeflux.measures.*
 import com.colofabrix.scala.timeflux.model.*
 import com.colofabrix.scala.timeflux.TimefluxClient.*
@@ -16,7 +17,6 @@ import fs2.io.net.Network
 import org.http4s.*
 import org.http4s.client.Client
 import org.http4s.client.dsl.Http4sClientDsl
-import org.http4s.client.middleware.*
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.Method.*
 import org.typelevel.log4cats.SelfAwareStructuredLogger
@@ -120,20 +120,18 @@ final class TimefluxClient[F[_]: Async] private (
     for
       baseApiUrl     <- getApiUrl()
       client         <- authenticator.withAuthClient()
-      requestWithOrg <- request.applyDefaultOrgId()
+      requestWithOrg <- applyDefaultOrgId(request)
       result         <- f(client, baseApiUrl, requestWithOrg)
     yield result
 
-  extension [A: OrgIdHandler as A](self: A) {
-    def applyDefaultOrgId(): F[A] =
-      A.get(self) match
-        case Some(_) =>
-          self.pure[F]
-        case None =>
-          getCredentials().flatMap { credentials =>
-            A.set(self, Some(credentials.orgId.value)).pure[F]
-          }
-  }
+  private def applyDefaultOrgId[A: OrgIdHandler as A](value: A): F[A] =
+    A.get(value) match
+      case Some(_) =>
+        value.pure[F]
+      case None =>
+        getCredentials().flatMap { credentials =>
+          A.set(value, Some(credentials.orgId.value)).pure[F]
+        }
 
   //  State management  //
 
@@ -196,7 +194,7 @@ object TimefluxClient:
   ): F[TimefluxClient[F]] =
     for
       atomicState     <- AtomicCell[F].of(initialState[F](clientConfig))
-      loggedHttpClient = Logger.colored[F](logBody = true, logHeaders = true)(httpClient)
+      loggedHttpClient = Logger[F]()(httpClient)
       client           = new TimefluxClient[F](loggedHttpClient, config, atomicState)
     yield client
 

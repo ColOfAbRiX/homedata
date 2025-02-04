@@ -6,7 +6,7 @@ import com.colofabrix.scala.timeflux.api.TimefluxRequestError
 import org.http4s.*
 import org.http4s.circe.CirceEntityDecoder.*
 
-object ErrorHandling:
+private[timeflux] object ErrorHandling:
 
   def handleClientStreamError[F[_]: Async](response: Response[F]): fs2.Stream[F, Unit] =
     fs2.Stream.eval(handleClientRunError(response))

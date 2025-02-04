@@ -15,7 +15,8 @@ import org.http4s.Method.*
 import org.typelevel.log4cats.SelfAwareStructuredLogger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 
-final class QueryRequestHandler[F[_]: Async](httpClient: Client[F], baseApiUrl: Uri) extends Http4sClientDsl[F]:
+final private[timeflux] class QueryRequestHandler[F[_]: Async](httpClient: Client[F], baseApiUrl: Uri)
+  extends Http4sClientDsl[F]:
 
   implicit private val logger: SelfAwareStructuredLogger[F] =
     Slf4jLogger.getLogger[F]
@@ -51,9 +52,6 @@ final class QueryRequestHandler[F[_]: Async](httpClient: Client[F], baseApiUrl: 
     response
       .body
       .through(fs2.text.utf8.decode)
-      .evalTap { x =>
-        logger.info(x)
-      }
       .through(lowlevel.rows[F, String]())
       .map(_.values)
       .pure[F]
