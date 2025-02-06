@@ -1,8 +1,8 @@
-package com.colofabrix.scala.timeflux.logger
+package com.colofabrix.scala.cuttlefish.logger
 
 import cats.effect.*
 import cats.syntax.all.*
-import com.colofabrix.scala.timeflux.logger.LogLevel.*
+import com.colofabrix.scala.cuttlefish.logger.LogLevel.*
 import fs2.*
 import org.http4s.*
 import org.http4s.client.*

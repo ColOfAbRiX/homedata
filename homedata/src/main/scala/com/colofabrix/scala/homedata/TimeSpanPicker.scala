@@ -9,28 +9,52 @@ import com.colofabrix.scala.homedata.TimeSpanPicker.Selector
  */
 final class TimeSpanPicker private (val selector: TimeSpanPicker.Selector, from: OffsetDateTime, to: OffsetDateTime):
 
+  /**
+   * Returns both From and To dates
+   */
   def pick(): (OffsetDateTime, OffsetDateTime) =
     if from.isBefore(to) then (from, to)
     else (to, from)
 
+  /**
+   * Returns the From date
+   */
   def pickFrom(): OffsetDateTime =
     pick()._1
 
+  /**
+   * Returns the To date
+   */
   def pickTo(): OffsetDateTime =
     pick()._2
 
+  /**
+   * Focuses the TimeSpanPicker to the From date
+   */
   def selectFrom(): TimeSpanPicker =
     new TimeSpanPicker(TimeSpanPicker.Selector.From, from, to)
 
+  /**
+   * Focuses the TimeSpanPicker to the To date
+   */
   def selectTo(): TimeSpanPicker =
     new TimeSpanPicker(TimeSpanPicker.Selector.To, from, to)
 
+  /**
+   * Sets the TimeSpanPicker to now
+   */
   def now(): TimeSpanPicker =
     returnUpdatedSelected(OffsetDateTime.now())
 
+  /**
+   * Resets the TimeSpanPicker configuration
+   */
   def reset(): TimeSpanPicker =
     TimeSpanPicker()
 
+  /**
+   * Sets individual parts of the Date and Time of the selected From/To date
+   */
   def setDateTime(
     year: Int = -1,
     month: Int = -1,
@@ -52,21 +76,33 @@ final class TimeSpanPicker private (val selector: TimeSpanPicker.Selector, from:
       ),
     )
 
+  /**
+   * Sets individual parts of the Date of the selected From/To date
+   */
   def setDate(year: Int, month: Int, day: Int): TimeSpanPicker =
     returnUpdatedSelected(
       updateSelected(year = Some(year), month = Some(month), day = Some(day)),
     )
 
+  /**
+   * Sets individual parts of the Time of the selected From/To date
+   */
   def setTime(hour: Int, minute: Int, second: Int): TimeSpanPicker =
     returnUpdatedSelected(
       updateSelected(hour = Some(hour), minute = Some(minute), second = Some(second)),
     )
 
+  /**
+   * Sets individual Zone Offset of the selected From/To date
+   */
   def setZoneOffset(offset: ZoneOffset): TimeSpanPicker =
     returnUpdatedSelected(
       updateSelected(offset = Some(offset)),
     )
 
+  /**
+   * Subtracts a given amount of time from the non-selected From/To date
+   */
   def otherMinus(
     years: Int = 0,
     months: Int = 0,
@@ -89,6 +125,9 @@ final class TimeSpanPicker private (val selector: TimeSpanPicker.Selector, from:
         .minusNanos(nanos),
     )
 
+  /**
+   * Adds a given amount of time from the non-selected From/To date
+   */
   def otherPlus(
     years: Int = 0,
     months: Int = 0,
@@ -111,6 +150,9 @@ final class TimeSpanPicker private (val selector: TimeSpanPicker.Selector, from:
         .plusNanos(nanos),
     )
 
+  /**
+   * Rounds both From and To dates to the given Chrono Unit
+   */
   def roundBoth(at: ChronoUnit): TimeSpanPicker =
     new TimeSpanPicker(selector, from.truncatedTo(at), to.truncatedTo(at))
 
@@ -153,9 +195,12 @@ final class TimeSpanPicker private (val selector: TimeSpanPicker.Selector, from:
 
 object TimeSpanPicker:
 
-  enum Selector:
+  private[TimeSpanPicker] enum Selector:
     case From
     case To
 
+  /**
+   * Creates a new TimeSpanPicker set to Now
+   */
   def apply(): TimeSpanPicker =
     new TimeSpanPicker(Selector.From, OffsetDateTime.now(), OffsetDateTime.now())

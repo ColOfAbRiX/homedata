@@ -1,6 +1,5 @@
 package com.colofabrix.scala.timeflux
 
-import cats.data.NonEmptyList
 import cats.effect.Async
 import cats.effect.std.AtomicCell
 import cats.implicits.given
@@ -19,8 +18,6 @@ import org.http4s.client.Client
 import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.Method.*
-import org.typelevel.log4cats.SelfAwareStructuredLogger
-import org.typelevel.log4cats.slf4j.Slf4jLogger
 import scala.concurrent.duration.*
 
 /**
@@ -37,9 +34,6 @@ final class TimefluxClient[F[_]: Async] private (
   private type StreamF[+A] =
     fs2.Stream[F, A]
 
-  implicit private val logger: SelfAwareStructuredLogger[F] =
-    Slf4jLogger.getLogger[F]
-
   private val authenticator: TimefluxAuthentication[F] =
     new TimefluxAuthentication(httpClient, config, atomicState)
 
@@ -47,14 +41,12 @@ final class TimefluxClient[F[_]: Async] private (
    * Logs into the Timeflux service
    */
   def login(orgId: OrgId, token: AuthToken): F[Unit] =
-    logger.debug("Login") >>
     authenticator.login(orgId, token)
 
   /**
    * Logs out the Timeflux service
    */
   def logout(): F[Unit] =
-    logger.debug("Logout") >>
     authenticator.logout()
 
   /**
@@ -62,7 +54,7 @@ final class TimefluxClient[F[_]: Async] private (
    */
   def listBuckets(request: ListBucketRequest): F[ListBucketsResponse] =
     handleRequest(request) { (client, baseApiUrl, req) =>
-      BucketRequestsHandler(httpClient, baseApiUrl).listBuckets(request)
+      BucketRequestsHandler(client, baseApiUrl).listBuckets(req)
     }
 
   /**
@@ -70,7 +62,7 @@ final class TimefluxClient[F[_]: Async] private (
    */
   def createBucket(request: CreateBucketRequest): F[CreateBucketResponse] =
     handleRequest(request) { (client, baseApiUrl, req) =>
-      BucketRequestsHandler(httpClient, baseApiUrl).createBucket(request)
+      BucketRequestsHandler(client, baseApiUrl).createBucket(req)
     }
 
   /**
@@ -78,7 +70,7 @@ final class TimefluxClient[F[_]: Async] private (
    */
   def deleteBucket(request: DeleteBucketRequest): F[Unit] =
     handleRequest(request) { (client, baseApiUrl, req) =>
-      BucketRequestsHandler(httpClient, baseApiUrl).deleteBucket(request)
+      BucketRequestsHandler(client, baseApiUrl).deleteBucket(req)
     }
 
   /**
@@ -86,7 +78,7 @@ final class TimefluxClient[F[_]: Async] private (
    */
   def createBucketIfMissing(request: CreateBucketRequest): F[Option[CreateBucketResponse]] =
     handleRequest(request) { (client, baseApiUrl, req) =>
-      BucketRequestsHandler(httpClient, baseApiUrl).createBucketIfMissing(request)
+      BucketRequestsHandler(client, baseApiUrl).createBucketIfMissing(req)
     }
 
   /**
@@ -109,40 +101,21 @@ final class TimefluxClient[F[_]: Async] private (
   /**
    * Queries InfluxDB and returns a stream of results
    */
-  def query(request: QueryRequest): F[StreamF[NonEmptyList[String]]] =
+  def query(request: QueryRequest): F[StreamF[ResultRow]] =
     handleRequest(request) { (client, baseApiUrl, req) =>
       QueryRequestHandler(client, baseApiUrl).queryRequest(req)
     }
 
   //  Internal operations  //
 
-  private def handleRequest[A: OrgIdHandler, B](request: A)(f: (Client[F], Uri, A) => F[B]): F[B] =
+  private def handleRequest[A, B](request: A)(f: (Client[F], Uri, A) => F[B]): F[B] =
     for
-      baseApiUrl     <- getApiUrl()
-      client         <- authenticator.withAuthClient()
-      requestWithOrg <- applyDefaultOrgId(request)
-      result         <- f(client, baseApiUrl, requestWithOrg)
+      baseApiUrl <- getApiUrl()
+      client     <- authenticator.withAuthClient()
+      result     <- f(client, baseApiUrl, request)
     yield result
 
-  private def applyDefaultOrgId[A: OrgIdHandler as A](value: A): F[A] =
-    A.get(value) match
-      case Some(_) =>
-        value.pure[F]
-      case None =>
-        getCredentials().flatMap { credentials =>
-          A.set(value, Some(credentials.orgId.value)).pure[F]
-        }
-
   //  State management  //
-
-  private def getCredentials(): F[TimefluxCredentials] =
-    atomicState.get.flatMap:
-      _.credentials match {
-        case None =>
-          TimefluxException("Required OrgID parameter is not set.", None).raiseError
-        case Some(credentials) =>
-          credentials.pure[F]
-      }
 
   private def getApiUrl(): F[Uri] =
     atomicState.get.flatMap:
@@ -194,7 +167,7 @@ object TimefluxClient:
   ): F[TimefluxClient[F]] =
     for
       atomicState     <- AtomicCell[F].of(initialState[F](clientConfig))
-      loggedHttpClient = Logger[F]()(httpClient)
+      loggedHttpClient = Logger[F](redactHeaders = false)(httpClient)
       client           = new TimefluxClient[F](loggedHttpClient, config, atomicState)
     yield client
 

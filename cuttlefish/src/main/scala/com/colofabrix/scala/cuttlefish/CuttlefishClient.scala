@@ -6,6 +6,7 @@ import cats.implicits.given
 import com.colofabrix.scala.cuttlefish.api.*
 import com.colofabrix.scala.cuttlefish.CuttlefishClient.*
 import com.colofabrix.scala.cuttlefish.FS2Logging.*
+import com.colofabrix.scala.cuttlefish.logger.Logger
 import com.colofabrix.scala.cuttlefish.model.*
 import dev.kovstas.fs2throttler.Throttler
 import fs2.io.net.Network
@@ -16,7 +17,6 @@ import org.http4s.circe.CirceEntityDecoder.*
 import org.http4s.client.Client
 import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.client.middleware.*
-import org.http4s.client.middleware.Logger
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.Method.*
 import org.http4s.Uri.Path.SegmentEncoder
@@ -205,6 +205,6 @@ object CuttlefishClient:
   private def apply[F[_]: Async](config: CuttlefishConfig, httpClient: Client[F]): F[CuttlefishClient[F]] =
     for
       initialState    <- AtomicCell[F].of(CuttlefishClientState[F](None))
-      loggedHttpClient = Logger.colored[F](logBody = true, logHeaders = true, redactHeadersWhen = _ => false)(httpClient)
+      loggedHttpClient = Logger()(httpClient)
       client           = new CuttlefishClient[F](loggedHttpClient, config, initialState)
     yield client

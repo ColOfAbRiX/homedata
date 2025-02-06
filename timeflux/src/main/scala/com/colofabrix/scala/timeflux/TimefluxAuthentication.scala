@@ -27,11 +27,15 @@ final private[timeflux] class TimefluxAuthentication[F[_]: Async](
     Slf4jLogger.getLogger[F]
 
   def login(orgId: OrgId, token: AuthToken): F[Unit] =
-    setCredentials(orgId, token)
+    logger.debug("Login") >>
+    setCredentials(orgId, token) >>
+    logger.trace("Logged in!")
 
   def logout(): F[Unit] =
+    logger.debug("Logout") >>
     clearCredentials() >>
-    clearAuthenticatedClient()
+    clearAuthenticatedClient() >>
+    logger.trace("Logged out!")
 
   def withAuthClient[A](): F[Client[F]] =
     atomicallyModifyAuthenticatedClient:
@@ -52,9 +56,8 @@ final private[timeflux] class TimefluxAuthentication[F[_]: Async](
       )
 
     Retry(retryPolicy):
-      Logger.colored[F](logBody = true, logHeaders = true):
-        TimefluxAuthenticatedClient[F](credentials.token, credentials.orgId):
-          httpClient
+      TimefluxAuthenticatedClient[F](credentials.token, credentials.orgId):
+        httpClient
 
   //  State management  //
 

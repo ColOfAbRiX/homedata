@@ -13,7 +13,7 @@ trait TimefluxDSL:
      */
     def listBuckets(name: Option[String] = None): F[ListBucketsResponse] =
       timefluxClient.listBuckets(
-        ListBucketRequest(name),
+        ListBucketRequest(name, None),
       )
 
     /**

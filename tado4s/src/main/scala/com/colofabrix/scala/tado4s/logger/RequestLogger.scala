@@ -1,8 +1,8 @@
-package com.colofabrix.scala.timeflux.logger
+package com.colofabrix.scala.tado4s.logger
 
 import cats.effect.*
 import cats.implicits.*
-import com.colofabrix.scala.timeflux.logger.LogLevel.*
+import com.colofabrix.scala.tado4s.logger.LogLevel.*
 import fs2.*
 import org.http4s.*
 import org.http4s.client.*

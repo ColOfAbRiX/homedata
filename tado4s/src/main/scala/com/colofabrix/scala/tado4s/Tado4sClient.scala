@@ -4,6 +4,7 @@ import cats.effect.Async
 import cats.effect.std.AtomicCell
 import cats.implicits.given
 import com.colofabrix.scala.tado4s.api.*
+import com.colofabrix.scala.tado4s.logger.Logger
 import com.colofabrix.scala.tado4s.Tado4sClient.*
 import fs2.io.net.Network
 import java.time.LocalDate
@@ -13,7 +14,6 @@ import org.http4s.*
 import org.http4s.circe.CirceEntityDecoder.*
 import org.http4s.client.Client
 import org.http4s.client.dsl.Http4sClientDsl
-import org.http4s.client.middleware.Logger
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.Method.*
 import org.typelevel.log4cats.SelfAwareStructuredLogger
@@ -226,6 +226,6 @@ object Tado4sClient:
   private def apply[F[_]: Async](config: TadoConfig, httpClient: Client[F]): F[Tado4sClient[F]] =
     for
       initialState    <- AtomicCell[F].of(TadoClientState[F](None, None, None))
-      loggedHttpClient = Logger.colored[F](logBody = true, logHeaders = true)(httpClient)
+      loggedHttpClient = Logger()(httpClient)
       client           = new Tado4sClient[F](loggedHttpClient, config, initialState)
     yield client
