@@ -5,10 +5,10 @@
     </encoder>
   </appender>
 
-  <logger name="com.colofabrix.scala.homedata" level="INFO"/>
-  <logger name="com.colofabrix.scala.cuttlefish" level="INFO"/>
-  <logger name="com.colofabrix.scala.tado4s" level="INFO"/>
-  <logger name="com.colofabrix.scala.timeflux" level="INFO"/>
+  <logger name="com.colofabrix.scala.homedata" level="DEBUG"/>
+  <logger name="com.colofabrix.scala.cuttlefish" level="DEBUG"/>
+  <logger name="com.colofabrix.scala.tado4s" level="DEBUG"/>
+  <logger name="com.colofabrix.scala.timeflux" level="DEBUG"/>
 
   <root level="OFF">
     <appender-ref ref="STDOUT" />

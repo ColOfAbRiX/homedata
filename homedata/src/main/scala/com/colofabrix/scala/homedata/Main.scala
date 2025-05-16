@@ -49,7 +49,7 @@ object Main extends IODeclineApp[Unit]:
       tadoPuller         <- TadoPuller()
       tadoMeasures        = tadoPuller.pullReadings(from, to).through(toApiMeasureStream)
       writer             <- InfluxWriter()
-      _                  <- writer.write(gasMeasures, electricityMeasures)
+      _                  <- writer.write(tadoMeasures, gasMeasures, electricityMeasures)
       // Extra testing code
       _ <- IO.println("HomeData - Simple statistics")
       timefluxClient <- TimefluxClient[IO](InfluxConfig.clientConfig)
