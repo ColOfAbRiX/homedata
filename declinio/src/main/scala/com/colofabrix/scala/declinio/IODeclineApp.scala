@@ -1,9 +1,21 @@
-package com.colofabrix.scala.decline
+package com.colofabrix.scala.declinio
 
 import cats.effect.*
 import cats.effect.std.Console
 import cats.syntax.all.*
 import com.monovore.decline.*
+
+
+/**
+ * Decline-ready application that uses Cats' IO and no configuration
+ */
+trait IOUnitDeclineApp extends IODeclineApp[Unit]:
+
+  final override def runWithConfig(config: Unit): IO[ExitCode] =
+    runNoConfig()
+
+  def runNoConfig(): IO[ExitCode]
+
 
 /**
  * Decline-ready application that uses Cats' IO
@@ -12,6 +24,7 @@ trait IODeclineApp[A] extends IOApp with DeclineApp[IO, A]:
 
   final override def run(args: List[String]): IO[ExitCode] =
     runDeclineApp(args)
+
 
 /**
  * Decline application for any effect F[_] that supports Sync and Console

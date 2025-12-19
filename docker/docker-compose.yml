@@ -9,7 +9,7 @@ services:
       - "8086:8086"
     volumes:
       - ./influxdb:/etc/influxdb2
-      - influxdb-storage:/var/lib/influxdb2
+      - ./influxdb-data:/var/lib/influxdb2
     environment:
       - DOCKER_INFLUXDB_INIT_MODE=setup
       - DOCKER_INFLUXDB_INIT_USERNAME=admin
@@ -30,5 +30,4 @@ services:
       - grafana-storage:/var/lib/grafana
 
 volumes:
-  influxdb-storage: {}
   grafana-storage: {}

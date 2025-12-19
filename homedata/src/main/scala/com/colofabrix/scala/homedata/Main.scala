@@ -2,7 +2,7 @@ package com.colofabrix.scala.homedata
 
 import cats.effect.*
 import cats.implicits.given
-import com.colofabrix.scala.decline.*
+import com.colofabrix.scala.declinio.*
 import com.colofabrix.scala.homedata.influx.*
 import com.colofabrix.scala.homedata.octopus.*
 import com.colofabrix.scala.homedata.tado.*

@@ -35,7 +35,7 @@ timeflux / Test / tpolecatScalacOptions := Set.empty
 lazy val root =
   project
     .in(file("."))
-    .aggregate(homedata, timeflux, tado4s, cuttlefish)
+    .aggregate(homedata, timeflux, tado4s, cuttlefish, declinio)
     .settings(
       name              := "root",
       version           := "0.1.0",
@@ -48,7 +48,7 @@ lazy val root =
 lazy val homedata =
   project
     .in(file("homedata"))
-    .dependsOn(timeflux, tado4s, cuttlefish)
+    .dependsOn(timeflux, tado4s, cuttlefish, declinio)
     .settings(
       name         := "homedata",
       version      := "0.1.0",
@@ -169,5 +169,21 @@ lazy val cuttlefish =
         "org.typelevel"         %% "cats-effect"         % catsEffectVersion,
         "org.typelevel"         %% "log4cats-core"       % log4catsVersion,
         "org.typelevel"         %% "log4cats-slf4j"      % log4catsVersion,
+      ),
+    )
+
+lazy val declinio =
+  project
+    .in(file("declinio"))
+    .settings(
+      name         := "declinio",
+      version      := "0.1.0",
+      organization := "com.colofabrix.scala.declinio",
+      scalaVersion := scala3Version,
+      libraryDependencies ++= List(
+        "com.monovore"  %% "decline"            % declineVersion,
+        "org.typelevel" %% "cats-effect"        % catsEffectVersion,
+        "org.typelevel" %% "cats-effect-std"    % catsEffectVersion,
+        "org.typelevel" %% "cats-effect-kernel" % catsEffectVersion,
       ),
     )
