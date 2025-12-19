@@ -11,5 +11,5 @@ final case class AuthResponse(
   refresh_token: String,
   expires_in: Int,
   scope: String,
-  jti: String,
+  jti: Option[String] = None,
 ) derives Decoder

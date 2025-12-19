@@ -61,7 +61,6 @@ object TadoPuller:
       _           <- logger.info(s"Initializing Tado puller...")
       _           <- logger.debug(s"Tado configuration: ${TadoConfig.config}")
       tadoClient  <- Tado4sClient[IO](None)
-      _           <- tadoClient.login(TadoConfig.config.username, TadoConfig.config.password)
       account     <- tadoClient.getAccountInfo()
       homeId       = account.homes.head.id
       zones       <- tadoClient.getHomeZones(homeId)

@@ -7,7 +7,7 @@ import com.colofabrix.scala.homedata.TimeSpanPicker.Selector
 /**
  * TimeSpanPicker makes picking time ranges easier and less painful
  */
-final class TimeSpanPicker private (val selector: TimeSpanPicker.Selector, from: OffsetDateTime, to: OffsetDateTime):
+final class TimeSpanPicker private (private val selector: TimeSpanPicker.Selector, from: OffsetDateTime, to: OffsetDateTime):
 
   /**
    * Returns both From and To dates
@@ -69,10 +69,10 @@ final class TimeSpanPicker private (val selector: TimeSpanPicker.Selector, from:
         year = if year < 0 then None else Some(year),
         month = if month < 0 then None else Some(month),
         day = if day < 0 then None else Some(day),
-        hour = if hour < 0 then None else Some(year),
-        minute = if minute < 0 then None else Some(month),
-        second = if second < 0 then None else Some(day),
-        nanos = if nanos < 0 then None else Some(day),
+        hour = if hour < 0 then None else Some(hour),
+        minute = if minute < 0 then None else Some(minute),
+        second = if second < 0 then None else Some(second),
+        nanos = if nanos < 0 then None else Some(nanos),
       ),
     )
 
@@ -113,7 +113,7 @@ final class TimeSpanPicker private (val selector: TimeSpanPicker.Selector, from:
     seconds: Int = 0,
     nanos: Int = 0,
   ): TimeSpanPicker =
-    returnUpdatedSelected(
+    returnUpdatedOther(
       getOtherDateTime()
         .minusYears(years)
         .minusMonths(months)
@@ -138,7 +138,7 @@ final class TimeSpanPicker private (val selector: TimeSpanPicker.Selector, from:
     seconds: Int = 0,
     nanos: Int = 0,
   ): TimeSpanPicker =
-    returnUpdatedSelected(
+    returnUpdatedOther(
       getOtherDateTime()
         .plusYears(years)
         .plusMonths(months)
@@ -160,6 +160,11 @@ final class TimeSpanPicker private (val selector: TimeSpanPicker.Selector, from:
     selector match
       case Selector.From => new TimeSpanPicker(selector, date, to)
       case Selector.To   => new TimeSpanPicker(selector, from, date)
+
+  private def returnUpdatedOther(date: OffsetDateTime): TimeSpanPicker =
+    selector match
+      case Selector.From => new TimeSpanPicker(selector, from, date)
+      case Selector.To   => new TimeSpanPicker(selector, date, to)
 
   private def getSelectedDateTime(): OffsetDateTime =
     selector match

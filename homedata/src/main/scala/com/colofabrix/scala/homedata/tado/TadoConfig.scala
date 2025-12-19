@@ -4,8 +4,6 @@ import pureconfig.*
 import pureconfig.generic.derivation.default.*
 
 final case class TadoConfig(
-  username: String,
-  password: String,
   requestsPerSec: Double,
 ) derives ConfigReader
 

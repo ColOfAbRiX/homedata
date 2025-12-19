@@ -31,7 +31,7 @@ transparent trait DeclineApp[F[_]: Sync: Console, A]:
   /**
    * Version of the application
    */
-  def version: String   = ""
+  def version: String = ""
 
   /**
    * Decline command line options

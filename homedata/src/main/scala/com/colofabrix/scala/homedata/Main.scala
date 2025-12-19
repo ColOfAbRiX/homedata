@@ -28,7 +28,7 @@ object Main extends IODeclineApp[Unit]:
     val (from, to) =
       TimeSpanPicker()
         .selectFrom()
-        .otherMinus(months = 1)
+        .otherMinus(days = 3)
         .roundBoth(ChronoUnit.DAYS)
         .pick()
 
@@ -50,7 +50,7 @@ object Main extends IODeclineApp[Unit]:
       tadoMeasures        = tadoPuller.pullReadings(from, to).through(toApiMeasureStream)
       writer             <- InfluxWriter()
       _                  <- writer.write(tadoMeasures, gasMeasures, electricityMeasures)
-      // Extra testing code
+      // Extra testing code for influx syntax
       _ <- IO.println("HomeData - Simple statistics")
       timefluxClient <- TimefluxClient[IO](InfluxConfig.clientConfig)
       points         <- timefluxClient.query(QueryRequest(query, None))
