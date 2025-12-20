@@ -28,6 +28,7 @@ Global / run / fork           := true
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
 Global / tpolecatExcludeOptions        ++= Set(ScalacOptions.warnUnusedLocals)
+homedata / tpolecatExcludeOptions      ++= Set(ScalacOptions.warnUnusedImports)
 homedata / Test / tpolecatScalacOptions := Set.empty
 tado4s / Test / tpolecatScalacOptions   := Set.empty
 timeflux / Test / tpolecatScalacOptions := Set.empty
@@ -43,6 +44,22 @@ lazy val root =
       scalaVersion      := scala3Version,
       semanticdbEnabled := true,
       semanticdbVersion := scalafixSemanticdb.revision,
+    )
+
+lazy val declinio =
+  project
+    .in(file("declinio"))
+    .settings(
+      name         := "declinio",
+      version      := "0.1.0",
+      organization := "com.colofabrix.scala.declinio",
+      scalaVersion := scala3Version,
+      libraryDependencies ++= List(
+        "com.monovore"  %% "decline"            % declineVersion,
+        "org.typelevel" %% "cats-effect"        % catsEffectVersion,
+        "org.typelevel" %% "cats-effect-std"    % catsEffectVersion,
+        "org.typelevel" %% "cats-effect-kernel" % catsEffectVersion,
+      ),
     )
 
 lazy val homedata =
@@ -169,21 +186,5 @@ lazy val cuttlefish =
         "org.typelevel"         %% "cats-effect"         % catsEffectVersion,
         "org.typelevel"         %% "log4cats-core"       % log4catsVersion,
         "org.typelevel"         %% "log4cats-slf4j"      % log4catsVersion,
-      ),
-    )
-
-lazy val declinio =
-  project
-    .in(file("declinio"))
-    .settings(
-      name         := "declinio",
-      version      := "0.1.0",
-      organization := "com.colofabrix.scala.declinio",
-      scalaVersion := scala3Version,
-      libraryDependencies ++= List(
-        "com.monovore"  %% "decline"            % declineVersion,
-        "org.typelevel" %% "cats-effect"        % catsEffectVersion,
-        "org.typelevel" %% "cats-effect-std"    % catsEffectVersion,
-        "org.typelevel" %% "cats-effect-kernel" % catsEffectVersion,
       ),
     )

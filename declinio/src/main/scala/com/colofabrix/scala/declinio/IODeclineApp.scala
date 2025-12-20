@@ -11,6 +11,9 @@ import com.monovore.decline.*
  */
 trait IOUnitDeclineApp extends IODeclineApp[Unit]:
 
+  final override def options: Opts[Unit] =
+    Opts.unit
+
   final override def runWithConfig(config: Unit): IO[ExitCode] =
     runNoConfig()
 
