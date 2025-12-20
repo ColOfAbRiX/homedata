@@ -8,10 +8,8 @@ import com.colofabrix.scala.timeflux.model.*
  *
  * @param serverUrl Influxdb server to connect to
  * @param authToken Influxdb Authentication Token
- * @param orgId Influxdb Organization ID
  */
 final case class TimefluxClientConfig(
   serverUrl: Uri,
   authToken: AuthToken,
-  orgId: OrgId,
 )

@@ -1,13 +1,12 @@
 package com.colofabrix.scala.cuttlefish
 
-import cats.effect.Async
 import com.colofabrix.scala.cuttlefish.api.*
 import com.colofabrix.scala.cuttlefish.model.*
 import java.time.OffsetDateTime
 
 trait CuttlefishDSL:
 
-  extension [F[_]: Async](cuttlefishClient: CuttlefishClient[F])
+  extension [F[_]](cuttlefishClient: CuttlefishClient[F])
 
     def pagedMeterConsumption(
       product: OctopusProduct,

@@ -1,6 +1,6 @@
 import org.typelevel.scalacoptions.ScalacOptions
 
-val scala3Version = "3.6.2"
+val scala3Version = "3.7.4"
 
 val caseInsensitiveVersion = "1.4.0"
 val catsEffectVersion      = "3.5.4"

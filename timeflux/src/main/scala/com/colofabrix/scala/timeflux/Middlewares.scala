@@ -10,19 +10,11 @@ import org.http4s.client.Client
  */
 object TimefluxAuthenticatedClient:
 
-  def apply[F[_]: MonadCancelThrow](token: AuthToken, orgId: OrgId)(httpClient: Client[F]): Client[F] =
+  def apply[F[_]: MonadCancelThrow](token: AuthToken)(httpClient: Client[F]): Client[F] =
     Client[F] { request =>
-      val requestOrgId =
-        request
-          .uri
-          .params
-          .get("orgID")
-          .getOrElse(orgId.value)
-
       val authorization = Headers("Authorization" -> s"Token ${token.value}")
       val authHeaders   = request.headers.put(authorization)
-      val authUri       = request.uri.withQueryParam("orgID", requestOrgId)
-      val authRequest   = request.withHeaders(authHeaders).withUri(authUri)
+      val authRequest   = request.withHeaders(authHeaders)
 
       httpClient.run(authRequest)
     }

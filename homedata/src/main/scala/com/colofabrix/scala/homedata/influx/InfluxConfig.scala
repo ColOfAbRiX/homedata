@@ -11,7 +11,7 @@ import scala.concurrent.duration.*
 
 final case class InfluxConfig(
   serverUrl: Uri,
-  orgId: OrgId,
+  orgName: OrgName,
   authToken: AuthToken,
   projectBucket: String,
   timeResolution: FiniteDuration,
@@ -20,9 +20,9 @@ final case class InfluxConfig(
 
 object InfluxConfig:
 
-  given ConfigReader[OrgId] =
+  given ConfigReader[OrgName] =
     ConfigReader.fromString: str =>
-      Right(OrgId(str))
+      Right(OrgName(str))
 
   given ConfigReader[AuthToken] =
     ConfigReader.fromString: str =>
@@ -36,6 +36,7 @@ object InfluxConfig:
       .loadOrThrow[InfluxConfig]
 
   val clientConfig: TimefluxClientConfig =
-    config
-      .into[TimefluxClientConfig]
-      .transform()
+    TimefluxClientConfig(
+      serverUrl = config.serverUrl,
+      authToken = config.authToken,
+    )

@@ -8,7 +8,6 @@ import java.security.cert.X509Certificate
 import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
-import org.http4s.*
 import org.http4s.client.Client
 
 object SSLValidationClient:

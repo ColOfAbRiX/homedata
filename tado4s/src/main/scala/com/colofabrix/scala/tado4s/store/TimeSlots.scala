@@ -157,7 +157,7 @@ final class TimeSlots[A] private (val resolution: FiniteDuration, private val st
 
   //  Internals  //
 
-  private def copy(resolution: FiniteDuration = resolution, store: InnerStore[A] = store): TimeSlots[A] =
+  private def copy(resolution: FiniteDuration = resolution, store: InnerStore[A]): TimeSlots[A] =
     new TimeSlots[A](resolution, store)
 
   private def roundToTimeSlot(value: OffsetDateTime): OffsetDateTime =
@@ -313,8 +313,8 @@ object TimeSlots:
     Ordering.by(_.toEpochSecond())
 
   extension (self: OffsetDateTime)
-    private def <(other: OffsetDateTime): Boolean   = self.isBefore(other)
-    private def <=(other: OffsetDateTime): Boolean  = self.isBefore(other) || self.isEqual(other)
-    private def ===(other: OffsetDateTime): Boolean = self.isEqual(other)
-    private def >=(other: OffsetDateTime): Boolean  = self.isAfter(other) || self.isEqual(other)
-    private def >(other: OffsetDateTime): Boolean   = self.isAfter(other)
+    def <(other: OffsetDateTime): Boolean   = self.isBefore(other)
+    def <=(other: OffsetDateTime): Boolean  = self.isBefore(other) || self.isEqual(other)
+    def ===(other: OffsetDateTime): Boolean = self.isEqual(other)
+    def >=(other: OffsetDateTime): Boolean  = self.isAfter(other) || self.isEqual(other)
+    def >(other: OffsetDateTime): Boolean   = self.isAfter(other)
