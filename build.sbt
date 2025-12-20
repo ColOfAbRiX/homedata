@@ -117,6 +117,7 @@ lazy val homedata =
 lazy val timeflux =
   project
     .in(file("timeflux"))
+    .dependsOn(h4sbl)
     .settings(
       name         := "timeflux",
       version      := "0.1.0",

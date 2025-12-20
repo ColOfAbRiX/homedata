@@ -8,7 +8,7 @@ import com.colofabrix.scala.timeflux.config.*
 import com.colofabrix.scala.timeflux.handlers.buckets.*
 import com.colofabrix.scala.timeflux.handlers.query.*
 import com.colofabrix.scala.timeflux.handlers.write.*
-import com.colofabrix.scala.timeflux.logger.*
+import com.colofabrix.scala.http4s.middleware.betterlogger.Logger
 import com.colofabrix.scala.timeflux.measures.*
 import com.colofabrix.scala.timeflux.model.*
 import com.colofabrix.scala.timeflux.TimefluxClient.*
@@ -61,8 +61,9 @@ final class TimefluxClient[F[_]: Async] private (
    * Creates a bucket
    */
   def createBucket(request: CreateBucketRequest): F[CreateBucketResponse] =
-    handleRequest(request) { (client, baseApiUrl, req) =>
-      BucketRequestsHandler(client, baseApiUrl).createBucket(req)
+    handleRequestWithOrgId(request) { (client, baseApiUrl, req, orgId) =>
+      val reqWithOrgId = req.copy(orgID = req.orgID.orElse(Some(orgId.value)))
+      BucketRequestsHandler(client, baseApiUrl).createBucket(reqWithOrgId)
     }
 
   /**
@@ -77,8 +78,9 @@ final class TimefluxClient[F[_]: Async] private (
    * Checks if a bucket exists and, if it doesn't, it creates it
    */
   def createBucketIfMissing(request: CreateBucketRequest): F[Option[CreateBucketResponse]] =
-    handleRequest(request) { (client, baseApiUrl, req) =>
-      BucketRequestsHandler(client, baseApiUrl).createBucketIfMissing(req)
+    handleRequestWithOrgId(request) { (client, baseApiUrl, req, orgId) =>
+      val reqWithOrgId = req.copy(orgID = req.orgID.orElse(Some(orgId.value)))
+      BucketRequestsHandler(client, baseApiUrl).createBucketIfMissing(reqWithOrgId)
     }
 
   /**
@@ -115,6 +117,14 @@ final class TimefluxClient[F[_]: Async] private (
       result     <- f(client, baseApiUrl, request)
     yield result
 
+  private def handleRequestWithOrgId[A, B](request: A)(f: (Client[F], Uri, A, OrgId) => F[B]): F[B] =
+    for
+      baseApiUrl <- getApiUrl()
+      client     <- authenticator.withAuthClient()
+      orgId      <- getOrgId()
+      result     <- f(client, baseApiUrl, request, orgId)
+    yield result
+
   //  State management  //
 
   private def getApiUrl(): F[Uri] =
@@ -124,6 +134,15 @@ final class TimefluxClient[F[_]: Async] private (
           TimefluxException("No InfluxDB URL set.", None).raiseError
         case Some(serverUrl) =>
           serverUrl.addPath(config.apiBase).pure[F]
+      }
+
+  private def getOrgId(): F[OrgId] =
+    atomicState.get.flatMap:
+      _.credentials match {
+        case None =>
+          TimefluxException("No credentials set.", None).raiseError
+        case Some(creds) =>
+          creds.orgId.pure[F]
       }
 
 /**
