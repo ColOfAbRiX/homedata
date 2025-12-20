@@ -3,20 +3,20 @@ package com.colofabrix.scala.tado4s
 import cats.effect.Async
 import cats.effect.std.AtomicCell
 import cats.implicits.*
-import com.colofabrix.scala.tado4s.Tado4sClient.*
+import com.colofabrix.scala.http4s.middleware.betterlogger.Http4sBeytterLogger
 import com.colofabrix.scala.tado4s.api.*
-import com.colofabrix.scala.tado4s.logger.Logger
 import com.colofabrix.scala.tado4s.security.*
+import com.colofabrix.scala.tado4s.Tado4sClient.*
 import fs2.io.net.Network
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
 import org.http4s.*
-import org.http4s.Method.*
 import org.http4s.circe.CirceEntityDecoder.*
 import org.http4s.client.Client
 import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.ember.client.EmberClientBuilder
+import org.http4s.Method.*
 import org.typelevel.log4cats.SelfAwareStructuredLogger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 import scala.concurrent.duration.*
@@ -224,12 +224,12 @@ object Tado4sClient:
   private def apply[F[_]: Async](config: TadoConfig, httpClient: Client[F]): F[Tado4sClient[F]] =
     for
       initialState    <- AtomicCell[F].of(TadoClientState[F](None, None, None))
-      loggedHttpClient = Logger()(httpClient)
+      loggedHttpClient = Http4sBeytterLogger()(httpClient)
       client           = new Tado4sClient[F](loggedHttpClient, config, initialState)
       _               <- client.initialize()
     yield client
 
   private def buildConfiguredHttpClient[F[_]: Async](config: TadoConfig, httpClient: Client[F]): Client[F] =
-    Logger():
+    Http4sBeytterLogger():
       SSLValidationClient(config.ignoreSsl):
         httpClient

@@ -1,4 +1,4 @@
-package com.colofabrix.scala.tado4s.logger
+package com.colofabrix.scala.http4s.middleware.betterlogger
 
 import cats.effect.Async
 import cats.syntax.all.*
@@ -9,7 +9,7 @@ import org.http4s.Message
 import org.typelevel.ci.CIString
 import scodec.bits.ByteVector
 
-private[logger] object LogBuilder:
+private[betterlogger] object LogBuilder:
 
   def logHeaders[F[_]](message: Message[F], logLevel: LogLevel, redactSensitiveHeaders: Boolean): String =
     val redactHeadersWhen: CIString => Boolean =

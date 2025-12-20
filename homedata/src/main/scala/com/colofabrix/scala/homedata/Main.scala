@@ -10,7 +10,6 @@ import com.colofabrix.scala.timeflux.*
 import com.colofabrix.scala.timeflux.api.QueryRequest
 import com.colofabrix.scala.timeflux.measures.TimefluxSerializable.toApiMeasureStream
 import com.monovore.decline.Opts
-// import java.time.*
 import java.time.temporal.ChronoUnit
 
 object Main extends IOUnitDeclineApp:

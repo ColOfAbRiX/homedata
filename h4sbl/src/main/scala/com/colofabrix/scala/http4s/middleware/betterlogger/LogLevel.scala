@@ -1,4 +1,4 @@
-package com.colofabrix.scala.cuttlefish.logger
+package com.colofabrix.scala.http4s.middleware.betterlogger
 
 import cats.syntax.all.given
 import cats.*

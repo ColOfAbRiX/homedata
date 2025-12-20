@@ -36,7 +36,7 @@ timeflux / Test / tpolecatScalacOptions := Set.empty
 lazy val root =
   project
     .in(file("."))
-    .aggregate(homedata, timeflux, tado4s, cuttlefish, declinio)
+    .aggregate(homedata, timeflux, tado4s, cuttlefish, declinio, h4sbl)
     .settings(
       name              := "root",
       version           := "0.1.0",
@@ -59,6 +59,28 @@ lazy val declinio =
         "org.typelevel" %% "cats-effect"        % catsEffectVersion,
         "org.typelevel" %% "cats-effect-std"    % catsEffectVersion,
         "org.typelevel" %% "cats-effect-kernel" % catsEffectVersion,
+      ),
+    )
+
+lazy val h4sbl =
+  project
+    .in(file("h4sbl"))
+    .settings(
+      name         := "h4sbl",
+      version      := "0.1.0",
+      organization := "com.colofabrix.scala.http4s.middleware.betterlogger",
+      scalaVersion := scala3Version,
+      libraryDependencies ++= List(
+        "co.fs2"        %% "fs2-core"            % fs2Version,
+        "org.http4s"    %% "http4s-client"       % http4sClientVersion,
+        "org.http4s"    %% "http4s-core"         % http4sClientVersion,
+        "org.scodec"    %% "scodec-bits"         % scodecBitsVersion,
+        "org.typelevel" %% "cats-core"           % catsVersion,
+        "org.typelevel" %% "cats-effect"         % catsEffectVersion,
+        "org.typelevel" %% "cats-effect-kernel"  % catsEffectVersion,
+        "org.typelevel" %% "case-insensitive"    % caseInsensitiveVersion,
+        "org.typelevel" %% "log4cats-core"       % log4catsVersion,
+        "org.typelevel" %% "log4cats-slf4j"      % log4catsVersion,
       ),
     )
 
@@ -129,6 +151,7 @@ lazy val timeflux =
 lazy val tado4s =
   project
     .in(file("tado4s"))
+    .dependsOn(h4sbl)
     .settings(
       name         := "tado4s",
       version      := "0.1.0",
@@ -163,7 +186,7 @@ lazy val tado4s =
 lazy val cuttlefish =
   project
     .in(file("cuttlefish"))
-    .dependsOn(timeflux, tado4s)
+    .dependsOn(timeflux, tado4s, h4sbl)
     .settings(
       name         := "cuttlefish",
       version      := "0.1.0",

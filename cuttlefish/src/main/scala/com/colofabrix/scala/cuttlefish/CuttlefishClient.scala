@@ -6,7 +6,7 @@ import cats.implicits.given
 import com.colofabrix.scala.cuttlefish.api.*
 import com.colofabrix.scala.cuttlefish.CuttlefishClient.*
 import com.colofabrix.scala.cuttlefish.FS2Logging.*
-import com.colofabrix.scala.cuttlefish.logger.Logger
+import com.colofabrix.scala.http4s.middleware.betterlogger.Http4sBeytterLogger
 import com.colofabrix.scala.cuttlefish.model.*
 import dev.kovstas.fs2throttler.Throttler
 import fs2.io.net.Network
@@ -205,6 +205,6 @@ object CuttlefishClient:
   private def apply[F[_]: Async](config: CuttlefishConfig, httpClient: Client[F]): F[CuttlefishClient[F]] =
     for
       initialState    <- AtomicCell[F].of(CuttlefishClientState[F](None))
-      loggedHttpClient = Logger()(httpClient)
+      loggedHttpClient = Http4sBeytterLogger()(httpClient)
       client           = new CuttlefishClient[F](loggedHttpClient, config, initialState)
     yield client
