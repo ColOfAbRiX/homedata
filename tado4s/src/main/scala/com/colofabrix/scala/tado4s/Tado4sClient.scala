@@ -1,17 +1,13 @@
 package com.colofabrix.scala.tado4s
 
 import cats.effect.Async
-import cats.effect.std.AtomicCell
 import cats.implicits.*
 import com.colofabrix.scala.http4s.middleware.betterlogger.Logger
 import com.colofabrix.scala.tado4s.api.*
 import com.colofabrix.scala.tado4s.security.*
 import com.colofabrix.scala.tado4s.store.TadoRefreshToken
-import com.colofabrix.scala.tado4s.Tado4sClient.*
 import fs2.io.net.Network
 import java.time.LocalDate
-import java.time.OffsetDateTime
-import java.time.temporal.ChronoUnit
 import org.http4s.*
 import org.http4s.circe.CirceEntityDecoder.*
 import org.http4s.client.Client
@@ -28,16 +24,12 @@ import scala.concurrent.duration.*
  * Reference: https://blog.scphillips.com/posts/2017/01/the-tado-api-v2/
  */
 final class Tado4sClient[F[_]: Async] private (
-  httpClient: Client[F],
   config: TadoConfig,
-  atomicState: AtomicCell[F, TadoClientState[F]],
+  authenticator: Tado4sAuthentication[F],
 ) extends Http4sClientDsl[F]:
 
   implicit private val logger: SelfAwareStructuredLogger[F] =
     Slf4jLogger.getLogger[F]
-
-  private val authenticator: Tado4sAuthentication[F] =
-    new Tado4sAuthentication[F](httpClient, config, atomicState)
 
   /**
    * Authenticate with a refresh token.
@@ -188,23 +180,6 @@ final class Tado4sClient[F[_]: Async] private (
  */
 object Tado4sClient:
 
-  final private[tado4s] case class TadoClientState[F[_]](
-    refreshToken: Option[TadoRefreshToken] = None,
-    authToken: Option[TadoAuthToken] = None,
-    authenticatedClient: Option[Client[F]] = None,
-  )
-
-  final private[tado4s] case class TadoAuthToken(
-    bearerToken: String,
-    expiry: OffsetDateTime,
-  ) {
-    override def toString(): String =
-      s"TadoAuthToken(" +
-      s"bearerToken=${bearerToken.take(8)}...${bearerToken.takeRight(8)}, " +
-      s"expiry=${expiry.truncatedTo(ChronoUnit.SECONDS).toLocalDateTime}" +
-      s")"
-  }
-
   /** Creates a new instance of Tado4s client using http4s Ember Client */
   def apply[F[_]: Async: Network](maybeConfig: Option[TadoConfig]): F[Tado4sClient[F]] =
     EmberClientBuilder
@@ -219,10 +194,10 @@ object Tado4sClient:
       }
 
   private def buildClient[F[_]: Async](config: TadoConfig, httpClient: Client[F]): F[Tado4sClient[F]] =
+    val configuredHttpClient = buildConfiguredHttpClient(config, httpClient)
     for
-      initialState        <- AtomicCell[F].of(TadoClientState[F](None, None, None))
-      configuredHttpClient = buildConfiguredHttpClient(config, httpClient)
-      client               = new Tado4sClient[F](configuredHttpClient, config, initialState)
+      authenticator <- Tado4sAuthentication(configuredHttpClient, config)
+      client         = new Tado4sClient[F](config, authenticator)
     yield client
 
   private def buildConfiguredHttpClient[F[_]: Async](config: TadoConfig, httpClient: Client[F]): Client[F] =

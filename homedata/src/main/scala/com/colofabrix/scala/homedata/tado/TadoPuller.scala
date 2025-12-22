@@ -67,7 +67,8 @@ object TadoPuller:
       zones       <- tadoClient.getHomeZones(homeId)
       _           <- logger.info(s"Initialized Tado puller: account=${account.email}, homeId=$homeId")
       initialState = TadoState(homeId, buildRoomsList(zones))
-    yield new TadoPuller(tadoClient, initialState)
+      result       = new TadoPuller(tadoClient, initialState)
+    yield result
 
   private def buildRoomsList(zones: Vector[HomeZoneResponse]): Map[Int, String] =
     zones
