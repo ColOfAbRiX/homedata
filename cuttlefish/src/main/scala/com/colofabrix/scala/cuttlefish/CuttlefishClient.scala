@@ -99,18 +99,22 @@ final class CuttlefishClient[F[_]: Async] private (
 
   //  Http Client Management  //
 
-  private def withAuthClient[A](): F[Client[F]] =
+  private def withAuthClient(): F[Client[F]] =
     logger.trace("Getting Authenticated Client") >>
-    atomicallyModifyAuthenticatedClient:
-      case Some(client) =>
-        logger.debug(s"Returning Cuttlefish authenticated client") >>
-        client.pure[F]
-      case None =>
-        for
-          _      <- logger.debug(s"Creating Cuttlefish authenticated client")
-          apiKey <- getApiKey()
-          client  = buildHttpClient(apiKey)
-        yield client
+    atomicState.evalModify { state =>
+      state.authenticatedClient match
+        case Some(client) =>
+          logger.debug("Returning Cuttlefish authenticated client").as((state, client))
+        case None =>
+          state.apiKey match
+            case None =>
+              CuttlefishError("No Octopus apiKey provided. Call login() first.")
+                .raiseError[F, (CuttlefishClientState[F], Client[F])]
+            case Some(apiKey) =>
+              val newClient = buildHttpClient(apiKey)
+              val newState  = state.copy(authenticatedClient = Some(newClient))
+              logger.debug("Creating Cuttlefish authenticated client").as((newState, newClient))
+    }
 
   private def buildHttpClient(apiKey: String): Client[F] =
     val retryPolicy =
@@ -145,28 +149,14 @@ final class CuttlefishClient[F[_]: Async] private (
 
   //  State management  //
 
-  private def getApiKey(): F[String] =
-    atomicState.get.flatMap: state =>
-      state.apiKey match
-        case Some(apiKey) => apiKey.pure[F]
-        case None         => CuttlefishError("No Octopus apiKey provided").raiseError
-
   private def setApiKey(apiKey: String): F[Unit] =
-    atomicState.update:
-      _.copy(apiKey = Some(apiKey))
+    atomicState.update(_.copy(apiKey = Some(apiKey), authenticatedClient = None))
 
   private def clearApiKey(): F[Unit] =
-    atomicState.update:
-      _.copy(apiKey = None)
+    atomicState.update(_.copy(apiKey = None, authenticatedClient = None))
 
   private def clearAuthenticatedClient(): F[Unit] =
-    atomicState.update:
-      _.copy(authenticatedClient = None)
-
-  private def atomicallyModifyAuthenticatedClient(f: Option[Client[F]] => F[Client[F]]): F[Client[F]] =
-    atomicState.evalModify: state =>
-      f(state.authenticatedClient).map: newAuthenticatedClient =>
-        (state.copy(authenticatedClient = Some(newAuthenticatedClient)), newAuthenticatedClient)
+    atomicState.update(_.copy(authenticatedClient = None))
 
   //  Givens  //
 
@@ -189,7 +179,6 @@ object CuttlefishClient:
     authenticatedClient: Option[Client[F]] = None,
   )
 
-  /** Creates a new instance of Cuttlefish client using http4s Ember Client */
   def apply[F[_]: Async: Network](maybeConfig: Option[CuttlefishConfig] = None): F[CuttlefishClient[F]] =
     EmberClientBuilder
       .default[F]

@@ -24,17 +24,23 @@ final private[timeflux] class TimefluxAuthentication[F[_]: Async](
   implicit private val logger: SelfAwareStructuredLogger[F] =
     Slf4jLogger.getLogger[F]
 
-  def withAuthClient[A](): F[Client[F]] =
-    atomicallyModifyAuthenticatedClient:
-      case None =>
-        for
-          credentials <- getCredentials()
-          client      <- buildHttpClient(credentials).pure[F]
-          _           <- logger.debug("Creating new Timeflux authenticated client")
-        yield client
-      case Some(client) =>
-        logger.trace(s"Returning Timeflux authenticated client") >>
-        client.pure[F]
+  /**
+   * Get an authenticated HTTP client.
+   */
+  def withAuthClient(): F[Client[F]] =
+    atomicState.evalModify { state =>
+      state.authenticatedClient match
+        case Some(client) =>
+          logger.trace("Returning Timeflux authenticated client").as((state, client))
+        case None =>
+          state.credentials match
+            case None =>
+              TimefluxException("No credentials set.", None).raiseError[F, (TimefluxClientState[F], Client[F])]
+            case Some(credentials) =>
+              val newClient = buildHttpClient(credentials)
+              val newState  = state.copy(authenticatedClient = Some(newClient))
+              logger.debug("Creating new Timeflux authenticated client").as((newState, newClient))
+    }
 
   private def buildHttpClient(credentials: TimefluxCredentials): Client[F] =
     val retryPolicy =
@@ -45,19 +51,3 @@ final private[timeflux] class TimefluxAuthentication[F[_]: Async](
     Retry(retryPolicy):
       TimefluxAuthenticatedClient[F](credentials.token):
         httpClient
-
-  //  State management  //
-
-  private def getCredentials(): F[TimefluxCredentials] =
-    atomicState.get.flatMap:
-      _.credentials match {
-        case None =>
-          TimefluxException("No credentials set.", None).raiseError
-        case Some(credentials) =>
-          credentials.pure[F]
-      }
-
-  private def atomicallyModifyAuthenticatedClient(f: Option[Client[F]] => F[Client[F]]): F[Client[F]] =
-    atomicState.evalModify: state =>
-      f(state.authenticatedClient).map: newAuthenticatedClient =>
-        (state.copy(authenticatedClient = Some(newAuthenticatedClient)), newAuthenticatedClient)
