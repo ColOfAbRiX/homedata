@@ -6,6 +6,7 @@ import cats.implicits.*
 import com.colofabrix.scala.http4s.middleware.betterlogger.Logger
 import com.colofabrix.scala.tado4s.api.*
 import com.colofabrix.scala.tado4s.security.*
+import com.colofabrix.scala.tado4s.store.TadoRefreshToken
 import com.colofabrix.scala.tado4s.Tado4sClient.*
 import fs2.io.net.Network
 import java.time.LocalDate
@@ -41,7 +42,7 @@ final class Tado4sClient[F[_]: Async] private (
   /**
    * Authenticate with a refresh token.
    */
-  def authenticate(initialRefreshToken: String): F[Unit] =
+  def authenticate(initialRefreshToken: TadoRefreshToken): F[Unit] =
     logger.debug("Authenticating with refresh token") >>
     authenticator.authenticate(initialRefreshToken)
 
@@ -188,7 +189,7 @@ final class Tado4sClient[F[_]: Async] private (
 object Tado4sClient:
 
   final private[tado4s] case class TadoClientState[F[_]](
-    refreshToken: Option[String] = None,
+    refreshToken: Option[TadoRefreshToken] = None,
     authToken: Option[TadoAuthToken] = None,
     authenticatedClient: Option[Client[F]] = None,
   )

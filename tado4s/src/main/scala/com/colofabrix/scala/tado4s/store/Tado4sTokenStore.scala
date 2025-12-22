@@ -2,16 +2,14 @@ package com.colofabrix.scala.tado4s.store
 
 import cats.effect.Sync
 import cats.implicits.given
-import java.nio.file.{ Files, Path, Paths }
+import com.typesafe.config.ConfigRenderOptions
+import java.nio.file.{Files, Path, Paths}
 import pureconfig.*
-import pureconfig.generic.derivation.default.*
 
 /**
- * Persisted token storage for Tado4s
+ * Persisted token storage for Tado4s - manages ~/.tado4s.conf
  */
-private[tado4s] final case class Tado4sTokenStore(refreshToken: String) derives ConfigReader
-
-private[tado4s] object Tado4sTokenStore {
+object Tado4sTokenStore:
 
   private val tokenPath: Path =
     Paths.get(System.getProperty("user.home"), ".tado4s.conf")
@@ -19,12 +17,12 @@ private[tado4s] object Tado4sTokenStore {
   /**
    * Load the token store from ~/.tado4s.conf
    */
-  def load[F[_]: Sync](): F[Option[Tado4sTokenStore]] =
+  def load[F[_]: Sync](): F[Option[TadoRefreshToken]] =
     Sync[F]
-      .blocking(ConfigSource.file(tokenPath.toFile).load[Tado4sTokenStore])
+      .blocking(ConfigSource.file(tokenPath.toFile).load[TadoRefreshToken])
       .map {
-        case Right(store) =>
-          Some(store)
+        case Right(token) =>
+          Some(token)
         case Left(error) =>
           System.err.println(s"Failed to parse ~/.tado4s.conf: $error")
           None
@@ -33,9 +31,11 @@ private[tado4s] object Tado4sTokenStore {
   /**
    * Save the refresh token to ~/.tado4s.conf
    */
-  def save[F[_]: Sync](refreshToken: String): F[Unit] =
+  def save[F[_]: Sync](token: TadoRefreshToken): F[Unit] =
     Sync[F].blocking {
-      val content = s"""refresh-token = "$refreshToken"\n"""
+      val configValue = ConfigWriter[TadoRefreshToken].to(token)
+      val renderOptions = ConfigRenderOptions.concise().setFormatted(true).setJson(false)
+      val content = configValue.render(renderOptions)
       Files.writeString(tokenPath, content)
       ()
     }
@@ -48,5 +48,3 @@ private[tado4s] object Tado4sTokenStore {
       if Files.exists(tokenPath) then Files.delete(tokenPath)
       ()
     }
-
-}

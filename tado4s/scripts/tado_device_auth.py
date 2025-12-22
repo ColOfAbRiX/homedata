@@ -3,6 +3,7 @@
 import requests
 import time
 import sys
+from datetime import datetime, timezone, timedelta
 
 CLIENT_ID = "1bb50063-6b0c-4d11-bd99-387f4a91cc46"
 DEVICE_AUTH_URL = "https://login.tado.com/oauth2/device_authorize"
@@ -66,12 +67,17 @@ def main():
 
     token_data = poll_for_token(device_code, interval)
 
+    issue_time = (datetime.now(timezone.utc) - timedelta(seconds=5)).isoformat()
+
     print("\n" + "=" * 50)
     print("Authorization successful!")
     print("=" * 50)
     print(f"\nAdd this to your secrets.conf (gitignored):\n")
     print(f'tado {{')
-    print(f'  refresh-token = "{token_data["refresh_token"]}"')
+    print(f'  initial-refresh-token {{')
+    print(f'    token = "{token_data["refresh_token"]}"')
+    print(f'    issue-time = "{issue_time}"')
+    print(f'  }}')
     print(f'}}')
 
 if __name__ == "__main__":
