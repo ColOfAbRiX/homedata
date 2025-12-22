@@ -5,6 +5,7 @@ import cats.effect.std.AtomicCell
 import cats.implicits.given
 import com.colofabrix.scala.tado4s.api.*
 import com.colofabrix.scala.tado4s.security.*
+import com.colofabrix.scala.tado4s.store.Tado4sTokenStore
 import com.colofabrix.scala.tado4s.Tado4sClient.*
 import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
@@ -23,38 +24,56 @@ final private[tado4s] class Tado4sAuthentication[F[_]: Async](
   atomicState: AtomicCell[F, TadoClientState[F]],
 ) extends Http4sClientDsl[F]:
 
-  implicit private val logger: SelfAwareStructuredLogger[F] =
+  private val logger: SelfAwareStructuredLogger[F] =
     Slf4jLogger.getLogger[F]
 
-  def initialize(): F[Unit] =
-    config.refreshToken match {
-      case Some(token) =>
-        atomicState.update(_.copy(refreshToken = Some(token)))
-      case None =>
-        Async[F].unit
-    }
+  /**
+   * Authenticate with a refresh token. Saves the token to ~/.tado4s.conf for future use.
+   */
+  def authenticate(initialRefreshToken: String): F[Unit] =
+    for
+      _           <- logger.debug("Authenticating with refresh token")
+      tokenToUser <- ensureLatestRefreshToken(Some(initialRefreshToken))
+      _           <- logger.info("Authentication successful, token saved to ~/.tado4s.conf")
+    yield ()
 
-  def login(refreshToken: String): F[Unit] =
-    logger.debug("Login with refresh token") >>
-    atomicState.update(_.copy(refreshToken = Some(refreshToken), authToken = None, authenticatedClient = None))
+  /**
+   * Authenticate with a refresh token. Saves the token to ~/.tado4s.conf for future use.
+   */
+  def authenticate(): F[Unit] =
+    for
+      _           <- logger.debug("Authenticating with refresh token")
+      tokenToUser <- ensureLatestRefreshToken(None)
+      _           <- logger.info("Authentication successful, token saved to ~/.tado4s.conf")
+    yield ()
 
+  /**
+   * Logout and clear all tokens including the persisted token file.
+   */
   def logout(): F[Unit] =
-    logger.debug("Logout") >>
-    atomicState.update:
-      _.copy(refreshToken = None, authToken = None, authenticatedClient = None)
+    for
+      _ <- logger.debug("Logout")
+      _ <- Tado4sTokenStore.clear[F]()
+      _ <- setNewRefreshToken(None)
+      _ <- logger.info("Logged out, token file deleted")
+    yield ()
 
-  def withAuthClient[A](retries: Int = 1): F[Client[F]] =
+  /**
+   * Get an authenticated HTTP client. Will attempt to load token from file if not in memory.
+   */
+  def getAuthenticatedClient[A](retries: Int = 1): F[Client[F]] =
+    ensureLatestRefreshToken(None) >>
     getAuthToken().flatMap {
       case None =>
-        logger.debug("No auth token, attempting to get one via refresh token") >>
+        logger.debug("No Authentication Token, attempting to get one via Refresh Token") >>
         handleTokenRefresh() >>
-        withAuthClient(retries - 1)
+        getAuthenticatedClient(retries - 1)
       case Some(authToken) if isTokenExpired(authToken) =>
         logger.info("Tado token expired") >>
         logger.debug(s"Expired token: $authToken") >>
         clearAuthenticatedClient() >>
         handleTokenRefresh() >>
-        withAuthClient(retries - 1)
+        getAuthenticatedClient(retries - 1)
       case Some(authToken) =>
         atomicallyModifyAuthenticatedClient {
           case Some(client) =>
@@ -68,15 +87,38 @@ final private[tado4s] class Tado4sAuthentication[F[_]: Async](
         }
     }
 
+  private def ensureLatestRefreshToken(initialRefreshToken: Option[String]): F[String] =
+    atomicState.get.flatMap {
+      case TadoClientState(Some(refreshToken), _, _) =>
+        refreshToken.pure
+      case TadoClientState(None, _, _) =>
+        Tado4sTokenStore
+          .load[F]()
+          .map {
+            _.map(_.refreshToken).orElse(initialRefreshToken)
+          }
+          .flatMap {
+            case Some(refreshToken) =>
+              logger.debug("Loaded refresh token from ~/.tado4s.conf") >>
+              Tado4sTokenStore.save[F](refreshToken) >>
+              atomicState.update(_.copy(refreshToken = Some(refreshToken))) >>
+              refreshToken.pure
+            case None =>
+              Tado4sError("No refresh token available. Call authenticate() with an initial token first.").raiseError
+          }
+    }
+
   private def handleTokenRefresh(): F[Unit] =
     atomicState
       .evalUpdate {
         case state @ TadoClientState(Some(refreshToken), _, _) =>
-          refreshRequest(refreshToken).map { case (newAuthToken, newRefreshToken) =>
-            state.copy(authToken = Some(newAuthToken), refreshToken = Some(newRefreshToken))
-          }
+          for
+            (newAuth, newRefresh) <- refreshRequest(refreshToken)
+            _                     <- Tado4sTokenStore.save[F](newRefresh)
+            result                 = state.copy(authToken = Some(newAuth), refreshToken = Some(newRefresh))
+          yield result
         case TadoClientState(None, _, _) =>
-          Tado4sError("No refresh token provided. Please run the device authorization flow to obtain one.").raiseError
+          Tado4sError("No refresh token provided. Please call authenticate() first.").raiseError
       }
       .handleErrorWith { error =>
         val tadoError = Tado4sError("Error while refreshing API token", Some(error))
@@ -85,20 +127,24 @@ final private[tado4s] class Tado4sAuthentication[F[_]: Async](
       }
 
   private def refreshRequest(refreshToken: String): F[(TadoAuthToken, String)] =
-    for
-      _ <- logger.info("Refreshing authentication token")
-      requestBody = UrlForm(
+    val requestBody =
+      UrlForm(
         "client_id"     -> config.clientId,
         "grant_type"    -> "refresh_token",
         "refresh_token" -> refreshToken,
         "scope"         -> "offline_access",
       )
-      postRequest = POST(requestBody, config.apiAuth / "oauth2" / "token")
+
+    val postRequest = POST(requestBody, config.apiAuth / "oauth2" / "token")
+
+    for
+      _            <- logger.info("Refreshing authentication token")
       authResponse <- httpClient.expect[AuthResponse](postRequest)
-      expiry = OffsetDateTime.now().plus(authResponse.expires_in.toLong, ChronoUnit.SECONDS)
-      newAuthToken = TadoAuthToken(authResponse.access_token, expiry)
-      _ <- logger.debug(s"Auth token refreshed $newAuthToken")
-    yield (newAuthToken, authResponse.refresh_token)
+      expiry        = OffsetDateTime.now().plus(authResponse.expires_in.toLong, ChronoUnit.SECONDS)
+      newAuthToken  = TadoAuthToken(authResponse.access_token, expiry)
+      _            <- logger.debug(s"Auth token refreshed, new token saved to file")
+      result        = (newAuthToken, authResponse.refresh_token)
+    yield result
 
   private def buildHttpClient(authToken: TadoAuthToken): Client[F] =
     val retryPolicy =
@@ -126,3 +172,8 @@ final private[tado4s] class Tado4sAuthentication[F[_]: Async](
   private def getAuthToken(): F[Option[TadoAuthToken]] =
     atomicState.get.map:
       _.authToken
+
+  private def setNewRefreshToken(refreshToken: Option[String]): F[Unit] =
+    atomicState.update { state =>
+      state.copy(refreshToken = refreshToken, authToken = None, authenticatedClient = None)
+    }

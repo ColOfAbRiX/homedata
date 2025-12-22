@@ -54,7 +54,7 @@ object AccountResponse:
     geoTrackingEnabled: Boolean,
     specialOffersEnabled: Boolean,
     onDemandLogRetrievalEnabled: Boolean,
-    pushNotifications: PushNotifications,
+    pushNotifications: Option[PushNotifications],
   ) derives Decoder
 
   final case class PushNotifications(

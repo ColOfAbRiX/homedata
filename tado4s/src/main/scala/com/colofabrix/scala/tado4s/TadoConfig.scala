@@ -11,7 +11,6 @@ import scala.concurrent.duration.*
  * @param apiBase Base URL for the API calls
  * @param apiAuth OAuth2 Authentication URL
  * @param clientId OAuth2 Client ID
- * @param refreshToken OAuth2 Refresh Token
  * @param httpTimeout HTTP Timeout
  * @param maxRetries Max number of retries for HTTP requests
  * @param maxRetryTime Maximum retry time
@@ -21,7 +20,6 @@ final case class TadoConfig(
   apiBase: Uri,
   apiAuth: Uri,
   clientId: String,
-  refreshToken: Option[String] = None,
   httpTimeout: FiniteDuration = 30.seconds,
   maxRetries: Int = 5,
   maxRetryTime: FiniteDuration = 1.minute,

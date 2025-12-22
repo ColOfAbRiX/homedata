@@ -38,15 +38,12 @@ final class Tado4sClient[F[_]: Async] private (
   private val authenticator: Tado4sAuthentication[F] =
     new Tado4sAuthentication[F](httpClient, config, atomicState)
 
-  private[tado4s] def initialize(): F[Unit] =
-    authenticator.initialize()
-
   /**
-   * Logs into the Tado service
+   * Authenticate with a refresh token.
    */
-  def login(refreshToken: String): F[Unit] =
-    logger.debug("Login") >>
-    authenticator.login(refreshToken)
+  def authenticate(initialRefreshToken: String): F[Unit] =
+    logger.debug("Authenticating with refresh token") >>
+    authenticator.authenticate(initialRefreshToken)
 
   /**
    * Logs out the Tado service
@@ -61,7 +58,7 @@ final class Tado4sClient[F[_]: Async] private (
   def getAccountInfo(): F[AccountResponse] =
     for
       _      <- logger.debug(s"Called getAccountInfo()")
-      client <- authenticator.withAuthClient()
+      client <- authenticator.getAuthenticatedClient()
       request = GET(config.apiBase / "me")
       result <- client.expectOr[AccountResponse](request)(handleClientExpectError)
       _      <- logger.trace(s"Response for getAccountInfo(): $result")
@@ -73,7 +70,7 @@ final class Tado4sClient[F[_]: Async] private (
   def getHomeDetails(homeId: Int): F[HomeResponse] =
     for
       _      <- logger.debug(s"Called getHomeDetails(): homeId=$homeId")
-      client <- authenticator.withAuthClient()
+      client <- authenticator.getAuthenticatedClient()
       request = GET(config.apiBase / "homes" / homeId)
       result <- client.expectOr[HomeResponse](request)(handleClientExpectError)
       _      <- logger.trace(s"Response for getHomeDetails(): $result")
@@ -85,7 +82,7 @@ final class Tado4sClient[F[_]: Async] private (
   def getHomeZones(homeId: Int): F[Vector[HomeZoneResponse]] =
     for
       _      <- logger.debug(s"Called getHomeZones(): homeId=$homeId")
-      client <- authenticator.withAuthClient()
+      client <- authenticator.getAuthenticatedClient()
       request = GET(config.apiBase / "homes" / homeId / "zones")
       result <- client.expectOr[Vector[HomeZoneResponse]](request)(handleClientExpectError)
       _      <- logger.trace(s"Response for getHomeZones(): $result")
@@ -97,7 +94,7 @@ final class Tado4sClient[F[_]: Async] private (
   def getHomeState(homeId: Int): F[HomeStateResponse] =
     for
       _      <- logger.debug(s"Called getHomeState(): homeId=$homeId")
-      client <- authenticator.withAuthClient()
+      client <- authenticator.getAuthenticatedClient()
       request = GET(config.apiBase / "homes" / homeId / "state")
       result <- client.expectOr[HomeStateResponse](request)(handleClientExpectError)
       _      <- logger.trace(s"Response for getHomeState(): $result")
@@ -109,7 +106,7 @@ final class Tado4sClient[F[_]: Async] private (
   def getHomeDevices(homeId: Int): F[Vector[HomeDeviceResponse]] =
     for
       _      <- logger.debug(s"Called getHomeDevices(): homeId=$homeId")
-      client <- authenticator.withAuthClient()
+      client <- authenticator.getAuthenticatedClient()
       request = GET(config.apiBase / "homes" / homeId / "devices")
       result <- client.expectOr[Vector[HomeDeviceResponse]](request)(handleClientExpectError)
       _      <- logger.trace(s"Response for getHomeDevices(): $result")
@@ -121,7 +118,7 @@ final class Tado4sClient[F[_]: Async] private (
   def getHomeInstallations(homeId: Int): F[Vector[HomeInstallationResponse]] =
     for
       _      <- logger.debug(s"Called getHomeInstallations(): homeId=$homeId")
-      client <- authenticator.withAuthClient()
+      client <- authenticator.getAuthenticatedClient()
       request = GET(config.apiBase / "homes" / homeId / "installations")
       result <- client.expectOr[Vector[HomeInstallationResponse]](request)(handleClientExpectError)
       _      <- logger.trace(s"Response for getHomeInstallations(): $result")
@@ -133,7 +130,7 @@ final class Tado4sClient[F[_]: Async] private (
   def getHomeUsers(homeId: Int): F[Vector[HomeUserResponse]] =
     for
       _      <- logger.debug(s"Called getHomeUsers(): homeId=$homeId")
-      client <- authenticator.withAuthClient()
+      client <- authenticator.getAuthenticatedClient()
       request = GET(config.apiBase / "homes" / homeId / "users")
       result <- client.expectOr[Vector[HomeUserResponse]](request)(handleClientExpectError)
       _      <- logger.trace(s"Response for getHomeUsers(): $result")
@@ -145,7 +142,7 @@ final class Tado4sClient[F[_]: Async] private (
   def getZoneState(homeId: Int, zoneId: Int): F[ZoneStateResponse] =
     for
       _      <- logger.debug(s"Called getZoneState(): homeId=$homeId, zoneId=$zoneId")
-      client <- authenticator.withAuthClient()
+      client <- authenticator.getAuthenticatedClient()
       request = GET(config.apiBase / "homes" / homeId / "zones" / zoneId / "state")
       result <- client.expectOr[ZoneStateResponse](request)(handleClientExpectError)
       _      <- logger.trace(s"Response for getZoneState(): $result")
@@ -157,7 +154,7 @@ final class Tado4sClient[F[_]: Async] private (
   def getHomeWeather(homeId: Int): F[WeatherResponse] =
     for
       _      <- logger.debug(s"Called getHomeWeather(): homeId=$homeId")
-      client <- authenticator.withAuthClient()
+      client <- authenticator.getAuthenticatedClient()
       request = GET(config.apiBase / "homes" / homeId / "weather")
       result <- client.expectOr[WeatherResponse](request)(handleClientExpectError)
       _      <- logger.trace(s"Response for getHomeWeather(): $result")
@@ -169,7 +166,7 @@ final class Tado4sClient[F[_]: Async] private (
   def getZoneDayReport(homeId: Int, zoneId: Int, date: LocalDate): F[DayReportResponse] =
     for
       _       <- logger.debug(s"Called getZoneDayReport(): homeId=$homeId, zoneId=$zoneId, date=$date")
-      client  <- authenticator.withAuthClient()
+      client  <- authenticator.getAuthenticatedClient()
       url      = config.apiBase / "homes" / homeId / "zones" / zoneId / "dayReport"
       queryUrl = url.withQueryParam("date", date.toString())
       result  <- client.expectOr[DayReportResponse](GET(queryUrl))(handleClientExpectError)
@@ -216,20 +213,18 @@ object Tado4sClient:
       .allocated
       .flatMap {
         case (httpClient, _) =>
-          val config               = maybeConfig.getOrElse(TadoConfig.config)
-          val configuredHttpClient = buildConfiguredHttpClient(config, httpClient)
-          Tado4sClient(config, configuredHttpClient)
+          val config = maybeConfig.getOrElse(TadoConfig.config)
+          buildClient(config, httpClient)
       }
 
-  private def apply[F[_]: Async](config: TadoConfig, httpClient: Client[F]): F[Tado4sClient[F]] =
+  private def buildClient[F[_]: Async](config: TadoConfig, httpClient: Client[F]): F[Tado4sClient[F]] =
     for
-      initialState    <- AtomicCell[F].of(TadoClientState[F](None, None, None))
-      loggedHttpClient = Logger()(httpClient)
-      client           = new Tado4sClient[F](loggedHttpClient, config, initialState)
-      _               <- client.initialize()
+      initialState        <- AtomicCell[F].of(TadoClientState[F](None, None, None))
+      configuredHttpClient = buildConfiguredHttpClient(config, httpClient)
+      client               = new Tado4sClient[F](configuredHttpClient, config, initialState)
     yield client
 
   private def buildConfiguredHttpClient[F[_]: Async](config: TadoConfig, httpClient: Client[F]): Client[F] =
-    Logger():
+    Logger:
       SSLValidationClient(config.ignoreSsl):
         httpClient

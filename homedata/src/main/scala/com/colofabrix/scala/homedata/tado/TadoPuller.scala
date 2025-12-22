@@ -5,6 +5,7 @@ import cats.implicits.given
 import com.colofabrix.scala.homedata.tado.readings.*
 import com.colofabrix.scala.homedata.utils.pipes.*
 import com.colofabrix.scala.tado4s.api.HomeZoneResponse
+import com.colofabrix.scala.tado4s.store.Tado4sTokenStore
 import com.colofabrix.scala.tado4s.Tado4sClient
 import java.time.*
 import org.typelevel.log4cats.Logger
@@ -58,16 +59,16 @@ object TadoPuller:
 
   def apply(): IO[TadoPuller] =
     for
-      _           <- logger.info(s"Initializing Tado puller...")
+      _           <- logger.info("Initializing Tado puller...")
       _           <- logger.debug(s"Tado configuration: ${TadoConfig.config}")
       tadoClient  <- Tado4sClient[IO](None)
+      _           <- tadoClient.authenticate(TadoConfig.config.initialRefreshToken)
       account     <- tadoClient.getAccountInfo()
       homeId       = account.homes.head.id
       zones       <- tadoClient.getHomeZones(homeId)
-      _           <- logger.info(s"Initialized Tado puller: account=${account.email}, homeId=$homeId, zones=${zones.map(_.id)}")
+      _           <- logger.info(s"Initialized Tado puller: account=${account.email}, homeId=$homeId")
       initialState = TadoState(homeId, buildRoomsList(zones))
-      result       = new TadoPuller(tadoClient, initialState)
-    yield result
+    yield new TadoPuller(tadoClient, initialState)
 
   private def buildRoomsList(zones: Vector[HomeZoneResponse]): Map[Int, String] =
     zones

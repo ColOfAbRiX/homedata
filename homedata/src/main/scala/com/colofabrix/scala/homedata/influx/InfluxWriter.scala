@@ -8,7 +8,7 @@ import com.colofabrix.scala.timeflux.model.OrgId
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 
-class InfluxWriter(timefluxClient: TimefluxClient[IO], orgId: String) extends TimefluxDSL:
+class InfluxWriter(timefluxClient: TimefluxClient[IO], orgId: String) extends TimefluxDSL {
 
   implicit private val logger: Logger[IO] =
     Slf4jLogger.getLogger[IO]
@@ -34,7 +34,9 @@ class InfluxWriter(timefluxClient: TimefluxClient[IO], orgId: String) extends Ti
       batchWrites = Some(InfluxConfig.config.batchWrites),
     )
 
-object InfluxWriter extends TimefluxDSL:
+}
+
+object InfluxWriter extends TimefluxDSL {
 
   implicit private val logger: Logger[IO] =
     Slf4jLogger.getLogger[IO]
@@ -65,3 +67,5 @@ object InfluxWriter extends TimefluxDSL:
         case None =>
           timefluxClient.resolveOrgId(InfluxConfig.config.orgName)
       }
+
+}
