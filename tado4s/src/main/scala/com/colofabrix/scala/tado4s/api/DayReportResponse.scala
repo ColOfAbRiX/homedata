@@ -4,149 +4,135 @@ import com.colofabrix.scala.tado4s.api.DayReportResponse.*
 import enumeratum.*
 import enumeratum.EnumEntry.UpperSnakecase
 import io.circe.*
-import io.circe.derivation.Configuration
 import java.time.*
 
 /**
  * DayReportResponse
- *
- * @param interval
- *   It's the interval of time that the report contains
- * @param stripes
- *   Stripes are the colored bands at the bottom of a graph, they represent the overall state of Tado, for example if
- *   the person is Away, Manual mode, Window, ...
  */
 final case class DayReportResponse(
-  zoneType: String,
+  zoneType: ZoneType,
   interval: Interval,
   hoursInDay: Int,
   measuredData: MeasuredData,
-  stripes: Measure.DataIntervals[ValueType.Stripes],
-  settings: Measure.DataIntervals[ValueType.HeatingSetting],
-  callForHeat: Measure.DataIntervals[ValueType.CallForHeat],
-  hotWaterProduction: Measure.DataIntervals[ValueType.Bool],
+  stripes: IntervalSeries[Stripes],
+  settings: IntervalSeries[HeatingSetting],
+  callForHeat: IntervalSeries[CallForHeat],
+  hotWaterProduction: IntervalSeries[Boolean],
   weather: Weather,
 ) derives Decoder
 
 object DayReportResponse:
 
-  //  Measure  //
+  //  Time Series Containers  //
 
-  transparent trait Measure:
-    def timeSeriesType: String
-    def valueType: String
+  final case class PointsSeries[A](
+    timeSeriesType: String,
+    valueType: String,
+    min: Option[A],
+    max: Option[A],
+    percentageUnit: Option[String],
+    dataPoints: Vector[DataPoint[A]],
+  ) derives Decoder
 
-  object Measure:
+  final case class IntervalSeries[A](
+    timeSeriesType: String,
+    valueType: String,
+    dataIntervals: Vector[DataInterval[A]],
+  ) derives Decoder
 
-    final case class DataPoints[A](
-      timeSeriesType: String,
-      valueType: String,
-      min: Option[A],
-      max: Option[A],
-      percentageUnit: Option[String],
-      dataPoints: Vector[TimeSeriesType.DataPoints[A]],
-    ) extends Measure derives Decoder
+  final case class SlotMap[A](
+    timeSeriesType: String,
+    valueType: String,
+    slots: Map[String, Option[A]],
+  ) derives Decoder
 
-    final case class DataIntervals[A](
-      timeSeriesType: String,
-      valueType: String,
-      dataIntervals: Vector[TimeSeriesType.DataIntervals[A]],
-    ) extends Measure derives Decoder
+  //  Time Series Elements  //
 
-    final case class Slots[A](
-      timeSeriesType: String,
-      valueType: String,
-      slots: Map[String, A],
-    ) extends Measure derives Decoder
+  final case class DataPoint[A](
+    timestamp: OffsetDateTime,
+    value: A,
+  ) derives Decoder
 
-  //  TimeSeriesType  //
-
-  transparent trait TimeSeriesType[A]:
-    def value: A
-
-  object TimeSeriesType:
-
-    final case class DataIntervals[A](
-      from: OffsetDateTime,
-      to: OffsetDateTime,
-      value: A,
-    ) extends TimeSeriesType[A] derives Decoder
-
-    final case class DataPoints[A](
-      timestamp: OffsetDateTime,
-      value: A,
-    ) extends TimeSeriesType[A] derives Decoder
-
-  //  ValueType  //
-
-  transparent trait ValueType
-
-  object ValueType:
-
-    //  Primitive Types  //
-
-    type Percentage = Double
-
-    type Bool = Boolean
-
-    //  Groups  //
-
-    final case class Stripes(
-      stripeType: String,
-      setting: Option[HeatingSetting],
-    ) extends ValueType derives Decoder
-
-    final case class Temperature(
-      celsius: Double,
-      fahrenheit: Double,
-    ) extends ValueType derives Decoder
-
-    final case class WeatherCondition(
-      state: OutsideState,
-      temperature: Temperature,
-    ) extends ValueType derives Decoder
-
-    final case class HeatingSetting(
-      `type`: String,
-      power: String,
-      temperature: Option[Temperature],
-    ) extends ValueType derives Decoder
-
-    //  CallForHeat  //
-
-    sealed abstract class CallForHeat(val dbValue: Int) extends ValueType with EnumEntry with UpperSnakecase
-
-    object CallForHeat extends Enum[CallForHeat] with CirceEnum[CallForHeat]:
-
-      case object None   extends CallForHeat(0)
-      case object Low    extends CallForHeat(1)
-      case object Medium extends CallForHeat(2)
-      case object High   extends CallForHeat(3)
-
-      val values = findValues
-
-  end ValueType
-
-  //  Other  //
-
-  final case class Interval(
+  final case class DataInterval[A](
     from: OffsetDateTime,
     to: OffsetDateTime,
+    value: Option[A],
   ) derives Decoder
 
-  final case class MeasuredData(
-    measuringDeviceConnected: Measure.DataIntervals[ValueType.Bool],
-    insideTemperature: Measure.DataPoints[ValueType.Temperature],
-    humidity: Measure.DataPoints[ValueType.Percentage],
+  //  Value Types  //
+
+  final case class Stripes(
+    stripeType: StripeType,
+    setting: Option[HeatingSetting],
   ) derives Decoder
 
-  final case class Weather(
-    condition: Measure.DataIntervals[ValueType.WeatherCondition],
-    sunny: Measure.DataIntervals[ValueType.Bool],
-    slots: Measure.Slots[ValueType.WeatherCondition],
+  final case class Temperature(
+    celsius: Double,
+    fahrenheit: Double,
   ) derives Decoder
 
-  //  OutsideState  //
+  final case class WeatherCondition(
+    state: OutsideState,
+    temperature: Temperature,
+  ) derives Decoder
+
+  final case class HeatingSetting(
+    `type`: HeatingType,
+    power: Power,
+    temperature: Option[Temperature],
+  ) derives Decoder
+
+  //  Enums  //
+
+  sealed abstract class ZoneType extends EnumEntry with UpperSnakecase
+
+  object ZoneType extends Enum[ZoneType] with CirceEnum[ZoneType]:
+
+    case object Heating  extends ZoneType
+    case object HotWater extends ZoneType
+
+    val values = findValues
+
+  sealed abstract class StripeType extends EnumEntry with UpperSnakecase
+
+  object StripeType extends Enum[StripeType] with CirceEnum[StripeType]:
+
+    case object Home               extends StripeType
+    case object Away               extends StripeType
+    case object OpenWindowDetected extends StripeType
+    case object Manual             extends StripeType
+    case object OverlayActive      extends StripeType
+
+    val values = findValues
+
+  sealed abstract class HeatingType extends EnumEntry with UpperSnakecase
+
+  object HeatingType extends Enum[HeatingType] with CirceEnum[HeatingType]:
+
+    case object Heating  extends HeatingType
+    case object HotWater extends HeatingType
+
+    val values = findValues
+
+  sealed abstract class Power extends EnumEntry with UpperSnakecase
+
+  object Power extends Enum[Power] with CirceEnum[Power]:
+
+    case object On  extends Power
+    case object Off extends Power
+
+    val values = findValues
+
+  sealed abstract class CallForHeat(val dbValue: Int) extends EnumEntry with UpperSnakecase
+
+  object CallForHeat extends Enum[CallForHeat] with CirceEnum[CallForHeat]:
+
+    case object None   extends CallForHeat(0)
+    case object Low    extends CallForHeat(1)
+    case object Medium extends CallForHeat(2)
+    case object High   extends CallForHeat(3)
+
+    val values = findValues
 
   sealed abstract class OutsideState(val dbValue: Int) extends EnumEntry with UpperSnakecase
 
@@ -165,3 +151,22 @@ object DayReportResponse:
     case object Thunderstorm  extends OutsideState(11)
 
     val values = findValues
+
+  //  Composite Types  //
+
+  final case class Interval(
+    from: OffsetDateTime,
+    to: OffsetDateTime,
+  ) derives Decoder
+
+  final case class MeasuredData(
+    measuringDeviceConnected: IntervalSeries[Boolean],
+    insideTemperature: PointsSeries[Temperature],
+    humidity: PointsSeries[Double],
+  ) derives Decoder
+
+  final case class Weather(
+    condition: IntervalSeries[WeatherCondition],
+    sunny: IntervalSeries[Boolean],
+    slots: SlotMap[WeatherCondition],
+  ) derives Decoder

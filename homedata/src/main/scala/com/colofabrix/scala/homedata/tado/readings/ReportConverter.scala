@@ -8,7 +8,6 @@ import com.colofabrix.scala.homedata.tado.*
 import com.colofabrix.scala.homedata.tado.readings.TadoDataStore.given
 import com.colofabrix.scala.tado4s.api.DayReportResponse
 import com.colofabrix.scala.tado4s.api.DayReportResponse.*
-import com.colofabrix.scala.tado4s.api.DayReportResponse.ValueType.*
 import java.time.OffsetDateTime
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
@@ -38,56 +37,72 @@ object ReportConverter:
           .toRawMapM
           .toVector
           .map { (time, reading) =>
-            reading.copy(room = Some(room), time = Some(time))
+            TadoReading(
+              room = Some(room),
+              time = Some(time),
+              temperature = reading.temperature,
+              humidity = reading.humidity,
+              setTemperature = reading.setTemperature,
+              outsideTemperature = reading.outsideTemperature,
+              outsideState = reading.outsideState,
+              outsideSun = reading.outsideSun,
+              heatingModulation = reading.heatingModulation,
+              atHome = reading.atHome,
+              windowOpen = reading.windowOpen,
+              manualSet = reading.manualSet,
+              isOff = reading.isOff,
+            )
           }
       }
 
-  private def getInsideTemperatures(insideTemperature: Measure.DataPoints[ValueType.Temperature]): IO[TadoDataStore] =
+  private def getInsideTemperatures(insideTemperature: PointsSeries[Temperature]): IO[TadoDataStore] =
     IO {
       insideTemperature
         .dataPoints
         .foldMap {
-          case TimeSeriesType.DataPoints(time, Temperature(temperature, _)) =>
+          case DataPoint(time, Temperature(temperature, _)) =>
             TadoDataStore(time, TadoReading.build(temperature = Some(temperature)))
         }
     }
 
-  private def getHumidity(humidity: Measure.DataPoints[ValueType.Percentage]): IO[TadoDataStore] =
+  private def getHumidity(humidity: PointsSeries[Double]): IO[TadoDataStore] =
     IO {
       humidity
         .dataPoints
         .foldMap {
-          case TimeSeriesType.DataPoints(time, humidity) =>
+          case DataPoint(time, humidity) =>
             TadoDataStore(time, TadoReading.build(humidity = Some(humidity)))
         }
     }
 
-  private def getSetTemperature(settings: Measure.DataIntervals[ValueType.HeatingSetting]): IO[TadoDataStore] =
+  private def getSetTemperature(settings: IntervalSeries[HeatingSetting]): IO[TadoDataStore] =
     IO {
       settings
         .dataIntervals
         .foldMap {
-          case TimeSeriesType.DataIntervals(from, to, ValueType.HeatingSetting(_, _, Some(Temperature(temp, _)))) =>
+          case DataInterval(from, to, Some(HeatingSetting(_, _, Some(Temperature(temp, _))))) =>
             TadoDataStore(
               from = from,
               to = to,
               reading = TadoReading.build(setTemperature = Some(temp), isOff = Some(false)),
             )
-          case TimeSeriesType.DataIntervals(from, to, ValueType.HeatingSetting(_, _, None)) =>
+          case DataInterval(from, to, Some(HeatingSetting(_, _, None))) =>
             TadoDataStore(
               from = from,
               to = to,
               reading = TadoReading.build(isOff = Some(true)),
             )
+          case DataInterval(_, _, None) =>
+            TadoDataStore()
         }
     }
 
-  private def getWeatherCondition(condition: Measure.DataIntervals[ValueType.WeatherCondition]): IO[TadoDataStore] =
+  private def getWeatherCondition(condition: IntervalSeries[WeatherCondition]): IO[TadoDataStore] =
     IO {
       condition
         .dataIntervals
         .foldMap {
-          case TimeSeriesType.DataIntervals(from, to, WeatherCondition(state, Temperature(temperature, _))) =>
+          case DataInterval(from, to, Some(WeatherCondition(state, Temperature(temperature, _)))) =>
             val reading =
               TadoReading.build(
                 outsideTemperature = Some(temperature),
@@ -95,36 +110,42 @@ object ReportConverter:
               )
 
             TadoDataStore(from, to, reading)
+          case DataInterval(_, _, None) =>
+            TadoDataStore()
         }
     }
 
-  private def getOutsideSun(sunny: Measure.DataIntervals[ValueType.Bool]): IO[TadoDataStore] =
+  private def getOutsideSun(sunny: IntervalSeries[Boolean]): IO[TadoDataStore] =
     IO {
       sunny
         .dataIntervals
         .foldMap {
-          case TimeSeriesType.DataIntervals(from, to, isSunny) =>
+          case DataInterval(from, to, Some(isSunny)) =>
             TadoDataStore(from, to, TadoReading.build(outsideSun = Some(isSunny)))
+          case DataInterval(_, _, None) =>
+            TadoDataStore()
         }
     }
 
-  private def getHeatingModulation(callForHeat: Measure.DataIntervals[ValueType.CallForHeat]): IO[TadoDataStore] =
+  private def getHeatingModulation(callForHeat: IntervalSeries[CallForHeat]): IO[TadoDataStore] =
     IO {
       callForHeat
         .dataIntervals
         .foldMap {
-          case TimeSeriesType.DataIntervals(from, to, callForHeat) =>
+          case DataInterval(from, to, Some(callForHeat)) =>
             TadoDataStore(from, to, TadoReading.build(heatingModulation = Some(callForHeat.dbValue.toDouble)))
+          case DataInterval(_, _, None) =>
+            TadoDataStore()
         }
     }
 
-  private def getInfoFromStripes(stripes: Measure.DataIntervals[ValueType.Stripes]): IO[TadoDataStore] =
+  private def getInfoFromStripes(stripes: IntervalSeries[Stripes]): IO[TadoDataStore] =
     stripes
       .dataIntervals
       .foldMap {
-        case dataInterval @ TimeSeriesType.DataIntervals(from, to, ValueType.Stripes(stripeType, _)) =>
+        case DataInterval(from, to, Some(Stripes(stripeType, _))) =>
           IO
-            .pure(stripeType.toUpperCase)
+            .pure(stripeType.entryName)
             .flatMap {
               case "AWAY" =>
                 IO(TadoReading.build(atHome = Some(false), windowOpen = Some(false), manualSet = Some(false)))
@@ -143,4 +164,6 @@ object ReportConverter:
             .map {
               TadoDataStore(from, to, _)
             }
+        case DataInterval(_, _, None) =>
+          IO.pure(TadoDataStore())
       }

@@ -40,8 +40,14 @@ class TadoPuller private (tadoClient: Tado4sClient[IO], scrapeLog: ScrapeLog[IO]
       tadoClient
         .getZoneDayReport(state.homeId, roomId, date)
         .flatMap(ReportConverter.convert(state.rooms(roomId), _))
-        .flatTap(_ => scrapeLog.logEntry(ScrapeService.Tado, toTimestamp(date), roomId.toString))
+        .flatTap(_ => logToScrapeLog(date, roomId))
     }
+
+  private def logToScrapeLog(date: LocalDate, roomId: Int): IO[Unit] =
+    if date.isBefore(LocalDate.now()) then
+      scrapeLog.logEntry(ScrapeService.Tado, toTimestamp(date), roomId.toString)
+    else
+      IO.unit
 
   private def toTimestamp(date: LocalDate): OffsetDateTime =
     date

@@ -197,19 +197,44 @@ values.find(_.isValid) match
   case None    => default
 ```
 
-### 2.6 Comments and Logging
+### 2.6 Documentation
 
-**Goal:** Keep the codebase clean without unnecessary noise.
+**Goal:** Document appropriately based on visibility and purpose.
 
 **What to do:**
-- Preserve all existing comments exactly as they are
-- Add logging only at key milestones
-- Use appropriate log levels: `debug` for flow, `info` for milestones, `error` for failures
+- **Public API interfaces** (traits/classes meant for external use): Full Scaladoc with short description, detailed description, arguments and type parameters
+- **Public methods**: One-line description only
+- **Objects, classes, traits**: One-line description only
+- **Private methods**: No documentation at all
+
+**Why:** Over-documentation creates noise. Public APIs need clarity for users; internals should be self-documenting through good naming.
+
+```scala
+// ✅ Correct - public API trait with full docs
+/**
+ * Client for interacting with the Tado API.
+ *
+ * Provides methods to retrieve home data, zone information, and day reports.
+ * Handles authentication and rate limiting internally.
+ *
+ * @tparam F Effect....
+ * @param config The configuration for connecting to the API
+ */
+trait TadoClient[F[_]]:
+  /** Retrieves the day report for a specific zone */
+  def getZoneDayReport(homeId: Int, zoneId: Int, date: LocalDate): F[DayReportResponse]
+
+// ✅ Correct - internal class with one-line description
+/** Parses raw API responses into domain types */
+object ResponseParser:
+  // No docs on private methods
+  private def parseInterval(json: Json): Option[Interval] = ...
+```
 
 **What NOT to do:**
-- Don't add new comments to explain code (write clearer code instead)
+- Don't add Scaladoc to private methods
+- Don't write multi-line docs for simple public methods
 - Don't remove existing comments
-- Don't add logging inside tight loops
 
 ### 2.7 Working with the Formatter
 
@@ -379,6 +404,38 @@ object MeterPointNumberWorker {
 final case class MeterPointNumber(value: String) {
   def getMeter(): F[Meter] = ...
 }
+```
+
+### 5.3 No Default Values or Copy
+
+**Goal:** Make structural changes obvious and caught at compile time.
+
+**What to do:**
+- Never use default parameter values in ADTs, functions, or APIs
+- Never use `.copy()` method on case classes—always recreate the full instance
+- Default values are only allowed in test code
+
+**Why:** When ADT structure changes (new fields added), default values and `.copy()` silently use defaults/old values, hiding bugs. Explicit instantiation forces you to handle all fields, making changes visible at compile time.
+
+```scala
+// ✅ Correct - explicit full construction with correct indentations for multi-line assignments
+val updated =
+  Config(
+    host = original.host,
+    port = original.port,
+    timeout = newTimeout,
+    retries = original.retries,  // Won't compile if new field added
+  )
+
+// ❌ Incorrect - copy hides structural changes
+val updated = original.copy(timeout = newTimeout)
+
+// ❌ Incorrect - default value hides missing argument
+final case class Config(
+  host: String,
+  port: Int,
+  timeout: Duration = 30.seconds,  // Don't do this
+)
 ```
 
 ---

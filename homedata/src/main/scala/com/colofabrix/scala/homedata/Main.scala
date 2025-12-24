@@ -25,7 +25,9 @@ object Main extends IOUnitDeclineApp:
     val (from, to) =
       TimeSpanPicker()
         .selectFrom()
-        .otherMinus(days = 3)
+        .setDate(2024, 1, 1)
+        .selectTo()
+        .setDate(2024, 1, 31)
         .roundBoth(ChronoUnit.DAYS)
         .pick()
 
