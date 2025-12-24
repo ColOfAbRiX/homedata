@@ -97,11 +97,12 @@ object DayReportResponse:
 
   object StripeType extends Enum[StripeType] with CirceEnum[StripeType]:
 
-    case object Home               extends StripeType
-    case object Away               extends StripeType
-    case object OpenWindowDetected extends StripeType
-    case object Manual             extends StripeType
-    case object OverlayActive      extends StripeType
+    case object Home                        extends StripeType
+    case object Away                        extends StripeType
+    case object OpenWindowDetected          extends StripeType
+    case object Manual                      extends StripeType
+    case object OverlayActive               extends StripeType
+    case object MeasuringDeviceDisconnected extends StripeType
 
     val values = findValues
 

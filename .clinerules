@@ -592,8 +592,9 @@ object ScrapeLog {
 
 ```
 com.colofabrix.scala.{project}
-  ├── api/       # Request/response types
-  ├── model/     # Domain models and error types
+  ├── api/       # Public API models
+  ├── model/     # Internal domain models and error types
+  ├── security/  # Code related to project security
 ```
 
 ### 9.2 File Organization

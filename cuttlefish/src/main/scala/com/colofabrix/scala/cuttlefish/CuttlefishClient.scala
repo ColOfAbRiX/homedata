@@ -97,6 +97,128 @@ final class CuttlefishClient[F[_]: Async] private (
 
       client.expectOr[MeterConsumptionResponse](GET(url))(handleClientExpectError)
 
+  //  Account Endpoint  //
+
+  /** Retrieves account information */
+  def getAccount(request: AccountRequest): F[AccountResponse] =
+    logger.debug(s"Getting account ${request.accountNumber}") >>
+    withAuthClient().flatMap: client =>
+      val url = config.apiBase / "accounts" / request.accountNumber / ""
+      client.expectOr[AccountResponse](GET(url))(handleClientExpectError)
+
+  //  Products Endpoints (No Auth Required)  //
+
+  /** Retrieves list of all products */
+  def getProducts(request: ProductsRequest): F[ProductsResponse] =
+    logger.debug("Getting products list") >>
+    internalGetProducts(request)
+
+  private def internalGetProducts(request: ProductsRequest): F[ProductsResponse] =
+    val url =
+      (config.apiBase / "products" / "")
+        .withOptionQueryParam("brand", request.brand)
+        .withOptionQueryParam("is_variable", request.isVariable)
+        .withOptionQueryParam("is_business", request.isBusiness)
+        .withOptionQueryParam("is_green", request.isGreen)
+        .withOptionQueryParam("is_prepay", request.isPrepay)
+        .withOptionQueryParam("available_at", request.availableAt)
+    httpClient.expectOr[ProductsResponse](GET(url))(handleClientExpectError)
+
+  /** Retrieves details for a specific product */
+  def getProductDetails(request: ProductDetailsRequest): F[ProductDetailsResponse] =
+    logger.debug(s"Getting product details for ${request.productCode}") >>
+    internalGetProductDetails(request)
+
+  private def internalGetProductDetails(request: ProductDetailsRequest): F[ProductDetailsResponse] =
+    val url =
+      (config.apiBase / "products" / request.productCode / "")
+        .withOptionQueryParam("tariffs_active_at", request.tariffsActiveAt)
+    httpClient.expectOr[ProductDetailsResponse](GET(url))(handleClientExpectError)
+
+  //  Grid Supply Points Endpoint (No Auth Required)  //
+
+  /** Retrieves grid supply points for a postcode */
+  def getGridSupplyPoints(request: GridSupplyPointsRequest): F[GridSupplyPointsResponse] =
+    logger.debug(s"Getting grid supply points for postcode ${request.postcode}") >> {
+      val url = (config.apiBase / "industry" / "grid-supply-points" / "").withQueryParam("postcode", request.postcode.value)
+      httpClient.expectOr[GridSupplyPointsResponse](GET(url))(handleClientExpectError)
+    }
+
+  //  Electricity Meter Point Endpoint (No Auth Required)  //
+
+  /** Retrieves information about an electricity meter point */
+  def getElectricityMeterPoint(request: ElectricityMeterPointRequest): F[ElectricityMeterPointResponse] =
+    logger.debug(s"Getting electricity meter point for mpan ${request.mpan}") >> {
+      val url = config.apiBase / "electricity-meter-points" / request.mpan / ""
+      httpClient.expectOr[ElectricityMeterPointResponse](GET(url))(handleClientExpectError)
+    }
+
+  //  Electricity Tariff Endpoints (No Auth Required)  //
+
+  /** Retrieves standard unit rates for an electricity tariff */
+  def getElectricityStandardUnitRates(request: ElectricityUnitRatesRequest): F[UnitRatesResponse] =
+    logger.debug(s"Getting electricity standard unit rates for ${request.productCode}/${request.tariffCode}") >>
+    internalGetElectricityTariffRates("standard-unit-rates", request)
+
+  /** Retrieves day unit rates for an electricity tariff (Economy 7) */
+  def getElectricityDayUnitRates(request: ElectricityUnitRatesRequest): F[UnitRatesResponse] =
+    logger.debug(s"Getting electricity day unit rates for ${request.productCode}/${request.tariffCode}") >>
+    internalGetElectricityTariffRates("day-unit-rates", request)
+
+  /** Retrieves night unit rates for an electricity tariff (Economy 7) */
+  def getElectricityNightUnitRates(request: ElectricityUnitRatesRequest): F[UnitRatesResponse] =
+    logger.debug(s"Getting electricity night unit rates for ${request.productCode}/${request.tariffCode}") >>
+    internalGetElectricityTariffRates("night-unit-rates", request)
+
+  private def internalGetElectricityTariffRates(rateType: String, request: ElectricityUnitRatesRequest): F[UnitRatesResponse] =
+    val url =
+      (config.apiBase / "products" / request.productCode / "electricity-tariffs" / request.tariffCode / rateType / "")
+        .withOptionQueryParam("period_from", request.periodFrom)
+        .withOptionQueryParam("period_to", request.periodTo)
+        .withOptionQueryParam("page_size", request.pageSize)
+    httpClient.expectOr[UnitRatesResponse](GET(url))(handleClientExpectError)
+
+  /** Retrieves standing charges for an electricity tariff */
+  def getElectricityStandingCharges(request: ElectricityStandingChargesRequest): F[StandingChargesResponse] =
+    logger.debug(s"Getting electricity standing charges for ${request.productCode}/${request.tariffCode}") >>
+    internalGetElectricityStandingCharges(request)
+
+  private def internalGetElectricityStandingCharges(request: ElectricityStandingChargesRequest): F[StandingChargesResponse] =
+    val url =
+      (config.apiBase / "products" / request.productCode / "electricity-tariffs" / request.tariffCode / "standing-charges" / "")
+        .withOptionQueryParam("period_from", request.periodFrom)
+        .withOptionQueryParam("period_to", request.periodTo)
+        .withOptionQueryParam("page_size", request.pageSize)
+    httpClient.expectOr[StandingChargesResponse](GET(url))(handleClientExpectError)
+
+  //  Gas Tariff Endpoints (No Auth Required)  //
+
+  /** Retrieves standard unit rates for a gas tariff */
+  def getGasStandardUnitRates(request: GasUnitRatesRequest): F[UnitRatesResponse] =
+    logger.debug(s"Getting gas standard unit rates for ${request.productCode}/${request.tariffCode}") >>
+    internalGetGasTariffRates(request)
+
+  private def internalGetGasTariffRates(request: GasUnitRatesRequest): F[UnitRatesResponse] =
+    val url =
+      (config.apiBase / "products" / request.productCode / "gas-tariffs" / request.tariffCode / "standard-unit-rates" / "")
+        .withOptionQueryParam("period_from", request.periodFrom)
+        .withOptionQueryParam("period_to", request.periodTo)
+        .withOptionQueryParam("page_size", request.pageSize)
+    httpClient.expectOr[UnitRatesResponse](GET(url))(handleClientExpectError)
+
+  /** Retrieves standing charges for a gas tariff */
+  def getGasStandingCharges(request: GasStandingChargesRequest): F[StandingChargesResponse] =
+    logger.debug(s"Getting gas standing charges for ${request.productCode}/${request.tariffCode}") >>
+    internalGetGasStandingCharges(request)
+
+  private def internalGetGasStandingCharges(request: GasStandingChargesRequest): F[StandingChargesResponse] =
+    val url =
+      (config.apiBase / "products" / request.productCode / "gas-tariffs" / request.tariffCode / "standing-charges" / "")
+        .withOptionQueryParam("period_from", request.periodFrom)
+        .withOptionQueryParam("period_to", request.periodTo)
+        .withOptionQueryParam("page_size", request.pageSize)
+    httpClient.expectOr[StandingChargesResponse](GET(url))(handleClientExpectError)
+
   //  Http Client Management  //
 
   private def withAuthClient(): F[Client[F]] =
@@ -167,6 +289,18 @@ final class CuttlefishClient[F[_]: Async] private (
     SegmentEncoder[String].contramap(_.value)
 
   private given SegmentEncoder[SerialNumber] =
+    SegmentEncoder[String].contramap(_.value)
+
+  private given SegmentEncoder[AccountNumber] =
+    SegmentEncoder[String].contramap(_.value)
+
+  private given SegmentEncoder[ProductCode] =
+    SegmentEncoder[String].contramap(_.value)
+
+  private given SegmentEncoder[TariffCode] =
+    SegmentEncoder[String].contramap(_.value)
+
+  private given SegmentEncoder[Mpan] =
     SegmentEncoder[String].contramap(_.value)
 
 /**
