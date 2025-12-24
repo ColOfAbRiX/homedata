@@ -1,0 +1,588 @@
+# Scala Coding Guidelines
+
+This document provides coding guidelines for AI agents working on this Scala codebase. These rules cover code style, architectural decisions, and best practices.
+
+---
+
+## Important: Design Decisions
+
+**Design decisions must always be discussed with the software engineer.**
+
+The guidelines in this document are principles, not rigid rules. They interact with each other and depend on context. Project-specific choices should be:
+- Deduced from the existing codebase
+- Asked about when uncertain
+- Adapted to the project's specific needs
+
+---
+
+## 1. KISS - Keep It Simple
+
+### 1.1 Simplicity is Key
+
+**Goal:** Make code understandable, debuggable, and maintainable—even by junior engineers, even a year later during an urgent support request.
+
+**What to do:**
+- Keep architecture, code, tests, and scripts simple
+- Avoid single lines with too many conceptual steps, nested calls, or chained operations
+- Strive for functions less than 40 lines
+- Keep cyclomatic complexity low
+
+**Why:** Simple code means easier understanding, less mental overhead, easier debugging and maintenance, easier testing. Most systems work best if kept simple rather than made complicated.
+
+**What NOT to do:**
+- Don't write overly clever code that's hard to understand
+- Don't nest too deeply—prefer flat, sequential approaches
+
+### 1.2 Don't Write Unnecessary Code
+
+**Goal:** Write only what's needed now, not what might be needed later.
+
+**What to do:**
+- Ask yourself: "Do I need this now or will I definitely need it in the next month?" If no, don't write it.
+- Don't generalize for the sake of generalizing or for fun—only if it benefits the outcome
+- Write utility functions only after you need them at least three times (Rule of 3)
+
+**Why:** It doesn't break if it's not there. Less code means fewer bugs, less maintenance.
+
+**What NOT to do:**
+- Don't over-engineer
+- Don't add speculative features
+
+### 1.3 Explicit Over Implicit
+
+**Goal:** Make code self-documenting and clear in its intentions.
+
+**What to do:**
+- Add intermediate variables with explicit names (using common sense, only to represent truly separate concepts)
+- Make intentions clear through naming and structure
+- Prefer explicit behavior over hidden mechanisms
+
+**Why:** Explicit code is easier to understand, debug, and maintain. Implicit behavior hides intentions behind mechanics.
+
+**What NOT to do:**
+- Don't use Scala implicit parameters—they're hidden and obscure intent
+- Don't rely on implicit conversions
+
+---
+
+## 2. Code Style
+
+### 2.1 Fluent Style
+
+**Goal:** Make code readable by clearly showing the transformation pipeline.
+
+**What to do:**
+- Write code using method chaining (fluent style)
+- Break chains at each method call, placing each method on its own line
+- Indent continuation lines to show they belong to the same expression
+
+**Why:** Fluent style makes data transformations easy to follow visually. Each line represents one step in the pipeline.
+
+**What NOT to do:**
+- Don't chain multiple operations on a single line
+- Don't break chains at arbitrary points
+
+```scala
+// ✅ Correct
+val result =
+  collection
+    .filter(_.isValid)
+    .map(_.transform)
+    .flatMap(process)
+
+// ❌ Incorrect - everything on one line
+val result = collection.filter(_.isValid).map(_.transform).flatMap(process)
+```
+
+**Exception:** If there is only one method call and it fits on the line, don't split:
+
+```scala
+// ✅ Correct - single method call
+val result = collection.filter(_.isValid)
+```
+
+### 2.2 Multi-line Assignments
+
+**Goal:** Clearly separate the variable name from its computed value.
+
+**What to do:**
+- When an assignment spans multiple lines, add a newline immediately after the `=` sign
+- Start the expression on the next line, indented
+
+```scala
+// ✅ Correct
+val adjustedRange =
+  missingSlots
+    .reduceOption((a, b) => a.min(b))
+    .getOrElse(defaultValue)
+
+// ❌ Incorrect - expression starts on same line as =
+val adjustedRange = missingSlots
+  .reduceOption((a, b) => a.min(b))
+  .getOrElse(defaultValue)
+```
+
+### 2.3 Scala 3 Syntax
+
+**Goal:** Use modern, clean Scala 3 syntax for better readability.
+
+**What to do:**
+- Use indentation-based syntax instead of braces
+- Use `then` keyword for `if` expressions
+- Use braceless `for` and `match` expressions
+
+```scala
+// ✅ Correct
+if condition then
+  doSomething()
+else
+  doSomethingElse()
+
+for
+  x <- xs
+  y <- ys
+  z <- x + y
+yield z
+
+// ❌ Incorrect - Scala 2 style with braces
+if (condition) {
+  doSomething()
+}
+```
+
+### 2.4 For-Comprehensions
+
+**Goal:** Keep for-comprehensions clean by using them as aggregators of function calls.
+
+**What to do:**
+- Use for-comprehensions to sequence effectful operations
+- Keep each step as a single, simple function call
+- Steps with very simple logic can be used as long as they fit a single line each
+- Extract complex logic into named functions and call those functions from the for-comprehension
+
+**Why:** For-comprehensions should read like a high-level description. Complex expressions buried inside make them hard to read.
+
+```scala
+// ✅ Correct - each step is simple
+for
+  account <- tadoClient.getAccountInfo()
+  homeId   = account.homes.head.id
+  zones   <- tadoClient.getHomeZones(homeId)
+yield zones
+
+// ❌ Incorrect - complex expression in step
+for
+  account <- tadoClient.getAccountInfo().flatMap { a =>
+    logger.info(s"Got account: $a") >> IO.pure(a)
+  }
+yield account
+```
+
+### 2.5 Prefer Library Functions
+
+**Goal:** Use idiomatic Scala by leveraging existing library functions.
+
+**What to do:**
+- Use `.getOrElse`, `.fold`, `.map`, `.flatMap` instead of explicit `match`
+- Look for existing combinators before writing pattern matches
+- If library methods become complex anonymous functions aggregators, then pattern matching is preferred
+
+```scala
+// ✅ Correct - library function
+values.find(_.isValid).getOrElse(default)
+
+// ❌ Incorrect - unnecessary pattern match
+values.find(_.isValid) match
+  case Some(v) => v
+  case None    => default
+```
+
+### 2.6 Comments and Logging
+
+**Goal:** Keep the codebase clean without unnecessary noise.
+
+**What to do:**
+- Preserve all existing comments exactly as they are
+- Add logging only at key milestones
+- Use appropriate log levels: `debug` for flow, `info` for milestones, `error` for failures
+
+**What NOT to do:**
+- Don't add new comments to explain code (write clearer code instead)
+- Don't remove existing comments
+- Don't add logging inside tight loops
+
+### 2.7 Working with the Formatter
+
+**Goal:** Prevent Scalafmt from creating awkward line breaks while keeping code readable.
+
+**Problem:** Scalafmt can create awkward formatting in two common scenarios:
+1. Breaking the return type onto a separate line
+2. Misaligning method chains after multi-argument calls
+
+**What to do:**
+- There is no single fixed solution—adapt based on the specific situation
+- Use a combination of techniques as needed:
+  - Split parameters onto separate lines
+  - Shorten method/variable names
+  - Use wildcard imports to reduce qualified names (`import Config.*`)
+  - Use brace syntax `{ }` for lambdas in chains
+  - Extract intermediate variables
+
+**Why:** Work with the formatter, not against it. The goal is readable code—use whatever combination of techniques achieves that.
+
+```scala
+// ❌ Formatter creates ugly breaks
+def pullGasReadings(from: OffsetDateTime, to: OffsetDateTime)
+: fs2.Stream[IO, OctopusReading] =
+  pullReadingsWithFilter(from, to, "gas", OctopusConfig.config.gasMprn)
+    .map(c => ...)
+
+// ✅ Correct - shortened names + wildcard import + braces
+import OctopusConfig.config.*
+
+def pullGasReadings(from: OffsetDateTime, to: OffsetDateTime): fs2.Stream[IO, OctopusReading] =
+  pullWithFilter(from, to, "gas", OctopusProduct.Gas, gasMprn, gasSerial).map { c =>
+    OctopusReading.GasReading(c.interval_start, c.consumption)
+  }
+```
+
+---
+
+## 3. Composition and Modularity
+
+### 3.1 Prefer Composition Over Inheritance
+
+**Goal:** Create flexible, reusable designs through composition.
+
+**What to do:**
+- Design by composition—combine small, focused components
+- Keep things confined with single responsibility
+- A class or module should have one reason to change
+
+**Why:** Composition gives more design flexibility. Class hierarchies are rigid and difficult to reuse in different contexts.
+
+### 3.2 Don't Reinvent the Wheel
+
+**Goal:** Reuse existing code and avoid duplication (by using libraries)
+
+**What to do:**
+- Reuse code, make things repeatable
+- Script repetitive tasks for repeatability
+
+**What NOT to do:**
+- Don't add too many dependencies—do you really need that fancy library?
+- Remember: you'll be the one upgrading it and dealing with its bugs
+
+### 3.3 Uniformity
+
+**Goal:** Make code predictable—see it once, understand it everywhere.
+
+**What to do:**
+- Use well-established design patterns (FP or OOP)
+- Prefer flat designs over deep nesting
+- Keep cyclomatic complexity low
+
+**Why:** Predictability means people understand solutions quicker, leading to more shared understanding and robust code.
+
+---
+
+## 4. Functional Programming
+
+### 4.1 Prefer FP Over OOP
+
+**Goal:** Generate simpler, easier to reason about code.
+
+**What to do:**
+- Prefer FP techniques over OOP
+- Use Cats typeclasses and data structures
+- Use OOP techniques sparingly when truly needed
+
+**Why:** FP creates simpler code without messy class hierarchies. Pure functions are easier to test, reason about, and compose.
+
+### 4.2 Impure Code at Boundaries
+
+**Goal:** Keep side effects at the edges of the system with pure business logic in the core.
+
+**What to do:**
+- Place IO operations at system boundaries
+- Write pure functions for business logic, parsing, transformations
+- Keep Java code and impure code at the boundary
+
+```scala
+// ✅ Correct - impurity at boundary
+object ScrapeLog {
+  def load[F[_]: Sync](path: Path): F[Set[Entry]] =
+    Sync[F].blocking {
+      JFiles.readAllLines(path).asScala.toList.flatMap(parseLine).toSet
+    }
+
+  // Pure parsing logic
+  private def parseLine(line: String): Option[Entry] =
+    line.split(",") match
+      case Array(a, b, c) => Some(Entry(a, b, c))
+      case _              => None
+}
+```
+
+### 4.3 Wrapping Blocking Code
+
+**Goal:** Properly handle blocking operations.
+
+**What to do:**
+- Use `Sync[F].blocking { ... }` to wrap blocking operations
+- Keep the blocking section as small as possible
+
+**Why:** Cats Effect uses a limited compute thread pool. Blocking operations can starve this pool.
+
+---
+
+## 5. Type Safety
+
+### 5.1 Domain Types
+
+**Goal:** Use the type system to prevent bugs and parameter mix-ups.
+
+**What to do:**
+- Wrap primitive types in domain-specific types at API boundaries
+- Use case class wrappers or opaque types for identifiers
+
+```scala
+// ✅ Correct - domain types prevent mix-ups
+final case class MeterPointNumber(value: String)
+final case class SerialNumber(value: String)
+
+def getMeter(mpn: MeterPointNumber, serial: SerialNumber): F[Meter]
+```
+
+### 5.2 Algebraic Data Types
+
+**Goal:** Give a strong, uniform foundation for data representation.
+
+**What to do:**
+- Always make case classes final
+- Keep ADTs as pure data containers
+- Put business logic in separate packages/objects
+
+**What NOT to do:**
+- Don't add behavior methods to ADTs
+- ADTs must never contain business logic
+
+```scala
+// ✅ Correct - ADT as data, logic separate
+final case class MeterPointNumber(value: String)
+
+object MeterPointNumberWorker {
+  def getMeter(mpn: MeterPointNumber): F[Meter] = ...
+}
+
+// ❌ Incorrect - behavior in ADT
+final case class MeterPointNumber(value: String) {
+  def getMeter(): F[Meter] = ...
+}
+```
+
+---
+
+## 6. Error Handling
+
+### 6.1 Error Categories (Types)
+
+**Goal:** Define minimal error types that evolve as the project grows. Project-specific error type structure should be discussed with the engineer.
+
+**Principle:** Start with minimal error types, add categories only as needed:
+- Begin with a simple error type
+- Differentiate recoverable vs fatal errors when needed
+- Add validation errors when needed
+
+**What to do:**
+- Error classes extend `Throwable`, NOT case classes
+- Keep categories to a minimum needed for the project
+
+```scala
+// ✅ Correct - regular class
+final class MyProjectError(message: String) extends Exception(message)
+
+// ❌ Incorrect - case class error
+case class MyProjectError(message: String) extends Exception(message)
+```
+
+### 6.2 Error Channels (Propagation)
+
+**Goal:** Use consistent channels for error propagation. The specific choice (`IO` vs `F[_]: MonadError`) depends on the project—deduce from existing code or ask the engineer.
+
+**What to do:**
+- Public API: Use effect types for error propagation
+- Internal implementation can use what's appropriate:
+  - `Validated` for accumulating config/parsing errors
+  - `raiseError` for simple error cases
+  - `Either`/`Option` where appropriate internally
+
+```scala
+// ✅ Public API uses effect type
+def fetchData(id: String): IO[Data]
+
+// ✅ Internal: Validated for accumulation
+private def validateConfig(raw: RawConfig): ValidatedNel[String, Config]
+
+// ✅ Convert at the boundary
+def loadConfig(): IO[Config] =
+  IO.fromValidated(validateConfig(raw))
+```
+
+### 6.3 Error Handling Strategies
+
+**Goal:** Always handle errors—choose the right strategy.
+
+**Fail-Fast (configuration, startup):**
+- Let errors bubble up until they fail the application
+- Fail at startup with complete error list
+- Use `Validated` to accumulate all config errors
+
+**Fail-Late (runtime, resilient systems):**
+- Keep application running
+- Log errors and continue
+
+```scala
+// Fail-fast at startup
+loadConfig() match
+  case Valid(config)   => runApp(config)
+  case Invalid(errors) =>
+    errors.foreach(logger.error)
+    sys.exit(1)
+
+// Fail-late for resilience
+def processItem(item: Item): IO[Unit] =
+  processInternal(item).handleErrorWith { error =>
+    logger.error(s"Failed: $error") >> IO.unit
+  }
+```
+
+---
+
+## 7. Testing
+
+### 7.1 Test Early
+
+**Goal:** Test for the features you need, not the features you remember.
+
+**What to do:**
+- Write a stub of your solution with building blocks and modules
+- Concentrate on test suites, stub all possible tests, mark as failing
+- Write tests until one fails, then implement the feature
+
+**Why:** Tests should reflect product requirements, not code written. Don't infer tests from code.
+
+### 7.2 Black-Box Testing
+
+**Goal:** Test behavior through public interfaces, not internal implementation.
+
+**What to do:**
+- Unit tests should know nothing about internal implementation
+- Test through the public interface only
+- Private methods are implementation details testable through public interface
+
+**Why:** Black-box testing makes refactoring easier. White-box testing couples tests to implementation, making changes difficult.
+
+**What NOT to do:**
+- Don't test private methods
+- Don't make methods public just to test them
+
+### 7.3 FP Testing
+
+**Goal:** Test data pipelines effectively.
+
+**What to do:**
+- Thoroughly unit test endpoints of data pipelines
+- Test wiring separately to ensure every step is called
+- Use integration tests for end-to-end service features
+
+---
+
+## 8. Class and Object Organization
+
+### 8.1 Factory Pattern
+
+**Goal:** Control object instantiation and edge cases
+
+**What to do:**
+- Make the constructor `private` when you need a factory
+- Create companion `apply` method returning `F[A]` or `Resource[F, A]`
+
+```scala
+final class ScrapeLog[F[_]: Async] private (...) {
+  def contains(e: Entry): Boolean = ...
+}
+
+object ScrapeLog {
+  def apply[F[_]: Async](path: Path): Resource[F, ScrapeLog[F]] = ...
+}
+```
+
+### 8.2 Method Organization
+
+**Goal:** Make classes easy to navigate.
+
+**What to do:**
+- Place public methods at the top
+- Place private methods below
+- Group related private methods together
+
+---
+
+## 9. File and Package Organization
+
+### 9.1 Package Structure
+
+```
+com.colofabrix.scala.{project}
+  ├── api/       # Request/response types
+  ├── model/     # Domain models and error types
+```
+
+### 9.2 File Organization
+
+**What to do:**
+- One primary type per file
+- Name file after primary type
+- Small related types can share a file
+
+---
+
+## 10. Code and System Properties
+
+**Goal:** Develop systems with the following properties:
+
+- **Correctness:** Code functions as intended, stems from requirements
+- **Robustness:** Ability to cope with errors and erroneous inputs gracefully
+- **Low Viscosity:** Easy to add new code while maintaining design
+- **Resiliency:** Ability to continue functioning in face of failures
+
+---
+
+## 11. Code Sanity
+
+**Goal:** Let the compiler help you.
+
+**What to do:**
+- Enable compiler checks, linting, and fatal warnings
+- Use Wartremover and Scalastyle
+
+**Why:** Constraints liberate. Strictness prevents common, easily avoidable mistakes.
+
+---
+
+## 12. Summary Checklist
+
+When writing new code, verify:
+
+- [ ] KISS: Is this the simplest solution?
+- [ ] Fluent style with proper line breaks
+- [ ] Multi-line assignments have newline after `=`
+- [ ] For-comprehensions have single-line steps
+- [ ] Domain types used at API boundaries
+- [ ] Error classes are not case classes
+- [ ] Blocking code wrapped in Sync[F].blocking
+- [ ] Impure code at system boundaries
+- [ ] Factory pattern used when initialization needed
+- [ ] Resource used for lifecycle management
+- [ ] Tests are black-box through public interface

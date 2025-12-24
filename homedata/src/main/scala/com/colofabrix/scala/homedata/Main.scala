@@ -5,6 +5,7 @@ import cats.implicits.given
 import com.colofabrix.scala.declinio.*
 import com.colofabrix.scala.homedata.influx.InfluxWriter
 import com.colofabrix.scala.homedata.octopus.OctopusPuller
+import com.colofabrix.scala.homedata.scrape.ScrapeLog
 import com.colofabrix.scala.homedata.tado.*
 import com.colofabrix.scala.timeflux.*
 import com.colofabrix.scala.timeflux.api.QueryRequest
@@ -36,20 +37,21 @@ object Main extends IOUnitDeclineApp:
         ||>  aggregateWindow(every: 1h, fn: mean, createEmpty: false)
         ||>  yield(name: "mean")""".stripMargin
 
-    for
-      // Real working Tado/Octopus
-      _                  <- IO.println("HomeData - Tado and Octopus scrapers")
-      octoPuller         <- OctopusPuller()
-      gasMeasures         = octoPuller.pullGasReadings(from, to).through(toApiMeasureStream)
-      electricityMeasures = octoPuller.pullElectricityReadings(from, to).through(toApiMeasureStream)
-      tadoPuller         <- TadoPuller()
-      tadoMeasures        = tadoPuller.pullReadings(from, to).through(toApiMeasureStream)
-      writer             <- InfluxWriter()
-      _                  <- writer.write(tadoMeasures, gasMeasures, electricityMeasures)
-    // // Extra testing code for influx syntax
-    // _ <- IO.println("HomeData - Simple statistics")
-    // timefluxClient <- TimefluxClient[IO](InfluxConfig.clientConfig)
-    // points         <- timefluxClient.query(QueryRequest(query, None))
-    // listPoints     <- points.compile.toList
-    // _              <- listPoints.traverse(IO.println)
-    yield ExitCode.Success
+    ScrapeLog[IO]().use { scrapeLog =>
+      for
+        _                  <- IO.println("HomeData - Tado and Octopus scrapers")
+        octoPuller         <- OctopusPuller(scrapeLog)
+        gasMeasures         = octoPuller.pullGasReadings(from, to).through(toApiMeasureStream)
+        electricityMeasures = octoPuller.pullElectricityReadings(from, to).through(toApiMeasureStream)
+        tadoPuller         <- TadoPuller(scrapeLog)
+        tadoMeasures        = tadoPuller.pullReadings(from, to).through(toApiMeasureStream)
+        writer             <- InfluxWriter()
+        _                  <- writer.write(tadoMeasures, gasMeasures, electricityMeasures)
+      // // Extra testing code for influx syntax
+      // _ <- IO.println("HomeData - Simple statistics")
+      // timefluxClient <- TimefluxClient[IO](InfluxConfig.clientConfig)
+      // points         <- timefluxClient.query(QueryRequest(query, None))
+      // listPoints     <- points.compile.toList
+      // _              <- listPoints.traverse(IO.println)
+      yield ExitCode.Success
+    }
