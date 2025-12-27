@@ -22,12 +22,20 @@ object Main extends IOUnitDeclineApp:
     "Tado and Octopus scrapers"
 
   override def runNoConfig(): IO[ExitCode] =
+    // val (from, to) =
+    //   TimeSpanPicker()
+    //     .selectFrom()
+    //     .setDate(2023, 11, 23)
+    //     .selectTo()
+    //     .now()
+    //     .roundBoth(ChronoUnit.DAYS)
+    //     .pick()
     val (from, to) =
       TimeSpanPicker()
         .selectFrom()
-        .setDate(2023, 11, 23)
+        .setDate(2024, 5, 23)
         .selectTo()
-        .now()
+        .setDate(2024, 5, 25)
         .roundBoth(ChronoUnit.DAYS)
         .pick()
 

@@ -24,3 +24,6 @@ TODO*
 
 # Sensitive files
 secrets.*
+
+# Data
+docker/influxdb-data

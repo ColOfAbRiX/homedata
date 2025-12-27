@@ -39,7 +39,7 @@ class OctopusPuller private (octopusClient: CuttlefishClient[IO], scrapeLog: Scr
     serial: SerialNumber,
   ): fs2.Stream[IO, ConsumptionResults] =
     val missingSlots =
-      generateHalfHourSlots(from, to).filterNot { slot =>
+      generateTimeSlots(from, to).filterNot { slot =>
         scrapeLog.contains(ScrapeService.Octopus, slot, meterType)
       }
 
@@ -62,11 +62,14 @@ class OctopusPuller private (octopusClient: CuttlefishClient[IO], scrapeLog: Scr
         )
 
       fs2.Stream.exec(logger.info(s"Pulling Octopus $meterType data from=$adjustedFrom to=$adjustedTo")) ++
-      streamReadings(request).evalTap { c =>
-        scrapeLog.logEntry(ScrapeService.Octopus, c.interval_start, meterType)
+      streamReadings(request).evalTap { result =>
+        if result.interval_start.isBefore(OffsetDateTime.now()) then
+          scrapeLog.logEntry(ScrapeService.Octopus, result.interval_start, meterType)
+        else
+          IO.unit
       }
 
-  private def generateHalfHourSlots(from: OffsetDateTime, to: OffsetDateTime): List[OffsetDateTime] =
+  private def generateTimeSlots(from: OffsetDateTime, to: OffsetDateTime): List[OffsetDateTime] =
     Iterator
       .iterate(from)(_.plusMinutes(30))
       .takeWhile(_.isBefore(to))
@@ -80,12 +83,10 @@ class OctopusPuller private (octopusClient: CuttlefishClient[IO], scrapeLog: Scr
             case MeterConsumptionResponse(_, Some(_), _, results) =>
               val nextPage        = pageRequest.page.map(_ + 1)
               val nextPageRequest = Option(pageRequest.copy(page = nextPage))
-              (results, nextPageRequest)
+              (fs2.Stream.emits(results), nextPageRequest)
+
             case MeterConsumptionResponse(_, None, _, results) =>
-              (results, None)
-          }
-          .map { (results, nextPage) =>
-            (fs2.Stream.emits(results), nextPage)
+              (fs2.Stream.emits(results), None)
           }
       }
       .through(throttle(OctopusConfig.config.requestsPerSec))
