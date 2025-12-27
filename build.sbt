@@ -9,11 +9,13 @@ val circeCoreVersion       = "0.14.10"
 val circeGenericVersion    = "0.14.10"
 val coreVersion            = "4.0.0-M8"
 val declineVersion         = "2.4.1"
+val declinioVersion        = "1.0.0"
 val ducktapeVersion        = "0.1.11"
 val enumeratumVersion      = "1.7.5"
 val fs2DataVersion         = "1.11.2"
 val fs2ThrottlerVersion    = "1.0.12"
 val fs2Version             = "3.9.3"
+val h4sbtVersion           = "1.0.0"
 val http4sClientVersion    = "0.23.24"
 val json4sNativeVersion    = "4.1.0-M4"
 val log4catsVersion        = "2.7.0"
@@ -36,7 +38,7 @@ timeflux / Test / tpolecatScalacOptions := Set.empty
 lazy val root =
   project
     .in(file("."))
-    .aggregate(homedata, timeflux, tado4s, cuttlefish, declinio, h4sbl)
+    .aggregate(homedata, timeflux, tado4s, cuttlefish)
     .settings(
       name              := "root",
       version           := "0.1.0",
@@ -46,48 +48,10 @@ lazy val root =
       semanticdbVersion := scalafixSemanticdb.revision,
     )
 
-lazy val declinio =
-  project
-    .in(file("declinio"))
-    .settings(
-      name         := "declinio",
-      version      := "0.1.0",
-      organization := "com.colofabrix.scala.declinio",
-      scalaVersion := scala3Version,
-      libraryDependencies ++= List(
-        "com.monovore"  %% "decline"            % declineVersion,
-        "org.typelevel" %% "cats-effect"        % catsEffectVersion,
-        "org.typelevel" %% "cats-effect-std"    % catsEffectVersion,
-        "org.typelevel" %% "cats-effect-kernel" % catsEffectVersion,
-      ),
-    )
-
-lazy val h4sbl =
-  project
-    .in(file("h4sbl"))
-    .settings(
-      name         := "h4sbl",
-      version      := "0.1.0",
-      organization := "com.colofabrix.scala.http4s.middleware.betterlogger",
-      scalaVersion := scala3Version,
-      libraryDependencies ++= List(
-        "co.fs2"        %% "fs2-core"            % fs2Version,
-        "org.http4s"    %% "http4s-client"       % http4sClientVersion,
-        "org.http4s"    %% "http4s-core"         % http4sClientVersion,
-        "org.scodec"    %% "scodec-bits"         % scodecBitsVersion,
-        "org.typelevel" %% "cats-core"           % catsVersion,
-        "org.typelevel" %% "cats-effect"         % catsEffectVersion,
-        "org.typelevel" %% "cats-effect-kernel"  % catsEffectVersion,
-        "org.typelevel" %% "case-insensitive"    % caseInsensitiveVersion,
-        "org.typelevel" %% "log4cats-core"       % log4catsVersion,
-        "org.typelevel" %% "log4cats-slf4j"      % log4catsVersion,
-      ),
-    )
-
 lazy val homedata =
   project
     .in(file("homedata"))
-    .dependsOn(timeflux, tado4s, cuttlefish, declinio)
+    .dependsOn(timeflux, tado4s, cuttlefish)
     .settings(
       name         := "homedata",
       version      := "0.1.0",
@@ -97,6 +61,8 @@ lazy val homedata =
         "ch.qos.logback"         % "logback-classic"    % logbackClassicVersion % Runtime,
         "co.fs2"                %% "fs2-core"           % fs2Version,
         "co.fs2"                %% "fs2-io"             % fs2Version,
+        "com.colofabrix.scala"  %% "declinio"           % declinioVersion,
+        "com.colofabrix.scala"  %% "h4sbl"              % h4sbtVersion,
         "com.github.pureconfig" %% "pureconfig-core"    % pureconfigVersion,
         "com.monovore"          %% "decline"            % declineVersion,
         "dev.kovstas"           %% "fs2-throttler"      % fs2ThrottlerVersion,
@@ -117,7 +83,6 @@ lazy val homedata =
 lazy val timeflux =
   project
     .in(file("timeflux"))
-    .dependsOn(h4sbl)
     .settings(
       name         := "timeflux",
       version      := "0.1.0",
@@ -127,6 +92,7 @@ lazy val timeflux =
         "ch.qos.logback"         % "logback-classic"     % logbackClassicVersion % Runtime,
         "co.fs2"                %% "fs2-core"            % fs2Version            % Runtime,
         "co.fs2"                %% "fs2-io"              % fs2Version,
+        "com.colofabrix.scala"  %% "h4sbl"               % h4sbtVersion,
         "com.github.pureconfig" %% "pureconfig-core"     % pureconfigVersion,
         "io.circe"              %% "circe-core"          % circeCoreVersion,
         "io.github.arainko"     %% "ducktape"            % ducktapeVersion,
@@ -152,7 +118,6 @@ lazy val timeflux =
 lazy val tado4s =
   project
     .in(file("tado4s"))
-    .dependsOn(h4sbl)
     .settings(
       name         := "tado4s",
       version      := "0.1.0",
@@ -164,6 +129,7 @@ lazy val tado4s =
         "co.fs2"                %% "fs2-io"              % fs2Version,
         "com.beachape"          %% "enumeratum-circe"    % enumeratumVersion,
         "com.beachape"          %% "enumeratum"          % enumeratumVersion,
+        "com.colofabrix.scala"  %% "h4sbl"               % h4sbtVersion,
         "com.github.pureconfig" %% "pureconfig-core"     % pureconfigVersion,
         "io.circe"              %% "circe-core"          % circeCoreVersion,
         "io.circe"              %% "circe-parser"        % circeCoreVersion      % Test,
@@ -187,7 +153,7 @@ lazy val tado4s =
 lazy val cuttlefish =
   project
     .in(file("cuttlefish"))
-    .dependsOn(timeflux, tado4s, h4sbl)
+    .dependsOn(timeflux, tado4s)
     .settings(
       name         := "cuttlefish",
       version      := "0.1.0",
@@ -195,6 +161,7 @@ lazy val cuttlefish =
       scalaVersion := scala3Version,
       libraryDependencies ++= List(
         "co.fs2"                %% "fs2-io"              % fs2Version,
+        "com.colofabrix.scala"  %% "h4sbl"               % h4sbtVersion,
         "com.github.pureconfig" %% "pureconfig-core"     % pureconfigVersion,
         "dev.kovstas"           %% "fs2-throttler"       % fs2ThrottlerVersion,
         "io.circe"              %% "circe-core"          % circeCoreVersion,

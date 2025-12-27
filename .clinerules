@@ -608,7 +608,7 @@ com.colofabrix.scala.{project}
 
 ## 10. Code and System Properties
 
-**Goal:** Develop systems with the following properties:
+**Goal:** Develop systems optimizing for the following properties:
 
 - **Correctness:** Code functions as intended, stems from requirements
 - **Robustness:** Ability to cope with errors and erroneous inputs gracefully

@@ -19,6 +19,7 @@ class TadoApiDecoders extends AnyFreeSpecLike with Matchers with EitherValues:
           "day_report_response/sample_2.jsonc",
           "day_report_response/sample_3.jsonc",
           "day_report_response/sample_4.jsonc",
+          "day_report_response/sample_5.jsonc",
         )
 
       files.foreach { jsonFile =>

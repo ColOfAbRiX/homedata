@@ -24,6 +24,7 @@ class TadoPuller private (tadoClient: Tado4sClient[IO], scrapeLog: ScrapeLog[IO]
       .through(throttle(TadoConfig.config.requestsPerSec))
       .map(pullRoom)
       .parJoinUnbounded
+      .onFinalize(logger.info("Completed pull of Tado data"))
 
   private def generateNextDate(to: OffsetDateTime)(current: LocalDate): Option[(LocalDate, LocalDate)] =
     if (current.isBefore(to.toLocalDate) || current.isEqual(to.toLocalDate)) then

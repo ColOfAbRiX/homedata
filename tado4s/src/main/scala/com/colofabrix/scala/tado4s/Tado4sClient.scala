@@ -2,7 +2,7 @@ package com.colofabrix.scala.tado4s
 
 import cats.effect.Async
 import cats.implicits.*
-import com.colofabrix.scala.http4s.middleware.betterlogger.Logger
+import com.colofabrix.scala.http4s.middleware.betterlogger.ClientLogger
 import com.colofabrix.scala.tado4s.api.*
 import com.colofabrix.scala.tado4s.security.*
 import com.colofabrix.scala.tado4s.store.TadoRefreshToken
@@ -201,6 +201,6 @@ object Tado4sClient:
     yield client
 
   private def buildConfiguredHttpClient[F[_]: Async](config: TadoConfig, httpClient: Client[F]): Client[F] =
-    Logger:
+    ClientLogger:
       SSLValidationClient(config.ignoreSsl):
         httpClient

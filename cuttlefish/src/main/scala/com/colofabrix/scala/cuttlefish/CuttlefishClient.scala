@@ -1,14 +1,12 @@
 package com.colofabrix.scala.cuttlefish
 
-import cats.effect.{ Async, Temporal }
+import cats.effect.Async
 import cats.effect.std.AtomicCell
 import cats.implicits.given
 import com.colofabrix.scala.cuttlefish.api.*
 import com.colofabrix.scala.cuttlefish.CuttlefishClient.*
-import com.colofabrix.scala.cuttlefish.FS2Logging.*
-import com.colofabrix.scala.http4s.middleware.betterlogger.Logger
+import com.colofabrix.scala.http4s.middleware.betterlogger.ClientLogger
 import com.colofabrix.scala.cuttlefish.model.*
-import dev.kovstas.fs2throttler.Throttler
 import fs2.io.net.Network
 import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
@@ -35,8 +33,8 @@ final class CuttlefishClient[F[_]: Async] private (
   atomicState: AtomicCell[F, CuttlefishClientState[F]],
 ) extends Http4sClientDsl[F]:
 
-  private type StreamF[+A] =
-    fs2.Stream[F, A]
+  // private type StreamF[+A] =
+  //   fs2.Stream[F, A]
 
   implicit private val logger: SelfAwareStructuredLogger[F] =
     Slf4jLogger.getLogger[F]
@@ -45,7 +43,7 @@ final class CuttlefishClient[F[_]: Async] private (
    * Logs into the Octopus service
    */
   def login(apiKey: String): F[Unit] =
-    logger.debug("Login") >>
+    logger.debug("Cuttlefish API Key Login") >>
     setApiKey(apiKey)
 
   /**
@@ -56,34 +54,13 @@ final class CuttlefishClient[F[_]: Async] private (
     clearApiKey() >>
     clearAuthenticatedClient()
 
-  def pagedMeterConsumption(request: MeterConsumptionRequest): F[MeterConsumptionResponse] =
+  def meterConsumption(request: MeterConsumptionRequest): F[MeterConsumptionResponse] =
     for
-      _      <- logger.debug(s"Called pagedMeterConsumption() with $request")
+      _      <- logger.debug(s"Called meterConsumption(product=${request.product})")
+      _      <- logger.trace(s"Called meterConsumption() with $request")
       result <- internalMeterConsumption(request)
-      _      <- logger.trace(s"Response for pagedMeterConsumption(): $result")
+      _      <- logger.trace(s"Response for meterConsumption(product=${request.product}): $result")
     yield result
-
-  def meterConsumption(request: MeterConsumptionRequest, throttle: Option[Throttle]): StreamF[ConsumptionResults] =
-    val pageZero = request.copy(page = Some(1))
-    fs2.Stream.debug(s"Called meterConsumption() with $request") >>
-    fs2.Stream
-      .unfoldLoopEval(pageZero) {
-        pageLoopMeterConsumption(_).map((results, nextPage) => (fs2.Stream.emits(results), nextPage))
-      }
-      .through(fs2Throttle(throttle))
-      .flatten
-
-  private def pageLoopMeterConsumption(pageRequest: MeterConsumptionRequest) =
-    logger.debug(s"Requesting ${pageRequest.product.value} meter page ${pageRequest.page.getOrElse(0)}") >>
-    logger.trace(s"Requesting meter page $pageRequest") >>
-    internalMeterConsumption(pageRequest).map {
-      case MeterConsumptionResponse(_, Some(_), _, results) =>
-        val nextPage        = pageRequest.page.map(_ + 1)
-        val nextPageRequest = Option(pageRequest.copy(page = nextPage))
-        (results, nextPageRequest)
-      case MeterConsumptionResponse(_, None, _, results) =>
-        (results, None)
-    }
 
   private def internalMeterConsumption(request: MeterConsumptionRequest): F[MeterConsumptionResponse] =
     withAuthClient().flatMap: client =>
@@ -99,7 +76,9 @@ final class CuttlefishClient[F[_]: Async] private (
 
   //  Account Endpoint  //
 
-  /** Retrieves account information */
+  /**
+   * Retrieves account information
+   */
   def getAccount(request: AccountRequest): F[AccountResponse] =
     logger.debug(s"Getting account ${request.accountNumber}") >>
     withAuthClient().flatMap: client =>
@@ -108,7 +87,9 @@ final class CuttlefishClient[F[_]: Async] private (
 
   //  Products Endpoints (No Auth Required)  //
 
-  /** Retrieves list of all products */
+  /**
+   * Retrieves list of all products
+   */
   def getProducts(request: ProductsRequest): F[ProductsResponse] =
     logger.debug("Getting products list") >>
     internalGetProducts(request)
@@ -122,9 +103,12 @@ final class CuttlefishClient[F[_]: Async] private (
         .withOptionQueryParam("is_green", request.isGreen)
         .withOptionQueryParam("is_prepay", request.isPrepay)
         .withOptionQueryParam("available_at", request.availableAt)
+
     httpClient.expectOr[ProductsResponse](GET(url))(handleClientExpectError)
 
-  /** Retrieves details for a specific product */
+  /**
+   * Retrieves details for a specific product
+   */
   def getProductDetails(request: ProductDetailsRequest): F[ProductDetailsResponse] =
     logger.debug(s"Getting product details for ${request.productCode}") >>
     internalGetProductDetails(request)
@@ -133,20 +117,28 @@ final class CuttlefishClient[F[_]: Async] private (
     val url =
       (config.apiBase / "products" / request.productCode / "")
         .withOptionQueryParam("tariffs_active_at", request.tariffsActiveAt)
+
     httpClient.expectOr[ProductDetailsResponse](GET(url))(handleClientExpectError)
 
   //  Grid Supply Points Endpoint (No Auth Required)  //
 
-  /** Retrieves grid supply points for a postcode */
+  /**
+   * Retrieves grid supply points for a postcode
+   */
   def getGridSupplyPoints(request: GridSupplyPointsRequest): F[GridSupplyPointsResponse] =
     logger.debug(s"Getting grid supply points for postcode ${request.postcode}") >> {
-      val url = (config.apiBase / "industry" / "grid-supply-points" / "").withQueryParam("postcode", request.postcode.value)
+      val url =
+        (config.apiBase / "industry" / "grid-supply-points" / "")
+          .withQueryParam("postcode", request.postcode.value)
+
       httpClient.expectOr[GridSupplyPointsResponse](GET(url))(handleClientExpectError)
     }
 
   //  Electricity Meter Point Endpoint (No Auth Required)  //
 
-  /** Retrieves information about an electricity meter point */
+  /**
+   * Retrieves information about an electricity meter point
+   */
   def getElectricityMeterPoint(request: ElectricityMeterPointRequest): F[ElectricityMeterPointResponse] =
     logger.debug(s"Getting electricity meter point for mpan ${request.mpan}") >> {
       val url = config.apiBase / "electricity-meter-points" / request.mpan / ""
@@ -155,45 +147,61 @@ final class CuttlefishClient[F[_]: Async] private (
 
   //  Electricity Tariff Endpoints (No Auth Required)  //
 
-  /** Retrieves standard unit rates for an electricity tariff */
+  /**
+   * Retrieves standard unit rates for an electricity tariff
+   */
   def getElectricityStandardUnitRates(request: ElectricityUnitRatesRequest): F[UnitRatesResponse] =
     logger.debug(s"Getting electricity standard unit rates for ${request.productCode}/${request.tariffCode}") >>
     internalGetElectricityTariffRates("standard-unit-rates", request)
 
-  /** Retrieves day unit rates for an electricity tariff (Economy 7) */
+  /**
+   * Retrieves day unit rates for an electricity tariff (Economy 7)
+   */
   def getElectricityDayUnitRates(request: ElectricityUnitRatesRequest): F[UnitRatesResponse] =
     logger.debug(s"Getting electricity day unit rates for ${request.productCode}/${request.tariffCode}") >>
     internalGetElectricityTariffRates("day-unit-rates", request)
 
-  /** Retrieves night unit rates for an electricity tariff (Economy 7) */
+  /**
+   * Retrieves night unit rates for an electricity tariff (Economy 7)
+   */
   def getElectricityNightUnitRates(request: ElectricityUnitRatesRequest): F[UnitRatesResponse] =
     logger.debug(s"Getting electricity night unit rates for ${request.productCode}/${request.tariffCode}") >>
     internalGetElectricityTariffRates("night-unit-rates", request)
 
-  private def internalGetElectricityTariffRates(rateType: String, request: ElectricityUnitRatesRequest): F[UnitRatesResponse] =
+  private def internalGetElectricityTariffRates(rateType: String, request: ElectricityUnitRatesRequest): F[
+    UnitRatesResponse,
+  ] =
     val url =
       (config.apiBase / "products" / request.productCode / "electricity-tariffs" / request.tariffCode / rateType / "")
         .withOptionQueryParam("period_from", request.periodFrom)
         .withOptionQueryParam("period_to", request.periodTo)
         .withOptionQueryParam("page_size", request.pageSize)
+
     httpClient.expectOr[UnitRatesResponse](GET(url))(handleClientExpectError)
 
-  /** Retrieves standing charges for an electricity tariff */
+  /**
+   * Retrieves standing charges for an electricity tariff
+   */
   def getElectricityStandingCharges(request: ElectricityStandingChargesRequest): F[StandingChargesResponse] =
     logger.debug(s"Getting electricity standing charges for ${request.productCode}/${request.tariffCode}") >>
     internalGetElectricityStandingCharges(request)
 
-  private def internalGetElectricityStandingCharges(request: ElectricityStandingChargesRequest): F[StandingChargesResponse] =
+  private def internalGetElectricityStandingCharges(request: ElectricityStandingChargesRequest): F[
+    StandingChargesResponse,
+  ] =
     val url =
       (config.apiBase / "products" / request.productCode / "electricity-tariffs" / request.tariffCode / "standing-charges" / "")
         .withOptionQueryParam("period_from", request.periodFrom)
         .withOptionQueryParam("period_to", request.periodTo)
         .withOptionQueryParam("page_size", request.pageSize)
+
     httpClient.expectOr[StandingChargesResponse](GET(url))(handleClientExpectError)
 
   //  Gas Tariff Endpoints (No Auth Required)  //
 
-  /** Retrieves standard unit rates for a gas tariff */
+  /**
+   * Retrieves standard unit rates for a gas tariff
+   */
   def getGasStandardUnitRates(request: GasUnitRatesRequest): F[UnitRatesResponse] =
     logger.debug(s"Getting gas standard unit rates for ${request.productCode}/${request.tariffCode}") >>
     internalGetGasTariffRates(request)
@@ -204,9 +212,12 @@ final class CuttlefishClient[F[_]: Async] private (
         .withOptionQueryParam("period_from", request.periodFrom)
         .withOptionQueryParam("period_to", request.periodTo)
         .withOptionQueryParam("page_size", request.pageSize)
+
     httpClient.expectOr[UnitRatesResponse](GET(url))(handleClientExpectError)
 
-  /** Retrieves standing charges for a gas tariff */
+  /**
+   * Retrieves standing charges for a gas tariff
+   */
   def getGasStandingCharges(request: GasStandingChargesRequest): F[StandingChargesResponse] =
     logger.debug(s"Getting gas standing charges for ${request.productCode}/${request.tariffCode}") >>
     internalGetGasStandingCharges(request)
@@ -217,6 +228,7 @@ final class CuttlefishClient[F[_]: Async] private (
         .withOptionQueryParam("period_from", request.periodFrom)
         .withOptionQueryParam("period_to", request.periodTo)
         .withOptionQueryParam("page_size", request.pageSize)
+
     httpClient.expectOr[StandingChargesResponse](GET(url))(handleClientExpectError)
 
   //  Http Client Management  //
@@ -247,18 +259,6 @@ final class CuttlefishClient[F[_]: Async] private (
     Retry(retryPolicy):
       CuttlefishAuthenticatedClient[F](apiKey):
         httpClient
-
-  //  Internal Methods  //
-
-  private def fs2Throttle[F[_]: Temporal, A](throttle: Option[Throttle]): fs2.Pipe[F, A, A] =
-    throttle match {
-      case None =>
-        identity
-      case Some(requestsPerSecond) =>
-        val elements = Math.max(requestsPerSecond.value, 1.0).toLong
-        val duration = Math.max(1.0 / requestsPerSecond.value, 1.0).toInt
-        Throttler.throttle[F, A](elements, duration.second, Throttler.Shaping)
-    }
 
   //  Error handlers  //
 
@@ -328,6 +328,6 @@ object CuttlefishClient:
   private def apply[F[_]: Async](config: CuttlefishConfig, httpClient: Client[F]): F[CuttlefishClient[F]] =
     for
       initialState    <- AtomicCell[F].of(CuttlefishClientState[F](None))
-      loggedHttpClient = Logger()(httpClient)
+      loggedHttpClient = ClientLogger(httpClient)
       client           = new CuttlefishClient[F](loggedHttpClient, config, initialState)
     yield client

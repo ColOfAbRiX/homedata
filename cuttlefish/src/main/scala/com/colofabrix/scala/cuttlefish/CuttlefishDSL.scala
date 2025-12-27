@@ -8,7 +8,7 @@ trait CuttlefishDSL:
 
   extension [F[_]](cuttlefishClient: CuttlefishClient[F])
 
-    def pagedMeterConsumption(
+    def meterConsumption(
       product: OctopusProduct,
       meterPointNumber: MeterPointNumber,
       serial: SerialNumber,
@@ -18,7 +18,7 @@ trait CuttlefishDSL:
       page: Option[Int] = None,
       orderBy: Option[String] = None,
     ): F[MeterConsumptionResponse] =
-      cuttlefishClient.pagedMeterConsumption(
+      cuttlefishClient.meterConsumption(
         MeterConsumptionRequest(
           product = product,
           meterPointNumber = meterPointNumber,
@@ -29,30 +29,6 @@ trait CuttlefishDSL:
           page = page,
           orderBy = orderBy,
         ),
-      )
-
-    def meterConsumption(
-      product: OctopusProduct,
-      meterPointNumber: MeterPointNumber,
-      serial: SerialNumber,
-      from: Option[OffsetDateTime] = None,
-      to: Option[OffsetDateTime] = None,
-      pageSize: Option[Int] = None,
-      orderBy: Option[String] = None,
-      throttle: Option[Throttle] = None,
-    ): fs2.Stream[F, ConsumptionResults] =
-      cuttlefishClient.meterConsumption(
-        request = MeterConsumptionRequest(
-          product = product,
-          meterPointNumber = meterPointNumber,
-          serial = serial,
-          from = from,
-          to = to,
-          pageSize = pageSize,
-          page = Some(1),
-          orderBy = orderBy,
-        ),
-        throttle = throttle,
       )
 
     //  Account  //

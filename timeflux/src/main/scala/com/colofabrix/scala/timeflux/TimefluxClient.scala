@@ -9,7 +9,7 @@ import com.colofabrix.scala.timeflux.handlers.buckets.*
 import com.colofabrix.scala.timeflux.handlers.orgs.*
 import com.colofabrix.scala.timeflux.handlers.query.*
 import com.colofabrix.scala.timeflux.handlers.write.*
-import com.colofabrix.scala.http4s.middleware.betterlogger.Logger
+import com.colofabrix.scala.http4s.middleware.betterlogger.ClientLogger
 import com.colofabrix.scala.timeflux.measures.*
 import com.colofabrix.scala.timeflux.model.*
 import com.colofabrix.scala.timeflux.TimefluxClient.*
@@ -30,9 +30,6 @@ final class TimefluxClient[F[_]: Async] private (
   config: TimefluxConfig,
   atomicState: AtomicCell[F, TimefluxClientState[F]],
 ) extends Http4sClientDsl[F]:
-
-  private type StreamF[+A] =
-    fs2.Stream[F, A]
 
   private val authenticator: TimefluxAuthentication[F] =
     new TimefluxAuthentication(httpClient, config, atomicState)
@@ -111,7 +108,7 @@ final class TimefluxClient[F[_]: Async] private (
   /**
    * Writes a stream of TimefluxSerializable values in a bucket
    */
-  def writeData[A: TimefluxSerializable](request: WriteRequest, values: StreamF[A]): F[Unit] =
+  def writeData[A: TimefluxSerializable](request: WriteRequest, values: fs2.Stream[F, A]): F[Unit] =
     prepareCall { (client, baseApiUrl) =>
       WriteRequestHandler(client, config, baseApiUrl)
         .writeRequest(request, values.through(TimefluxSerializable.toApiMeasureStream))
@@ -120,7 +117,7 @@ final class TimefluxClient[F[_]: Async] private (
   /**
    * Writes a stream of TimefluxSerializable values in a bucket
    */
-  def writeMeasures(request: WriteRequest, values: StreamF[Measure]): F[Unit] =
+  def writeMeasures(request: WriteRequest, values: fs2.Stream[F, Measure]): F[Unit] =
     prepareCall { (client, baseApiUrl) =>
       WriteRequestHandler(client, config, baseApiUrl).writeRequest(request, values)
     }
@@ -128,7 +125,7 @@ final class TimefluxClient[F[_]: Async] private (
   /**
    * Queries InfluxDB and returns a stream of results
    */
-  def query(request: QueryRequest): F[StreamF[ResultRow]] =
+  def query(request: QueryRequest): F[fs2.Stream[F, ResultRow]] =
     prepareCall { (client, baseApiUrl) =>
       QueryRequestHandler(client, baseApiUrl).queryRequest(request)
     }
@@ -193,7 +190,7 @@ object TimefluxClient:
   ): F[TimefluxClient[F]] =
     for
       atomicState     <- AtomicCell[F].of(initialState[F](clientConfig))
-      loggedHttpClient = Logger[F](redactHeaders = false)(httpClient)
+      loggedHttpClient = ClientLogger[F](httpClient)
       client           = new TimefluxClient[F](loggedHttpClient, config, atomicState)
     yield client
 

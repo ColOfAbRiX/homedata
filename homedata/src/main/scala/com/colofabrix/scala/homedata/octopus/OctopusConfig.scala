@@ -12,6 +12,7 @@ final case class OctopusConfig(
   gasMprn: MeterPointNumber,
   gasSerial: SerialNumber,
   requestsPerSec: Double,
+  pageSize: Int,
 ) derives ConfigReader
 
 object OctopusConfig:

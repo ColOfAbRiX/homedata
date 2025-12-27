@@ -3,9 +3,9 @@ package com.colofabrix.scala.homedata
 import cats.effect.*
 import cats.implicits.given
 import com.colofabrix.scala.declinio.*
-import com.colofabrix.scala.homedata.influx.InfluxWriter
-import com.colofabrix.scala.homedata.octopus.OctopusPuller
-import com.colofabrix.scala.homedata.scrape.ScrapeLog
+import com.colofabrix.scala.homedata.influx.*
+import com.colofabrix.scala.homedata.octopus.*
+import com.colofabrix.scala.homedata.scrape.*
 import com.colofabrix.scala.homedata.tado.*
 import com.colofabrix.scala.timeflux.*
 import com.colofabrix.scala.timeflux.api.QueryRequest
@@ -39,7 +39,7 @@ object Main extends IOUnitDeclineApp:
         ||>  aggregateWindow(every: 1h, fn: mean, createEmpty: false)
         ||>  yield(name: "mean")""".stripMargin
 
-    ScrapeLog[IO]().use { scrapeLog =>
+    ScrapeLog[IO](HomedataConfig.config.scrapeLog.logPath).use { scrapeLog =>
       for
         _                  <- IO.println("HomeData - Tado and Octopus scrapers")
         octoPuller         <- OctopusPuller(scrapeLog)
