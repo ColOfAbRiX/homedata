@@ -16,7 +16,7 @@ final case class ZoneStateResponse(
   sensorDataPoints: ZoneStateResponse.SensorDataPoints,
 ) derives Decoder
 
-object ZoneStateResponse:
+object ZoneStateResponse {
 
   final case class ActivityDataPoints(
     heatingPower: Option[HeatingPower],
@@ -60,3 +60,5 @@ object ZoneStateResponse:
     `type`: String,
     precision: Temperature,
   ) derives Decoder
+
+}

@@ -2,7 +2,7 @@ package com.colofabrix.scala.homedata.utils
 
 import java.time.*
 import java.time.temporal.ChronoUnit
-import com.colofabrix.scala.homedata.TimeSpanPicker.Selector
+import com.colofabrix.scala.homedata.utils.TimeSpanPicker.Selector
 
 /**
  * TimeSpanPicker makes picking time ranges easier and less painful
@@ -202,9 +202,9 @@ final class TimeSpanPicker private (private val selector: TimeSpanPicker.Selecto
 
 object TimeSpanPicker {
 
-  private[TimeSpanPicker] enum Selector:
-    case From
-    case To
+  private[TimeSpanPicker] enum Selector {
+    case From, To
+  }
 
   /**
    * Creates a new TimeSpanPicker set to Now

@@ -21,7 +21,7 @@ final case class DayReportResponse(
   weather: Weather,
 ) derives Decoder
 
-object DayReportResponse:
+object DayReportResponse {
 
   //  Time Series Containers  //
 
@@ -86,16 +86,18 @@ object DayReportResponse:
 
   sealed abstract class ZoneType extends EnumEntry with UpperSnakecase
 
-  object ZoneType extends Enum[ZoneType] with CirceEnum[ZoneType]:
+  object ZoneType extends Enum[ZoneType] with CirceEnum[ZoneType] {
 
     case object Heating  extends ZoneType
     case object HotWater extends ZoneType
 
     val values = findValues
 
+  }
+
   sealed abstract class StripeType extends EnumEntry with UpperSnakecase
 
-  object StripeType extends Enum[StripeType] with CirceEnum[StripeType]:
+  object StripeType extends Enum[StripeType] with CirceEnum[StripeType] {
 
     case object Home                        extends StripeType
     case object Away                        extends StripeType
@@ -106,27 +108,33 @@ object DayReportResponse:
 
     val values = findValues
 
+  }
+
   sealed abstract class HeatingType extends EnumEntry with UpperSnakecase
 
-  object HeatingType extends Enum[HeatingType] with CirceEnum[HeatingType]:
+  object HeatingType extends Enum[HeatingType] with CirceEnum[HeatingType] {
 
     case object Heating  extends HeatingType
     case object HotWater extends HeatingType
 
     val values = findValues
 
+  }
+
   sealed abstract class Power extends EnumEntry with UpperSnakecase
 
-  object Power extends Enum[Power] with CirceEnum[Power]:
+  object Power extends Enum[Power] with CirceEnum[Power] {
 
     case object On  extends Power
     case object Off extends Power
 
     val values = findValues
 
+  }
+
   sealed abstract class CallForHeat(val dbValue: Int) extends EnumEntry with UpperSnakecase
 
-  object CallForHeat extends Enum[CallForHeat] with CirceEnum[CallForHeat]:
+  object CallForHeat extends Enum[CallForHeat] with CirceEnum[CallForHeat] {
 
     case object None   extends CallForHeat(0)
     case object Low    extends CallForHeat(1)
@@ -135,9 +143,11 @@ object DayReportResponse:
 
     val values = findValues
 
+  }
+
   sealed abstract class OutsideState(val dbValue: Int) extends EnumEntry with UpperSnakecase
 
-  object OutsideState extends Enum[OutsideState] with CirceEnum[OutsideState]:
+  object OutsideState extends Enum[OutsideState] with CirceEnum[OutsideState] {
 
     case object Cloudy        extends OutsideState(1)
     case object CloudyMostly  extends OutsideState(2)
@@ -152,6 +162,8 @@ object DayReportResponse:
     case object Thunderstorm  extends OutsideState(11)
 
     val values = findValues
+
+  }
 
   //  Composite Types  //
 
@@ -171,3 +183,5 @@ object DayReportResponse:
     sunny: IntervalSeries[Boolean],
     slots: SlotMap[WeatherCondition],
   ) derives Decoder
+
+}

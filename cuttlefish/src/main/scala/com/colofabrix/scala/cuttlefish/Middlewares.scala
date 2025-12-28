@@ -8,7 +8,7 @@ import org.http4s.headers.Authorization
 /**
  * Http4s client that performs Cuttlefish authentication
  */
-object CuttlefishAuthenticatedClient:
+object CuttlefishAuthenticatedClient {
 
   def apply[F[_]: MonadCancelThrow](apiKey: String)(httpClient: Client[F]): Client[F] =
     Client[F] { request =>
@@ -17,3 +17,5 @@ object CuttlefishAuthenticatedClient:
       val authRequest   = request.withHeaders(authHeaders)
       httpClient.run(authRequest)
     }
+
+}

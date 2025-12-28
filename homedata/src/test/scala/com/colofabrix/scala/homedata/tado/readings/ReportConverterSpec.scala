@@ -8,7 +8,7 @@ import org.scalatest.freespec.AnyFreeSpecLike
 import org.scalatest.matchers.should.Matchers
 import scala.io.Source
 
-class ReportConverterSpec extends AnyFreeSpecLike with Matchers with IOValues:
+class ReportConverterSpec extends AnyFreeSpecLike with Matchers with IOValues {
 
   "ReportConverter should convert the json" in {
     val result =
@@ -25,3 +25,5 @@ class ReportConverterSpec extends AnyFreeSpecLike with Matchers with IOValues:
         .mkString
 
     circeDecode[DayReportResponse](json).fold(error => throw error, identity)
+
+}

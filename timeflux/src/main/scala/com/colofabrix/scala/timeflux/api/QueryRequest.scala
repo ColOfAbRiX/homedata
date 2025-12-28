@@ -12,7 +12,7 @@ final case class QueryRequest(
   orgID: Option[String],
 )
 
-object QueryRequest:
+object QueryRequest {
 
   final private[timeflux] case class QueryGetRequest(
     orgID: Option[String],
@@ -21,3 +21,5 @@ object QueryRequest:
   final private[timeflux] case class QueryPostRequest(
     query: String,
   ) derives Encoder.AsObject
+
+}

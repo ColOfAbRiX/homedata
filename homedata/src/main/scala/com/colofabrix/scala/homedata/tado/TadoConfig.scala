@@ -9,7 +9,7 @@ final case class TadoConfig(
   initialRefreshToken: TadoRefreshToken,
 ) derives ConfigReader
 
-object TadoConfig:
+object TadoConfig {
 
   val config =
     ConfigSource
@@ -17,3 +17,5 @@ object TadoConfig:
       .withFallback(ConfigSource.resources("secrets.conf"))
       .at("tado")
       .loadOrThrow[TadoConfig]
+
+}

@@ -218,18 +218,21 @@ object TimeSlots {
 
   //  TimeValue  //
 
-  enum TimeValue[A]:
+  enum TimeValue[A] {
 
     case InstantValue[A](time: OffsetDateTime, value: A) extends TimeValue[A]
 
     case TimeSpanValue[A](from: OffsetDateTime, to: OffsetDateTime, value: A) extends TimeValue[A]
 
-  object TimeValue:
+  }
 
-    extension [A](self: TimeValue[A])
+  object TimeValue {
+
+    extension [A](self: TimeValue[A]) {
       def get: A = self match
         case InstantValue(_, value)     => value
         case TimeSpanValue(_, _, value) => value
+    }
 
     given Functor[TimeValue] with
       def map[A, B](fa: TimeValue[A])(f: A => B): TimeValue[B] =
@@ -249,14 +252,17 @@ object TimeSlots {
       def show(value: OffsetDateTime): String =
         value.toString
 
+  }
+
   //  InnerStore  //
 
   private type InnerStore[A] =
     TreeMap[OffsetDateTime, Set[TimeValue[A]]]
 
-  private object InnerStore:
+  private object InnerStore {
     def empty[A]: TreeMap[OffsetDateTime, Set[TimeValue[A]]] =
       TreeMap.empty[OffsetDateTime, Set[TimeValue[A]]]
+  }
 
   //  Factory Methods  //
 

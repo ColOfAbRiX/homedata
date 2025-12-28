@@ -1,10 +1,10 @@
-package com.colofabrix.scala.cuttlefish
+package com.colofabrix.scala.homedata.utils
 
-import org.typelevel.log4cats.SelfAwareStructuredLogger
+import org.typelevel.log4cats.Logger
 
 object FS2Logging {
 
-  extension [F[_]](self: fs2.Stream.type)(using logger: SelfAwareStructuredLogger[F]) {
+  extension [F[_]](self: fs2.Stream.type)(using logger: Logger[F]) {
 
     def trace(message: => String): fs2.Stream[F, Nothing] =
       fs2.Stream.exec(logger.trace(message))

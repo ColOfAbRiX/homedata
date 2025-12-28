@@ -6,12 +6,12 @@ import com.colofabrix.scala.timeflux.api.TimePrecision
 /**
  * Data that can be serialized into a measure to be written in InfluxDB
  */
-trait TimefluxSerializable[A]:
+trait TimefluxSerializable[A] {
 
   /** Transform the data into a measure */
   def toMeasure(a: A): Measure
 
-  extension [A: TimefluxSerializable](self: A)
+  extension [A: TimefluxSerializable](self: A) {
 
     /** Transform the data into a measure */
     def toMeasure: Measure =
@@ -21,10 +21,16 @@ trait TimefluxSerializable[A]:
     def toLineProtocol(timePrecision: TimePrecision): LineProtocolValue =
       MeasureWriter.writeToLineProtocol(this.toMeasure(self), timePrecision)
 
-object TimefluxSerializable:
+  }
+
+}
+
+object TimefluxSerializable {
 
   def apply[A](using ev: TimefluxSerializable[A]): TimefluxSerializable[A] =
     ev
 
   def toApiMeasureStream[F[_], A](using ev: TimefluxSerializable[A]): fs2.Pipe[F, A, Measure] =
     _.map(ev.toMeasure)
+
+}

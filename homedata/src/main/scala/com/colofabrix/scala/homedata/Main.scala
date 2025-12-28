@@ -13,7 +13,7 @@ import com.colofabrix.scala.timeflux.api.QueryRequest
 import com.colofabrix.scala.timeflux.measures.TimefluxSerializable.toApiMeasureStream
 import java.time.temporal.ChronoUnit
 
-object Main extends IOUnitDeclineApp:
+object Main extends IOUnitDeclineApp {
 
   override def name: String =
     "HomeData"
@@ -49,11 +49,13 @@ object Main extends IOUnitDeclineApp:
         tadoMeasures        = tadoPuller.pullReadings(from, to).through(toApiMeasureStream)
         writer             <- InfluxWriter()
         _                  <- writer.write(tadoMeasures, gasMeasures, electricityMeasures)
-        // // Extra testing code for influx syntax
-        // _ <- IO.println("HomeData - Simple statistics")
-        // timefluxClient <- TimefluxClient[IO](InfluxConfig.clientConfig)
-        // points         <- timefluxClient.query(QueryRequest(query, None))
-        // listPoints     <- points.compile.toList
-        // _              <- listPoints.traverse(IO.println)
+        // Extra testing code for influx syntax
+        _ <- IO.println("HomeData - Simple statistics")
+        timefluxClient <- TimefluxClient[IO](InfluxConfig.clientConfig)
+        points         <- timefluxClient.query(QueryRequest(query, None))
+        listPoints     <- points.compile.toList
+        _              <- listPoints.traverse(IO.println)
       yield ExitCode.Success
     }
+
+}

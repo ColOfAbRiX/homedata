@@ -3,9 +3,9 @@ package com.colofabrix.scala.timeflux
 import com.colofabrix.scala.timeflux.api.*
 import com.colofabrix.scala.timeflux.measures.*
 
-trait TimefluxDSL:
+trait TimefluxDSL {
 
-  extension [F[_]](timefluxClient: TimefluxClient[F])
+  extension [F[_]](timefluxClient: TimefluxClient[F]) {
 
     // --- Organizations API ---
 
@@ -99,3 +99,7 @@ trait TimefluxDSL:
       val fullPrecision = precision.getOrElse(TimePrecision.Milliseconds)
       val request       = WriteRequest(bucket, Some(orgID), fullPrecision, batchWrites)
       timefluxClient.writeMeasures(request, values)
+
+  }
+
+}

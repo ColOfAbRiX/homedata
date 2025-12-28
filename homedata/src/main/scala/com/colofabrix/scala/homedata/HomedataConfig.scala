@@ -16,10 +16,12 @@ final case class ScrapeLogConfig(
   batchWait: FiniteDuration
 ) derives ConfigReader
 
-object HomedataConfig:
+object HomedataConfig {
 
   val config =
     ConfigSource
       .default
       .withFallback(ConfigSource.resources("secrets.conf"))
       .loadOrThrow[HomedataConfig]
+
+}

@@ -8,7 +8,7 @@ import org.http4s.client.Client
 /**
  * Http4s client that performs Timeflux authentication
  */
-object TimefluxAuthenticatedClient:
+object TimefluxAuthenticatedClient {
 
   def apply[F[_]: MonadCancelThrow](token: AuthToken)(httpClient: Client[F]): Client[F] =
     Client[F] { request =>
@@ -18,3 +18,5 @@ object TimefluxAuthenticatedClient:
 
       httpClient.run(authRequest)
     }
+
+}

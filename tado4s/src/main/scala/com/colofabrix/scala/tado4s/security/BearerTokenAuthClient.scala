@@ -8,7 +8,7 @@ import org.http4s.headers.Authorization
 /**
  * Http4s client that performs Tado authentication
  */
-object BearerTokenAuthClient:
+object BearerTokenAuthClient {
 
   def apply[F[_]: MonadCancelThrow](bearerToken: String)(httpClient: Client[F]): Client[F] =
     Client[F] { request =>
@@ -17,3 +17,5 @@ object BearerTokenAuthClient:
       val authRequest   = request.withHeaders(authHeaders)
       httpClient.run(authRequest)
     }
+
+}

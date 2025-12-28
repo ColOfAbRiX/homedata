@@ -168,9 +168,10 @@ final class CuttlefishClient[F[_]: Async] private (
     logger.debug(s"Getting electricity night unit rates for ${request.productCode}/${request.tariffCode}") >>
     internalGetElectricityTariffRates("night-unit-rates", request)
 
-  private def internalGetElectricityTariffRates(rateType: String, request: ElectricityUnitRatesRequest): F[
-    UnitRatesResponse,
-  ] =
+  private def internalGetElectricityTariffRates(
+    rateType: String,
+    request: ElectricityUnitRatesRequest,
+  ): F[UnitRatesResponse] =
     val url =
       (config.apiBase / "products" / request.productCode / "electricity-tariffs" / request.tariffCode / rateType / "")
         .withOptionQueryParam("period_from", request.periodFrom)
@@ -186,9 +187,9 @@ final class CuttlefishClient[F[_]: Async] private (
     logger.debug(s"Getting electricity standing charges for ${request.productCode}/${request.tariffCode}") >>
     internalGetElectricityStandingCharges(request)
 
-  private def internalGetElectricityStandingCharges(request: ElectricityStandingChargesRequest): F[
-    StandingChargesResponse,
-  ] =
+  private def internalGetElectricityStandingCharges(
+    request: ElectricityStandingChargesRequest,
+  ): F[StandingChargesResponse] =
     val url =
       (config.apiBase / "products" / request.productCode / "electricity-tariffs" / request.tariffCode / "standing-charges" / "")
         .withOptionQueryParam("period_from", request.periodFrom)

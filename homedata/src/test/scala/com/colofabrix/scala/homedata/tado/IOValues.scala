@@ -10,7 +10,7 @@ import cats.effect.unsafe.IORuntime
  * Mixin trait that provides helper methods for scalatest Suite, similar to scalatest's EitherValues, to test IO and
  * access its values, including exceptions
  */
-trait IOValues:
+trait IOValues {
   self: Suite =>
 
   implicit private val testRuntime: IORuntime =
@@ -46,3 +46,5 @@ trait IOValues:
         .getOrElse {
           fail("Timeout while waiting for operation to complete")
         }
+
+}

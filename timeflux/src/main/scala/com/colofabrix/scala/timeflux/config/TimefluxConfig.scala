@@ -21,7 +21,7 @@ final case class TimefluxConfig(
   maxRetryTime: FiniteDuration = 1.minute,
 ) derives ConfigReader
 
-object TimefluxConfig:
+object TimefluxConfig {
 
   given ConfigReader[FiniteDuration] =
     ConfigReader.fromString:
@@ -33,3 +33,5 @@ object TimefluxConfig:
       .default
       .at("timeflux")
       .loadOrThrow[TimefluxConfig]
+
+}

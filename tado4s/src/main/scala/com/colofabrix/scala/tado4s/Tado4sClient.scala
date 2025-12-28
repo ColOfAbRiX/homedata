@@ -203,8 +203,10 @@ object Tado4sClient {
     yield client
 
   private def buildConfiguredHttpClient[F[_]: Async](config: TadoConfig, httpClient: Client[F]): Client[F] =
-    ClientLogger:
-      SSLValidationClient(config.ignoreSsl):
+    ClientLogger {
+      SSLValidationClient(config.ignoreSsl) {
         httpClient
+      }
+    }
 
 }

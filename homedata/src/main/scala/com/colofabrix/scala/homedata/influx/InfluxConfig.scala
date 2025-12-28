@@ -18,7 +18,7 @@ final case class InfluxConfig(
   batchWrites: Int,
 ) derives ConfigReader
 
-object InfluxConfig:
+object InfluxConfig {
 
   given ConfigReader[OrgName] =
     ConfigReader.fromString: str =>
@@ -40,3 +40,5 @@ object InfluxConfig:
       serverUrl = config.serverUrl,
       authToken = config.authToken,
     )
+
+}

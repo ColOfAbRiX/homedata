@@ -12,7 +12,7 @@ import java.time.OffsetDateTime
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 
-object ReportConverter:
+object ReportConverter {
 
   implicit private val logger: Logger[IO] =
     Slf4jLogger.getLogger[IO]
@@ -167,3 +167,5 @@ object ReportConverter:
         case DataInterval(_, _, None) =>
           IO.pure(TadoDataStore())
       }
+
+}

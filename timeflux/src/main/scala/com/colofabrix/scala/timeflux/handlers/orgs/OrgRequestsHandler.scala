@@ -14,7 +14,7 @@ import org.typelevel.log4cats.SelfAwareStructuredLogger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 
 final private[timeflux] class OrgRequestsHandler[F[_]: Async](httpClient: Client[F], baseApiUrl: Uri)
-  extends Http4sClientDsl[F]:
+  extends Http4sClientDsl[F] {
 
   implicit private val logger: SelfAwareStructuredLogger[F] =
     Slf4jLogger.getLogger[F]
@@ -52,3 +52,5 @@ final private[timeflux] class OrgRequestsHandler[F[_]: Async](httpClient: Client
       .flatTap { result =>
         logger.trace(s"Response for createOrgIfMissing(): $result")
       }
+
+}

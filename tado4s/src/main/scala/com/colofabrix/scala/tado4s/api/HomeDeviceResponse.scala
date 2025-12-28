@@ -40,9 +40,11 @@ final case class MountingState(
 
 sealed trait DeviceOrientation extends EnumEntry with UpperSnakecase
 
-object DeviceOrientation extends Enum[DeviceOrientation] with CirceEnum[DeviceOrientation]:
+object DeviceOrientation extends Enum[DeviceOrientation] with CirceEnum[DeviceOrientation] {
 
   case object Horizontal extends DeviceOrientation
   case object Vertical   extends DeviceOrientation
 
   val values = findValues
+
+}

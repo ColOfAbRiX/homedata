@@ -4,7 +4,7 @@ package com.colofabrix.scala.cuttlefish.model
 
 opaque type Throttle = Double
 
-object Throttle:
+object Throttle {
 
   extension (self: Throttle)
     def value: Double =
@@ -12,11 +12,13 @@ object Throttle:
   def apply(value: Double): Throttle =
     value
 
+}
+
 // MeterPointNumber
 
 opaque type MeterPointNumber = String
 
-object MeterPointNumber:
+object MeterPointNumber {
 
   extension (self: MeterPointNumber)
     def value: String =
@@ -24,11 +26,13 @@ object MeterPointNumber:
   def apply(value: String): MeterPointNumber =
     value
 
+}
+
 // SerialNumber
 
 opaque type SerialNumber = String
 
-object SerialNumber:
+object SerialNumber {
 
   extension (self: SerialNumber)
     def value: String =
@@ -36,11 +40,13 @@ object SerialNumber:
   def apply(value: String): SerialNumber =
     value
 
+}
+
 // AccountNumber
 
 opaque type AccountNumber = String
 
-object AccountNumber:
+object AccountNumber {
 
   extension (self: AccountNumber)
     def value: String =
@@ -48,11 +54,13 @@ object AccountNumber:
   def apply(value: String): AccountNumber =
     value
 
+}
+
 // ProductCode
 
 opaque type ProductCode = String
 
-object ProductCode:
+object ProductCode {
 
   extension (self: ProductCode)
     def value: String =
@@ -60,11 +68,13 @@ object ProductCode:
   def apply(value: String): ProductCode =
     value
 
+}
+
 // TariffCode
 
 opaque type TariffCode = String
 
-object TariffCode:
+object TariffCode {
 
   extension (self: TariffCode)
     def value: String =
@@ -72,11 +82,13 @@ object TariffCode:
   def apply(value: String): TariffCode =
     value
 
+}
+
 // Postcode
 
 opaque type Postcode = String
 
-object Postcode:
+object Postcode {
 
   extension (self: Postcode)
     def value: String =
@@ -84,14 +96,18 @@ object Postcode:
   def apply(value: String): Postcode =
     value
 
+}
+
 // Mpan
 
 opaque type Mpan = String
 
-object Mpan:
+object Mpan {
 
   extension (self: Mpan)
     def value: String =
       self
   def apply(value: String): Mpan =
     value
+
+}

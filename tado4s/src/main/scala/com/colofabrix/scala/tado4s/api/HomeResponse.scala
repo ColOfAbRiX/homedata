@@ -34,7 +34,7 @@ final case class HomeResponse(
   isHeatSourceInstalled: Boolean,
 ) derives Decoder
 
-object HomeResponse:
+object HomeResponse {
 
   final case class Address(
     addressLine1: String,
@@ -60,3 +60,5 @@ object HomeResponse:
     supported: Boolean,
     enabled: Boolean,
   ) derives Decoder
+
+}

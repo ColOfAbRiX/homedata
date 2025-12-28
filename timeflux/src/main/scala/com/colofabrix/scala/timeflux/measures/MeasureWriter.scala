@@ -9,7 +9,7 @@ import com.colofabrix.scala.timeflux.api.TimePrecision
  *
  * See https://docs.influxdata.com/influxdb/v2/reference/syntax/line-protocol:
  */
-private[timeflux] object MeasureWriter:
+private[timeflux] object MeasureWriter {
 
   def writeToLineProtocol(measure: Measure, timePrecision: TimePrecision): LineProtocolValue =
     val lineMeasure =
@@ -45,11 +45,12 @@ private[timeflux] object MeasureWriter:
 
     LineProtocolValue(s"${lineMeasure}${lineTags}${lineFields} ${lineTime}".trim)
 
-  extension [A](xs: Vector[A])
+  extension [A](xs: Vector[A]) {
     private def emptyAsNone: Option[Vector[A]] =
       if xs.isEmpty then None else Some(xs)
+  }
 
-  extension (string: String)
+  extension (string: String) {
     private def escapeName: String =
       string
         .replaceAll(raw"\\", "\\\\")
@@ -80,6 +81,7 @@ private[timeflux] object MeasureWriter:
       string
         .replaceAll("\"", "\\\"")
         .trim
+  }
 
   private def writeFieldValue(fieldValue: FieldValue): String =
     fieldValue match
@@ -88,3 +90,5 @@ private[timeflux] object MeasureWriter:
       case FieldValue.IntegerValue(value)  => s"${value.toString}i"
       case FieldValue.UIntegerValue(value) => s"${value.toString}u"
       case FieldValue.BooleanValue(value)  => value.toString
+
+}

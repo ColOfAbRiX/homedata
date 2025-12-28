@@ -6,14 +6,16 @@ import io.circe.*
 import io.circe.derivation.*
 import java.time.*
 
-enum TimePrecision(val value: String, val multiplier: Long):
+enum TimePrecision(val value: String, val multiplier: Long) {
 
   case Seconds      extends TimePrecision("s", 0)
   case Milliseconds extends TimePrecision("ms", 3)
   case Microseconds extends TimePrecision("us", 6)
   case Nanoseconds  extends TimePrecision("ns", 9)
 
-object TimePrecision:
+}
+
+object TimePrecision {
 
   given Order[TimePrecision] with
     def compare(x: TimePrecision, y: TimePrecision): Int =
@@ -22,6 +24,8 @@ object TimePrecision:
   given UrlParamsEncoder[TimePrecision] with
     def encode(a: TimePrecision): Map[String, String] =
       Map("" -> a.value)
+
+}
 
 final case class Buckets(
   name: String,

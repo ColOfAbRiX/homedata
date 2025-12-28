@@ -8,14 +8,16 @@ import scala.annotation.nowarn
  * Transforms any ADT into a Map[String, String] to be used as QueryParameters in http4s. Product types are encoded as
  * dot-separated paths and sum types are encoded as strings
  */
-private[timeflux] trait UrlParamsEncoder[A]:
+private[timeflux] trait UrlParamsEncoder[A] {
   def encode(a: A): Map[String, String]
 
-  extension (a: A)
+  extension (a: A) {
     def toQueryParams: Map[String, String] =
       encode(a)
+  }
+}
 
-private[timeflux] object UrlParamsEncoder:
+private[timeflux] object UrlParamsEncoder {
   import scala.deriving.Mirror
   import scala.compiletime.*
 
@@ -29,7 +31,7 @@ private[timeflux] object UrlParamsEncoder:
   //  ADT  //
 
   @nowarn inline def deriveProductType[A](using m: Mirror.ProductOf[A]): UrlParamsEncoder[A] =
-    new UrlParamsEncoder[A]:
+    new UrlParamsEncoder[A] {
       def encode(a: A): Map[String, String] =
         val elemLabels   = getElemLabels[m.MirroredElemLabels]
         val elemEncoders = getTypeclassInstances[m.MirroredElemTypes]
@@ -50,13 +52,15 @@ private[timeflux] object UrlParamsEncoder:
               val qualifiedKey = List(elemLabel, k).filter(_.nonEmpty).mkString(".")
               qualifiedKey -> v
           }
+    }
 
   @nowarn inline def deriveSumType[A](using m: Mirror.SumOf[A]): UrlParamsEncoder[A] =
-    new UrlParamsEncoder[A]:
+    new UrlParamsEncoder[A] {
       def encode(a: A): Map[String, String] =
         val elemEncoders = getTypeclassInstances[m.MirroredElemTypes]
         val elemOrdinal  = m.ordinal(a)
         elemEncoders(elemOrdinal).encode(a)
+    }
 
   inline def getElemLabels[A <: Tuple]: List[String] =
     inline erasedValue[A] match
@@ -102,3 +106,5 @@ private[timeflux] object UrlParamsEncoder:
 
   given booleanUrlParamsEncoder: UrlParamsEncoder[Boolean] with
     def encode(a: Boolean): Map[String, String] = Map("" -> a.toString())
+
+}

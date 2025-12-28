@@ -10,7 +10,7 @@ import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 import org.http4s.client.Client
 
-object SSLValidationClient:
+object SSLValidationClient {
 
   def apply[F[_]: MonadCancelThrow](ignoreSsl: Boolean)(httpClient: Client[F]): Client[F] =
     Client[F] { request =>
@@ -39,3 +39,5 @@ object SSLValidationClient:
     sslContext.init(null, Array[TrustManager](trustManager), new SecureRandom())
     sslContext
   }
+
+}

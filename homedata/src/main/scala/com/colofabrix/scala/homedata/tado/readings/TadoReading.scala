@@ -21,7 +21,7 @@ final case class TadoReading(
   windowOpen: Option[Boolean],
 )
 
-object TadoReading:
+object TadoReading {
 
   def build(
     time: Option[OffsetDateTime] = None,
@@ -115,7 +115,7 @@ object TadoReading:
         windowOpen = (x.windowOpen, y.windowOpen).readingsLast,
       )
 
-  extension [A](self: (Option[A], Option[A]))
+  extension [A](self: (Option[A], Option[A])) {
 
     def readingsAvg(using A: Fractional[A]): Option[A] =
       val list = self._1.toList ::: self._2.toList
@@ -123,3 +123,7 @@ object TadoReading:
 
     def readingsLast: Option[A] =
       self._1.orElse(self._2)
+
+  }
+
+}

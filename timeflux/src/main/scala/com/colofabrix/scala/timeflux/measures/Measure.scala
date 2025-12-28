@@ -12,24 +12,27 @@ final case class Measure(
   time: OffsetDateTime
 )
 
-object Measure:
+object Measure {
 
   given TimefluxSerializable[Measure] with
     def toMeasure(m: Measure): Measure = m
+
+}
 
 /**
  * Measure Field
  */
 final case class MeasureField(name: String, value: FieldValue)
 
-enum FieldValue:
+enum FieldValue {
   case StringValue(value: String)    extends FieldValue
   case FloatValue(value: BigDecimal) extends FieldValue
   case IntegerValue(value: Int)      extends FieldValue
   case UIntegerValue(value: Long)    extends FieldValue
   case BooleanValue(value: Boolean)  extends FieldValue
+}
 
-object FieldValue:
+object FieldValue {
 
   def apply[A](value: A): FieldValue =
     value match
@@ -40,6 +43,8 @@ object FieldValue:
       case v: Long       => FieldValue.UIntegerValue(v)
       case v: Boolean    => FieldValue.BooleanValue(v)
       case v: Any        => FieldValue.StringValue(v.toString())
+
+}
 
 /**
  * Measure Tag

@@ -18,7 +18,7 @@ final private[timeflux] class WriteRequestHandler[F[_]: Async](
   httpClient: Client[F],
   config: TimefluxConfig,
   baseApiUrl: Uri,
-) extends Http4sClientDsl[F]:
+) extends Http4sClientDsl[F] {
 
   implicit private val logger: SelfAwareStructuredLogger[F] =
     Slf4jLogger.getLogger[F]
@@ -66,3 +66,5 @@ final private[timeflux] class WriteRequestHandler[F[_]: Async](
       .flatMap(handleClientStreamError)
       .compile
       .drain
+
+}

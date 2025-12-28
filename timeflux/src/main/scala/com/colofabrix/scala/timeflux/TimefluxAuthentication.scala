@@ -19,7 +19,7 @@ final private[timeflux] class TimefluxAuthentication[F[_]: Async](
   httpClient: Client[F],
   config: TimefluxConfig,
   atomicState: AtomicCell[F, TimefluxClientState[F]],
-) extends Http4sClientDsl[F]:
+) extends Http4sClientDsl[F] {
 
   implicit private val logger: SelfAwareStructuredLogger[F] =
     Slf4jLogger.getLogger[F]
@@ -51,3 +51,5 @@ final private[timeflux] class TimefluxAuthentication[F[_]: Async](
     Retry(retryPolicy):
       TimefluxAuthenticatedClient[F](credentials.token):
         httpClient
+
+}

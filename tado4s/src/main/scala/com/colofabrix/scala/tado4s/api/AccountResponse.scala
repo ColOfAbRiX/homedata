@@ -16,7 +16,7 @@ final case class AccountResponse(
   mobileDevices: Vector[AccountResponse.MobileDevice],
 ) derives Decoder
 
-object AccountResponse:
+object AccountResponse {
 
   final case class Home(
     id: Int,
@@ -68,3 +68,5 @@ object AccountResponse:
     tariffHighPriceAlert: Boolean,
     tariffLowPriceAlert: Boolean
   ) derives Decoder
+
+}

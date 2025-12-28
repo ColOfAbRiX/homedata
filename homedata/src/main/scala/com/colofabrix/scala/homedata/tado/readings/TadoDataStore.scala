@@ -12,7 +12,7 @@ import scala.concurrent.duration.*
 type TadoDataStore =
   TimeSlots[TadoReading]
 
-object TadoDataStore:
+object TadoDataStore {
 
   private def TimeResolution: FiniteDuration =
     InfluxConfig.config.timeResolution
@@ -33,3 +33,5 @@ object TadoDataStore:
 
     def combine(x: TadoDataStore, y: TadoDataStore): TadoDataStore =
       TimeSlots.given_Semigroup_TimeSlots[TadoReading].combine(x, y)
+
+}

@@ -12,7 +12,7 @@ final case class WeatherResponse(
   weatherState: WeatherResponse.WeatherState,
 ) derives Decoder
 
-object WeatherResponse:
+object WeatherResponse {
 
   final case class OutsideTemperature(
     celsius: Double,
@@ -38,3 +38,5 @@ object WeatherResponse:
     value: String,
     timestamp: OffsetDateTime,
   ) derives Decoder
+
+}

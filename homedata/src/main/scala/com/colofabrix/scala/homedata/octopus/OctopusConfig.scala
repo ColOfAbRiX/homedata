@@ -15,7 +15,7 @@ final case class OctopusConfig(
   pageSize: Int,
 ) derives ConfigReader
 
-object OctopusConfig:
+object OctopusConfig {
 
   val config =
     ConfigSource
@@ -31,3 +31,5 @@ object OctopusConfig:
   given ConfigReader[SerialNumber] =
     ConfigReader.fromString: str =>
       Right(SerialNumber(str))
+
+}

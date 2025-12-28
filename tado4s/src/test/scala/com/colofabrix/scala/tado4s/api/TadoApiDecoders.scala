@@ -8,7 +8,7 @@ import org.scalatest.matchers.should.Matchers
 import scala.io.Source
 import java.time.OffsetDateTime
 
-class TadoApiDecoders extends AnyFreeSpecLike with Matchers with EitherValues:
+class TadoApiDecoders extends AnyFreeSpecLike with Matchers with EitherValues {
 
   "Circe should decode a sample file" - {
 
@@ -86,3 +86,5 @@ class TadoApiDecoders extends AnyFreeSpecLike with Matchers with EitherValues:
       .getLines
       .map(_.replaceAll("\\s*//.*$", ""))
       .mkString
+
+}
