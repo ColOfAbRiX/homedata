@@ -35,13 +35,21 @@ final class ScrapeLog[F[_]: Async] private (
     Slf4jLogger.getLogger[F]
 
   def contains(service: ScrapeService, timestamp: OffsetDateTime, entityId: String): Boolean =
-    entries.contains(ScrapeEntry(service, timestamp.withOffsetSameInstant(ZoneOffset.UTC), entityId))
+    contains(ScrapeEntry(service, timestamp.withOffsetSameInstant(ZoneOffset.UTC), entityId))
 
   def logEntry(service: ScrapeService, timestamp: OffsetDateTime, entityId: String): F[Unit] =
-    writeQueue.offer(ScrapeEntry(service, timestamp.withOffsetSameInstant(ZoneOffset.UTC), entityId))
+    val entry = ScrapeEntry(service, timestamp.withOffsetSameInstant(ZoneOffset.UTC), entityId)
+    if !contains(entry) then
+      logger.trace(s"Queueing Scrape Log entry ${entry}") >>
+      writeQueue.offer(entry)
+    else
+      Async[F].unit
 
   def size: Int =
     entries.size
+
+  private def contains(entry: ScrapeEntry): Boolean =
+    entries.contains(entry)
 
   private def runWriter: fs2.Stream[F, Nothing] =
     fs2.Stream
@@ -79,7 +87,7 @@ object ScrapeLog {
     for
       _          <- Resource.eval(ensureDirectoryExists(absPath))
       logEntries <- Resource.eval(load(absPath))
-      writeQueue <- Resource.eval(Queue.bounded[F, ScrapeEntry](1000))
+      writeQueue <- Resource.eval(Queue.bounded[F, ScrapeEntry](HomedataConfig.config.scrapeLog.batchSize))
       scrapeLog   = new ScrapeLog(logEntries, writeQueue, absPath)
       _          <- scrapeLog.runWriter.compile.drain.background
     yield scrapeLog

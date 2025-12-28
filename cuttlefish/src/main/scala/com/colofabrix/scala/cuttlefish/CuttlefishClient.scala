@@ -31,10 +31,7 @@ final class CuttlefishClient[F[_]: Async] private (
   httpClient: Client[F],
   config: CuttlefishConfig,
   atomicState: AtomicCell[F, CuttlefishClientState[F]],
-) extends Http4sClientDsl[F]:
-
-  // private type StreamF[+A] =
-  //   fs2.Stream[F, A]
+) extends Http4sClientDsl[F] {
 
   implicit private val logger: SelfAwareStructuredLogger[F] =
     Slf4jLogger.getLogger[F]
@@ -54,6 +51,9 @@ final class CuttlefishClient[F[_]: Async] private (
     clearApiKey() >>
     clearAuthenticatedClient()
 
+  /**
+   * Retrieves the meter consumption data
+   */
   def meterConsumption(request: MeterConsumptionRequest): F[MeterConsumptionResponse] =
     for
       _      <- logger.debug(s"Called meterConsumption(product=${request.product})")
@@ -303,10 +303,12 @@ final class CuttlefishClient[F[_]: Async] private (
   private given SegmentEncoder[Mpan] =
     SegmentEncoder[String].contramap(_.value)
 
+}
+
 /**
  * Cuttlefish Client for Scala
  */
-object CuttlefishClient:
+object CuttlefishClient {
 
   final private case class CuttlefishClientState[F[_]](
     apiKey: Option[String],
@@ -331,3 +333,5 @@ object CuttlefishClient:
       loggedHttpClient = ClientLogger(httpClient)
       client           = new CuttlefishClient[F](loggedHttpClient, config, initialState)
     yield client
+
+}

@@ -43,30 +43,31 @@ class OctopusPuller private (octopusClient: CuttlefishClient[IO], scrapeLog: Scr
         scrapeLog.contains(ScrapeService.Octopus, slot, meterType)
       }
 
-    if missingSlots.isEmpty then
-      fs2.Stream.empty
-    else
-      val adjustedFrom = missingSlots.min
-      val adjustedTo   = missingSlots.max.plusMinutes(30)
+    val gaps = groupContiguousSlots(missingSlots)
 
-      val request =
-        MeterConsumptionRequest(
-          product = product,
-          meterPointNumber = meterPointNumber,
-          serial = serial,
-          from = Some(adjustedFrom),
-          to = Some(adjustedTo),
-          pageSize = Some(OctopusConfig.config.pageSize),
-          page = Some(1),
-          orderBy = None,
-        )
+    fs2.Stream.exec(logger.info(s"Pulling Octopus $meterType data from=$from to=$to")) ++
+    fs2.Stream
+      .emits(gaps)
+      .flatMap { (gapFrom, gapTo) =>
+        val request =
+          MeterConsumptionRequest(
+            product = product,
+            meterPointNumber = meterPointNumber,
+            serial = serial,
+            from = Some(gapFrom),
+            to = Some(gapTo),
+            pageSize = Some(OctopusConfig.config.pageSize),
+            page = Some(1),
+            orderBy = None,
+          )
 
-      fs2.Stream.exec(logger.info(s"Pulling Octopus $meterType data from=$adjustedFrom to=$adjustedTo")) ++
-      streamReadings(request).evalTap { result =>
-        if result.interval_start.isBefore(OffsetDateTime.now()) then
-          scrapeLog.logEntry(ScrapeService.Octopus, result.interval_start, meterType)
-        else
-          IO.unit
+        fs2.Stream.exec(logger.debug(s"Pulling Octopus $meterType data from=$gapFrom to=$gapTo")) ++
+        streamReadings(request).evalTap { result =>
+          if result.interval_start.isBefore(OffsetDateTime.now()) then
+            scrapeLog.logEntry(ScrapeService.Octopus, result.interval_start, meterType)
+          else
+            IO.unit
+        }
       }
 
   private def generateTimeSlots(from: OffsetDateTime, to: OffsetDateTime): List[OffsetDateTime] =
@@ -74,6 +75,24 @@ class OctopusPuller private (octopusClient: CuttlefishClient[IO], scrapeLog: Scr
       .iterate(from)(_.plusMinutes(30))
       .takeWhile(_.isBefore(to))
       .toList
+
+  private def groupContiguousSlots(slots: List[OffsetDateTime]): List[(OffsetDateTime, OffsetDateTime)] =
+    slots match
+      case Nil =>
+        Nil
+      case head :: tail =>
+        tail
+          .foldLeft(List((head, head))) { case (acc, slot) =>
+            val (currentFrom, currentTo) = acc.head
+            if slot == currentTo.plusMinutes(30) then
+              (currentFrom, slot) :: acc.tail
+            else
+              (slot, slot) :: acc
+          }
+          .map { (gapFrom, gapTo) =>
+            (gapFrom, gapTo.plusMinutes(30))
+          }
+          .reverse
 
   private def streamReadings(request: MeterConsumptionRequest): fs2.Stream[IO, ConsumptionResults] =
     fs2.Stream

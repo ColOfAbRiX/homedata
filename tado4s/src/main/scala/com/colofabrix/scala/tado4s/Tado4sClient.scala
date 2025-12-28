@@ -26,7 +26,7 @@ import scala.concurrent.duration.*
 final class Tado4sClient[F[_]: Async] private (
   config: TadoConfig,
   authenticator: Tado4sAuthentication[F],
-) extends Http4sClientDsl[F]:
+) extends Http4sClientDsl[F] {
 
   implicit private val logger: SelfAwareStructuredLogger[F] =
     Slf4jLogger.getLogger[F]
@@ -175,10 +175,12 @@ final class Tado4sClient[F[_]: Async] private (
         Tado4sError("Tado Request Error", Some(error))
       }
 
+}
+
 /**
  * Tado Client for Scala
  */
-object Tado4sClient:
+object Tado4sClient {
 
   /** Creates a new instance of Tado4s client using http4s Ember Client */
   def apply[F[_]: Async: Network](maybeConfig: Option[TadoConfig]): F[Tado4sClient[F]] =
@@ -204,3 +206,5 @@ object Tado4sClient:
     ClientLogger:
       SSLValidationClient(config.ignoreSsl):
         httpClient
+
+}

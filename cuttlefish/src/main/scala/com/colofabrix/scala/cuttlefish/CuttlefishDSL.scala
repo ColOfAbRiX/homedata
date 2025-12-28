@@ -4,7 +4,7 @@ import com.colofabrix.scala.cuttlefish.api.*
 import com.colofabrix.scala.cuttlefish.model.*
 import java.time.OffsetDateTime
 
-trait CuttlefishDSL:
+trait CuttlefishDSL {
 
   extension [F[_]](cuttlefishClient: CuttlefishClient[F])
 
@@ -183,3 +183,5 @@ trait CuttlefishDSL:
           pageSize = pageSize,
         ),
       )
+
+}

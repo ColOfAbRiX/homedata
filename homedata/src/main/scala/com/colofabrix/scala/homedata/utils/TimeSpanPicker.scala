@@ -1,4 +1,4 @@
-package com.colofabrix.scala.homedata
+package com.colofabrix.scala.homedata.utils
 
 import java.time.*
 import java.time.temporal.ChronoUnit
@@ -7,7 +7,7 @@ import com.colofabrix.scala.homedata.TimeSpanPicker.Selector
 /**
  * TimeSpanPicker makes picking time ranges easier and less painful
  */
-final class TimeSpanPicker private (private val selector: TimeSpanPicker.Selector, from: OffsetDateTime, to: OffsetDateTime):
+final class TimeSpanPicker private (private val selector: TimeSpanPicker.Selector, from: OffsetDateTime, to: OffsetDateTime) {
 
   /**
    * Returns both From and To dates
@@ -198,7 +198,9 @@ final class TimeSpanPicker private (private val selector: TimeSpanPicker.Selecto
       offset.getOrElse(selected.getOffset()),
     )
 
-object TimeSpanPicker:
+}
+
+object TimeSpanPicker {
 
   private[TimeSpanPicker] enum Selector:
     case From
@@ -209,3 +211,5 @@ object TimeSpanPicker:
    */
   def apply(): TimeSpanPicker =
     new TimeSpanPicker(Selector.From, OffsetDateTime.now(), OffsetDateTime.now())
+
+}

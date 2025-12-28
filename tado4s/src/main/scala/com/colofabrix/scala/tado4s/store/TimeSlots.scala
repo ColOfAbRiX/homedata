@@ -13,7 +13,7 @@ import scala.jdk.DurationConverters.*
 /**
  * Time Slots accumulator for time series data
  */
-final class TimeSlots[A] private (val resolution: FiniteDuration, private val store: InnerStore[A]):
+final class TimeSlots[A] private (val resolution: FiniteDuration, private val store: InnerStore[A]) {
 
   /**
    * Add a value at a specific point in time into its time slot
@@ -212,7 +212,9 @@ final class TimeSlots[A] private (val resolution: FiniteDuration, private val st
       case TimeUnit.NANOSECONDS  => value.getNano
     }
 
-object TimeSlots:
+}
+
+object TimeSlots {
 
   //  TimeValue  //
 
@@ -318,3 +320,5 @@ object TimeSlots:
     def ===(other: OffsetDateTime): Boolean = self.isEqual(other)
     def >=(other: OffsetDateTime): Boolean  = self.isAfter(other) || self.isEqual(other)
     def >(other: OffsetDateTime): Boolean   = self.isAfter(other)
+
+}

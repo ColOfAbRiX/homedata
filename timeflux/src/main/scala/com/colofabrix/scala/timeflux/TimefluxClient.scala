@@ -29,7 +29,7 @@ final class TimefluxClient[F[_]: Async] private (
   httpClient: Client[F],
   config: TimefluxConfig,
   atomicState: AtomicCell[F, TimefluxClientState[F]],
-) extends Http4sClientDsl[F]:
+) extends Http4sClientDsl[F] {
 
   private val authenticator: TimefluxAuthentication[F] =
     new TimefluxAuthentication(httpClient, config, atomicState)
@@ -150,10 +150,12 @@ final class TimefluxClient[F[_]: Async] private (
           serverUrl.addPath(config.apiBase).pure[F]
       }
 
+}
+
 /**
  * InfluxDB Client for Scala
  */
-object TimefluxClient:
+object TimefluxClient {
 
   final private[timeflux] case class TimefluxClientState[F[_]](
     credentials: Option[TimefluxCredentials] = None,
@@ -199,3 +201,5 @@ object TimefluxClient:
       serverUrl = Some(clientConfig.serverUrl),
       credentials = Some(TimefluxCredentials(clientConfig.authToken)),
     )
+
+}

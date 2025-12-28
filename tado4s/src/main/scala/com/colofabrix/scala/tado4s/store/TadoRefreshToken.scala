@@ -13,7 +13,7 @@ final case class TadoRefreshToken(
   issueTime: OffsetDateTime,
 ) derives ConfigReader
 
-object TadoRefreshToken:
+object TadoRefreshToken {
 
   given ConfigReader[OffsetDateTime] =
     ConfigReader.fromString(s => Right(OffsetDateTime.parse(s)))
@@ -24,3 +24,5 @@ object TadoRefreshToken:
       .withValue("token", ConfigValueFactory.fromAnyRef(token.token))
       .withValue("issue-time", ConfigValueFactory.fromAnyRef(token.issueTime.toString))
       .root()
+
+}

@@ -20,7 +20,7 @@ final case class CuttlefishConfig(
   maxRetryTime: FiniteDuration = 1.minute,
 ) derives ConfigReader
 
-object CuttlefishConfig:
+object CuttlefishConfig {
 
   given ConfigReader[Uri] =
     ConfigReader.fromString:
@@ -38,3 +38,5 @@ object CuttlefishConfig:
       .withFallback(ConfigSource.resources("secrets.conf"))
       .at("cuttlefish")
       .loadOrThrow[CuttlefishConfig]
+
+}

@@ -29,7 +29,7 @@ final case class TadoConfig(
 /**
  * Tado4s configuration
  */
-object TadoConfig:
+object TadoConfig {
 
   given ConfigReader[FiniteDuration] =
     ConfigReader.fromString:
@@ -47,3 +47,5 @@ object TadoConfig:
       .withFallback(ConfigSource.resources("secrets.conf"))
       .at("tado")
       .loadOrThrow[TadoConfig]
+
+}

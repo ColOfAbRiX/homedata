@@ -4,12 +4,12 @@ import cats.data.NonEmptyList
 
 opaque type ResultRow = NonEmptyList[String]
 
-object ResultRow:
+object ResultRow {
 
   def apply(value: NonEmptyList[String]): ResultRow =
     value
 
-  extension (self: ResultRow) {
-    def value: NonEmptyList[String] =
-      self
-  }
+  extension (self: ResultRow) def value: NonEmptyList[String] =
+    self
+
+}

@@ -7,10 +7,10 @@ import com.colofabrix.scala.homedata.influx.*
 import com.colofabrix.scala.homedata.octopus.*
 import com.colofabrix.scala.homedata.scrape.*
 import com.colofabrix.scala.homedata.tado.*
+import com.colofabrix.scala.homedata.utils.TimeSpanPicker
 import com.colofabrix.scala.timeflux.*
 import com.colofabrix.scala.timeflux.api.QueryRequest
 import com.colofabrix.scala.timeflux.measures.TimefluxSerializable.toApiMeasureStream
-import com.monovore.decline.Opts
 import java.time.temporal.ChronoUnit
 
 object Main extends IOUnitDeclineApp:
@@ -22,20 +22,12 @@ object Main extends IOUnitDeclineApp:
     "Tado and Octopus scrapers"
 
   override def runNoConfig(): IO[ExitCode] =
-    // val (from, to) =
-    //   TimeSpanPicker()
-    //     .selectFrom()
-    //     .setDate(2023, 11, 23)
-    //     .selectTo()
-    //     .now()
-    //     .roundBoth(ChronoUnit.DAYS)
-    //     .pick()
     val (from, to) =
       TimeSpanPicker()
         .selectFrom()
-        .setDate(2024, 5, 23)
+        .setDate(2023, 11, 23)
         .selectTo()
-        .setDate(2024, 5, 25)
+        .now()
         .roundBoth(ChronoUnit.DAYS)
         .pick()
 
@@ -57,11 +49,11 @@ object Main extends IOUnitDeclineApp:
         tadoMeasures        = tadoPuller.pullReadings(from, to).through(toApiMeasureStream)
         writer             <- InfluxWriter()
         _                  <- writer.write(tadoMeasures, gasMeasures, electricityMeasures)
-      // // Extra testing code for influx syntax
-      // _ <- IO.println("HomeData - Simple statistics")
-      // timefluxClient <- TimefluxClient[IO](InfluxConfig.clientConfig)
-      // points         <- timefluxClient.query(QueryRequest(query, None))
-      // listPoints     <- points.compile.toList
-      // _              <- listPoints.traverse(IO.println)
+        // // Extra testing code for influx syntax
+        // _ <- IO.println("HomeData - Simple statistics")
+        // timefluxClient <- TimefluxClient[IO](InfluxConfig.clientConfig)
+        // points         <- timefluxClient.query(QueryRequest(query, None))
+        // listPoints     <- points.compile.toList
+        // _              <- listPoints.traverse(IO.println)
       yield ExitCode.Success
     }

@@ -9,7 +9,7 @@ import pureconfig.*
 /**
  * Persisted token storage for Tado4s - manages ~/.tado4s.conf
  */
-object Tado4sTokenStore:
+object Tado4sTokenStore {
 
   private val tokenPath: Path =
     Paths.get(System.getProperty("user.home"), ".tado4s.conf")
@@ -24,7 +24,7 @@ object Tado4sTokenStore:
         case Right(token) =>
           Some(token)
         case Left(error) =>
-          System.err.println(s"Failed to parse ~/.tado4s.conf: $error")
+          System.err.println(s"Failed to parse ${tokenPath}: $error")
           None
       }
 
@@ -48,3 +48,5 @@ object Tado4sTokenStore:
       if Files.exists(tokenPath) then Files.delete(tokenPath)
       ()
     }
+
+}

@@ -5,7 +5,7 @@ import java.time.OffsetDateTime
 
 sealed trait OctopusReading
 
-object OctopusReading:
+object OctopusReading {
 
   given TimefluxSerializable[OctopusReading] with
     override def toMeasure(reading: OctopusReading): Measure =
@@ -19,7 +19,7 @@ object OctopusReading:
     consumption: Double,
   ) extends OctopusReading
 
-  object ElectricityReading:
+  object ElectricityReading {
 
     given TimefluxSerializable[ElectricityReading] with
       override def toMeasure(reading: ElectricityReading): Measure =
@@ -30,12 +30,14 @@ object OctopusReading:
           time = reading.time,
         )
 
+  }
+
   final case class GasReading(
     time: OffsetDateTime,
     consumption: Double,
   ) extends OctopusReading
 
-  object GasReading:
+  object GasReading {
 
     given TimefluxSerializable[GasReading] with
       override def toMeasure(reading: GasReading): Measure =
@@ -45,3 +47,7 @@ object OctopusReading:
           tags = Vector.empty,
           time = reading.time,
         )
+
+  }
+
+}
