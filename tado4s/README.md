@@ -21,16 +21,22 @@ automatic token refresh, and typed request/response models.
 
 ## Supported Endpoints
 
-| Category           | Endpoints                                |
-|--------------------|------------------------------------------|
-| **Account**        | User account information                 |
-| **Homes**          | Home details and configuration           |
-| **Zones**          | Zone configuration and state             |
-| **Devices**        | Registered device information            |
-| **Installations**  | Installation details                     |
-| **Users**          | Configured user information              |
-| **Weather**        | Current weather at home location         |
-| **Day Reports**    | Historical zone data for a specific day  |
+| Category              | Endpoints                                        |
+|-----------------------|--------------------------------------------------|
+| **Account**           | User account information                         |
+| **Homes**             | Home details, state, and presence control        |
+| **Zones**             | Zone configuration, state, and capabilities      |
+| **Zone Control**      | Manual temperature control, overlays, schedules  |
+| **Timetables**        | Active timetable, all timetables, blocks         |
+| **Away Configuration**| Away mode settings per zone                      |
+| **Devices**           | Registered device information                    |
+| **Mobile Devices**    | Mobile device management and geo-tracking        |
+| **Installations**     | Installation details                             |
+| **Users**             | Configured user information                      |
+| **Weather**           | Current weather at home location                 |
+| **Day Reports**       | Historical zone data for a specific day          |
+| **Heating Circuits**  | Heating circuit information                      |
+| **Air Comfort**       | Air comfort and freshness data                   |
 
 ## Quick Start
 
@@ -126,20 +132,38 @@ val weather =
 
 The main entry point for interacting with the Tado API.
 
-| Method                               | Description                        |
-|--------------------------------------|------------------------------------|
-| `authenticate(refreshToken)`         | Authenticate with refresh token    |
-| `logout()`                           | Clear authentication               |
-| `getAccountInfo()`                   | Get user account information       |
-| `getHomeDetails(homeId)`             | Get home configuration             |
-| `getHomeZones(homeId)`               | Get zones for a home               |
-| `getHomeState(homeId)`               | Get current home state             |
-| `getHomeDevices(homeId)`             | Get registered devices             |
-| `getHomeInstallations(homeId)`       | Get installation details           |
-| `getHomeUsers(homeId)`               | Get configured users               |
-| `getZoneState(homeId, zoneId)`       | Get zone current state             |
-| `getHomeWeather(homeId)`             | Get weather at home location       |
-| `getZoneDayReport(homeId, zoneId, date)` | Get historical day report      |
+| Method                               | Description                              |
+|--------------------------------------|------------------------------------------|
+| `authenticate(refreshToken)`         | Authenticate with refresh token          |
+| `logout()`                           | Clear authentication                     |
+| `getAccountInfo()`                   | Get user account information             |
+| `getHomeDetails(homeId)`             | Get home configuration                   |
+| `getHomeZones(homeId)`               | Get zones for a home                     |
+| `getHomeState(homeId)`               | Get current home state                   |
+| `getHomeDevices(homeId)`             | Get registered devices                   |
+| `getHomeInstallations(homeId)`       | Get installation details                 |
+| `getHomeUsers(homeId)`               | Get configured users                     |
+| `getZoneState(homeId, zoneId)`       | Get zone current state                   |
+| `getHomeWeather(homeId)`             | Get weather at home location             |
+| `getZoneDayReport(homeId, zoneId, date)` | Get historical day report            |
+| `getZoneCapabilities(request)`       | Get zone temperature capabilities        |
+| `getEarlyStart(request)`             | Get early start settings                 |
+| `setEarlyStart(request)`             | Set early start enabled/disabled         |
+| `getActiveTimetable(request)`        | Get active schedule timetable            |
+| `setActiveTimetable(request)`        | Set active schedule timetable            |
+| `getTimetables(request)`             | Get all schedule timetables              |
+| `getTimetableBlocks(request)`        | Get schedule blocks for a timetable      |
+| `getAwayConfiguration(request)`      | Get away mode configuration              |
+| `setAwayConfiguration(request)`      | Set away mode configuration              |
+| `setZoneOverlay(request)`            | Set manual temperature control           |
+| `deleteZoneOverlay(request)`         | Clear manual control, resume schedule    |
+| `setHomePresence(request)`           | Set home to HOME or AWAY                 |
+| `getMobileDevices(request)`          | Get mobile devices                       |
+| `getMobileDeviceSettings(request)`   | Get mobile device settings               |
+| `setMobileDeviceSettings(request)`   | Set mobile device geo-tracking           |
+| `deleteMobileDevice(request)`        | Remove a mobile device                   |
+| `getHeatingCircuits(request)`        | Get heating circuit information          |
+| `getAirComfort(request)`             | Get air comfort and freshness data       |
 
 ### Response Types
 

@@ -10,6 +10,7 @@ import fs2.io.net.Network
 import java.time.LocalDate
 import org.http4s.*
 import org.http4s.circe.CirceEntityDecoder.*
+import org.http4s.circe.CirceEntityEncoder.*
 import org.http4s.client.Client
 import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.ember.client.EmberClientBuilder
@@ -22,6 +23,7 @@ import scala.concurrent.duration.*
  * Tado Client for Scala
  *
  * Reference: https://blog.scphillips.com/posts/2017/01/the-tado-api-v2/
+ *            https://kritsel.github.io/tado-openapispec-v2/swagger.html
  */
 final class Tado4sClient[F[_]: Async] private (
   config: TadoConfig,
@@ -166,6 +168,258 @@ final class Tado4sClient[F[_]: Async] private (
       _       <- logger.trace(s"Response for getZoneDayReport(): $result")
     yield result
 
+  //  Zone Control APIs  //
+
+  /**
+   * Zone capabilities
+   */
+  def getZoneCapabilities(request: ZoneCapabilitiesRequest): F[ZoneCapabilitiesResponse] =
+    for
+      _      <- logger.debug(s"Called getZoneCapabilities(): homeId=${request.homeId}, zoneId=${request.zoneId}")
+      client <- authenticator.getAuthenticatedClient()
+      url     = config.apiBase / "homes" / request.homeId / "zones" / request.zoneId / "capabilities"
+      result <- client.expectOr[ZoneCapabilitiesResponse](GET(url))(handleClientExpectError)
+      _      <- logger.trace(s"Response for getZoneCapabilities(): $result")
+    yield result
+
+  /**
+   * Get early start settings
+   */
+  def getEarlyStart(request: GetEarlyStartRequest): F[EarlyStartResponse] =
+    for
+      _      <- logger.debug(s"Called getEarlyStart(): homeId=${request.homeId}, zoneId=${request.zoneId}")
+      client <- authenticator.getAuthenticatedClient()
+      url     = config.apiBase / "homes" / request.homeId / "zones" / request.zoneId / "earlyStart"
+      result <- client.expectOr[EarlyStartResponse](GET(url))(handleClientExpectError)
+      _      <- logger.trace(s"Response for getEarlyStart(): $result")
+    yield result
+
+  /**
+   * Set early start settings
+   */
+  def setEarlyStart(request: SetEarlyStartRequest): F[EarlyStartResponse] =
+    for
+      _      <- logger.debug(s"Called setEarlyStart(): homeId=${request.homeId}, zoneId=${request.zoneId}")
+      client <- authenticator.getAuthenticatedClient()
+      url     = config.apiBase / "homes" / request.homeId / "zones" / request.zoneId / "earlyStart"
+      body    = EarlyStartResponse(enabled = request.enabled)
+      result <- client.expectOr[EarlyStartResponse](PUT(body, url))(handleClientExpectError)
+      _      <- logger.trace(s"Response for setEarlyStart(): $result")
+    yield result
+
+  /**
+   * Get active timetable
+   */
+  def getActiveTimetable(request: GetActiveTimetableRequest): F[ActiveTimetableResponse] =
+    for
+      _      <- logger.debug(s"Called getActiveTimetable(): homeId=${request.homeId}, zoneId=${request.zoneId}")
+      client <- authenticator.getAuthenticatedClient()
+      url     = config.apiBase / "homes" / request.homeId / "zones" / request.zoneId / "schedule" / "activeTimetable"
+      result <- client.expectOr[ActiveTimetableResponse](GET(url))(handleClientExpectError)
+      _      <- logger.trace(s"Response for getActiveTimetable(): $result")
+    yield result
+
+  /**
+   * Set active timetable
+   */
+  def setActiveTimetable(request: SetActiveTimetableRequest): F[ActiveTimetableResponse] =
+    for
+      _      <- logger.debug(s"Called setActiveTimetable(): homeId=${request.homeId}, zoneId=${request.zoneId}")
+      client <- authenticator.getAuthenticatedClient()
+      url     = config.apiBase / "homes" / request.homeId / "zones" / request.zoneId / "schedule" / "activeTimetable"
+      body    = ActiveTimetableResponse(id = request.timetableId, `type` = "ONE_DAY")
+      result <- client.expectOr[ActiveTimetableResponse](PUT(body, url))(handleClientExpectError)
+      _      <- logger.trace(s"Response for setActiveTimetable(): $result")
+    yield result
+
+  /**
+   * Get all timetables
+   */
+  def getTimetables(request: GetTimetablesRequest): F[Vector[TimetablesResponse.Timetable]] =
+    for
+      _      <- logger.debug(s"Called getTimetables(): homeId=${request.homeId}, zoneId=${request.zoneId}")
+      client <- authenticator.getAuthenticatedClient()
+      url     = config.apiBase / "homes" / request.homeId / "zones" / request.zoneId / "schedule" / "timetables"
+      result <- client.expectOr[Vector[TimetablesResponse.Timetable]](GET(url))(handleClientExpectError)
+      _      <- logger.trace(s"Response for getTimetables(): $result")
+    yield result
+
+  /**
+   * Get timetable blocks
+   */
+  def getTimetableBlocks(request: GetTimetableBlocksRequest): F[Vector[TimetableBlocksResponse.Block]] =
+    val homeId      = request.homeId
+    val zoneId      = request.zoneId
+    val timetableId = request.timetableId
+    for
+      _      <- logger.debug(s"Called getTimetableBlocks(): homeId=$homeId, zoneId=$zoneId, timetableId=$timetableId")
+      client <- authenticator.getAuthenticatedClient()
+      url     = config.apiBase / "homes" / homeId / "zones" / zoneId / "schedule" / "timetables" / timetableId / "blocks"
+      result <- client.expectOr[Vector[TimetableBlocksResponse.Block]](GET(url))(handleClientExpectError)
+      _      <- logger.trace(s"Response for getTimetableBlocks(): $result")
+    yield result
+
+  /**
+   * Get away configuration
+   */
+  def getAwayConfiguration(request: GetAwayConfigurationRequest): F[AwayConfigurationResponse] =
+    for
+      _      <- logger.debug(s"Called getAwayConfiguration(): homeId=${request.homeId}, zoneId=${request.zoneId}")
+      client <- authenticator.getAuthenticatedClient()
+      url     = config.apiBase / "homes" / request.homeId / "zones" / request.zoneId / "schedule" / "awayConfiguration"
+      result <- client.expectOr[AwayConfigurationResponse](GET(url))(handleClientExpectError)
+      _      <- logger.trace(s"Response for getAwayConfiguration(): $result")
+    yield result
+
+  /**
+   * Set away configuration
+   */
+  def setAwayConfiguration(request: SetAwayConfigurationRequest): F[AwayConfigurationResponse] =
+    val body =
+      AwayConfigurationResponse(
+        `type` = request.`type`,
+        autoAdjust = request.autoAdjust,
+        comfortLevel = request.comfortLevel,
+        setting = request.setting,
+      )
+    for
+      _      <- logger.debug(s"Called setAwayConfiguration(): homeId=${request.homeId}, zoneId=${request.zoneId}")
+      client <- authenticator.getAuthenticatedClient()
+      url     = config.apiBase / "homes" / request.homeId / "zones" / request.zoneId / "schedule" / "awayConfiguration"
+      result <- client.expectOr[AwayConfigurationResponse](PUT(body, url))(handleClientExpectError)
+      _      <- logger.trace(s"Response for setAwayConfiguration(): $result")
+    yield result
+
+  /**
+   * Set zone overlay (manual control)
+   */
+  def setZoneOverlay(request: SetZoneOverlayRequest): F[ZoneOverlayResponse] =
+    for
+      _      <- logger.debug(s"Called setZoneOverlay(): homeId=${request.homeId}, zoneId=${request.zoneId}")
+      client <- authenticator.getAuthenticatedClient()
+      url     = config.apiBase / "homes" / request.homeId / "zones" / request.zoneId / "overlay"
+      body    = SetZoneOverlayBody(setting = request.setting, termination = request.termination)
+      result <- client.expectOr[ZoneOverlayResponse](PUT(body, url))(handleClientExpectError)
+      _      <- logger.trace(s"Response for setZoneOverlay(): $result")
+    yield result
+
+  /**
+   * Delete zone overlay
+   */
+  def deleteZoneOverlay(request: DeleteZoneOverlayRequest): F[Unit] =
+    for
+      _      <- logger.debug(s"Called deleteZoneOverlay(): homeId=${request.homeId}, zoneId=${request.zoneId}")
+      client <- authenticator.getAuthenticatedClient()
+      url     = config.apiBase / "homes" / request.homeId / "zones" / request.zoneId / "overlay"
+      _      <- client.successful(DELETE(url))
+      _      <- logger.trace(s"Response for deleteZoneOverlay(): success")
+    yield ()
+
+  //  Home Control APIs  //
+
+  /**
+   * Set home presence
+   */
+  def setHomePresence(request: SetHomePresenceRequest): F[Unit] =
+    for
+      _      <- logger.debug(s"Called setHomePresence(): homeId=${request.homeId}")
+      client <- authenticator.getAuthenticatedClient()
+      url     = config.apiBase / "homes" / request.homeId / "presence"
+      body    = SetHomePresenceBody(homePresence = request.homePresence)
+      _      <- client.successful(PUT(body, url))
+      _      <- logger.trace(s"Response for setHomePresence(): success")
+    yield ()
+
+  /**
+   * Get mobile devices
+   */
+  def getMobileDevices(request: GetMobileDevicesRequest): F[Vector[MobileDevicesResponse.MobileDevice]] =
+    for
+      _      <- logger.debug(s"Called getMobileDevices(): homeId=${request.homeId}")
+      client <- authenticator.getAuthenticatedClient()
+      url     = config.apiBase / "homes" / request.homeId / "mobileDevices"
+      result <- client.expectOr[Vector[MobileDevicesResponse.MobileDevice]](GET(url))(handleClientExpectError)
+      _      <- logger.trace(s"Response for getMobileDevices(): $result")
+    yield result
+
+  /**
+   * Get mobile device settings
+   */
+  def getMobileDeviceSettings(request: GetMobileDeviceSettingsRequest): F[MobileDeviceSettingsResponse] =
+    val homeId   = request.homeId
+    val deviceId = request.mobileDeviceId
+    for
+      _      <- logger.debug(s"Called getMobileDeviceSettings(): homeId=$homeId, mobileDeviceId=$deviceId")
+      client <- authenticator.getAuthenticatedClient()
+      url     = config.apiBase / "homes" / homeId / "mobileDevices" / deviceId / "settings"
+      result <- client.expectOr[MobileDeviceSettingsResponse](GET(url))(handleClientExpectError)
+      _      <- logger.trace(s"Response for getMobileDeviceSettings(): $result")
+    yield result
+
+  /**
+   * Set mobile device settings
+   */
+  def setMobileDeviceSettings(request: SetMobileDeviceSettingsRequest): F[MobileDeviceSettingsResponse] =
+    val homeId   = request.homeId
+    val deviceId = request.mobileDeviceId
+    val body     = MobileDeviceSettingsResponse(request.geoTrackingEnabled, request.pushNotifications)
+    for
+      _      <- logger.debug(s"Called setMobileDeviceSettings(): homeId=$homeId, mobileDeviceId=$deviceId")
+      client <- authenticator.getAuthenticatedClient()
+      url     = config.apiBase / "homes" / homeId / "mobileDevices" / deviceId / "settings"
+      result <- client.expectOr[MobileDeviceSettingsResponse](PUT(body, url))(handleClientExpectError)
+      _      <- logger.trace(s"Response for setMobileDeviceSettings(): $result")
+    yield result
+
+  /**
+   * Delete mobile device
+   */
+  def deleteMobileDevice(request: DeleteMobileDeviceRequest): F[Unit] =
+    val homeId   = request.homeId
+    val deviceId = request.mobileDeviceId
+    for
+      _      <- logger.debug(s"Called deleteMobileDevice(): homeId=$homeId, mobileDeviceId=$deviceId")
+      client <- authenticator.getAuthenticatedClient()
+      url     = config.apiBase / "homes" / homeId / "mobileDevices" / deviceId
+      _      <- client.successful(DELETE(url))
+      _      <- logger.trace(s"Response for deleteMobileDevice(): success")
+    yield ()
+
+  /**
+   * Get heating circuits
+   */
+  def getHeatingCircuits(request: GetHeatingCircuitsRequest): F[Vector[HeatingCircuitsResponse.HeatingCircuit]] =
+    for
+      _      <- logger.debug(s"Called getHeatingCircuits(): homeId=${request.homeId}")
+      client <- authenticator.getAuthenticatedClient()
+      url     = config.apiBase / "homes" / request.homeId / "heatingCircuits"
+      result <- client.expectOr[Vector[HeatingCircuitsResponse.HeatingCircuit]](GET(url))(handleClientExpectError)
+      _      <- logger.trace(s"Response for getHeatingCircuits(): $result")
+    yield result
+
+  /**
+   * Get air comfort
+   */
+  def getAirComfort(request: GetAirComfortRequest): F[AirComfortResponse] =
+    for
+      _      <- logger.debug(s"Called getAirComfort(): homeId=${request.homeId}")
+      client <- authenticator.getAuthenticatedClient()
+      url     = config.apiBase / "homes" / request.homeId / "airComfort"
+      result <- client.expectOr[AirComfortResponse](GET(url))(handleClientExpectError)
+      _      <- logger.trace(s"Response for getAirComfort(): $result")
+    yield result
+
+  //  Helper case classes for request bodies  //
+
+  final private case class SetZoneOverlayBody(
+    setting: ZoneOverlayRequest.Setting,
+    termination: ZoneOverlayRequest.Termination,
+  ) derives io.circe.Encoder.AsObject
+
+  final private case class SetHomePresenceBody(
+    homePresence: String,
+  ) derives io.circe.Encoder.AsObject
+
   //  Error handlers  //
 
   private def handleClientExpectError(response: Response[F]): F[Throwable] =
@@ -182,7 +436,9 @@ final class Tado4sClient[F[_]: Async] private (
  */
 object Tado4sClient {
 
-  /** Creates a new instance of Tado4s client using http4s Ember Client */
+  /**
+   * Creates a new instance of Tado4s client using http4s Ember Client
+   */
   def apply[F[_]: Async: Network](maybeConfig: Option[TadoConfig]): F[Tado4sClient[F]] =
     EmberClientBuilder
       .default[F]

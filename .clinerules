@@ -229,11 +229,12 @@ values.find(_.isValid) match
 
 **What to do:**
 - **Public API interfaces** (traits/classes meant for external use): Full Scaladoc with short description, detailed description, arguments and type parameters
-- **Public methods**: One-line description only
-- **Objects, classes, traits**: One-line description only
+- **Public methods**: Short description only (one sentence)
+- **Objects, classes, traits**: Short description only (one sentence)
 - **Private methods**: No documentation at all
+- **Scaladoc format**: Always use multi-line format for Scaladoc, never single-line `/** text */`
 
-**Why:** Over-documentation creates noise. Public APIs need clarity for users; internals should be self-documenting through good naming.
+**Why:** Over-documentation creates noise. Public APIs need clarity for users; internals should be self-documenting through good naming. Multi-line Scaladoc format is more consistent and easier to expand when needed.
 
 ```scala
 // ✅ Correct - public API trait with full docs
@@ -247,20 +248,29 @@ values.find(_.isValid) match
  * @param config The configuration for connecting to the API
  */
 trait TadoClient[F[_]]:
-  /** Retrieves the day report for a specific zone */
+  /**
+   * Retrieves the day report for a specific zone
+   */
   def getZoneDayReport(homeId: Int, zoneId: Int, date: LocalDate): F[DayReportResponse]
 
-// ✅ Correct - internal class with one-line description
-/** Parses raw API responses into domain types */
+// ✅ Correct - internal class with short description (still multi-line format)
+/**
+ * Parses raw API responses into domain types
+ */
 object ResponseParser:
   // No docs on private methods
   private def parseInterval(json: Json): Option[Interval] = ...
+
+// ❌ Incorrect - single-line Scaladoc format
+/** Parses raw API responses into domain types */
+object ResponseParser:
 ```
 
 **What NOT to do:**
 - Don't add Scaladoc to private methods
-- Don't write multi-line docs for simple public methods
+- Don't write lengthy docs for simple public methods
 - Don't remove existing comments
+- Don't use single-line Scaladoc format `/** text */`
 
 ### 2.7 Working with the Formatter
 
