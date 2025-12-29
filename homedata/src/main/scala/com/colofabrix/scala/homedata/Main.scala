@@ -32,11 +32,11 @@ object Main extends IOUnitDeclineApp {
 
     val query =
       """from(bucket: "home_data")
-        ||>  range(start: -1d)
-        ||>  filter(fn: (r) => r["_measurement"] == "gas")
-        ||>  filter(fn: (r) => r["_field"] == "consumption")
-        ||>  aggregateWindow(every: 1h, fn: mean, createEmpty: false)
-        ||>  yield(name: "mean")""".stripMargin
+        |  |> range(start: -3d)
+        |  |> filter(fn: (r) => r["_measurement"] == "electricity")
+        |  |> filter(fn: (r) => r["_field"] == "consumption")
+        |  |> aggregateWindow(every: 1h, fn: mean, createEmpty: false)
+        |  |> yield(name: "mean")""".stripMargin
 
     ScrapeLog[IO](HomedataConfig.config.scrapeLog.logPath).use { scrapeLog =>
       for

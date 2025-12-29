@@ -18,7 +18,7 @@ class InfluxReader(timefluxClient: TimefluxClient[IO], orgId: String) extends Ti
 
   def query(query: String): IO[fs2.Stream[IO, ResultRow]] =
     for
-      _      <- logger.info("Wiring readings into database...")
+      _      <- logger.info("Running Flux query...")
       result <- timefluxClient.query(QueryRequest(query, orgId))
     yield result
 
@@ -32,16 +32,19 @@ object InfluxReader extends TimefluxDSL {
   private lazy val orgName =
     InfluxConfig.config.orgName.value
 
+  private lazy val bucket =
+    InfluxConfig.config.projectBucket
+
   def apply(): IO[InfluxReader] =
     for
       _              <- logger.info("Initializing Influx reader...")
       _              <- logger.debug(s"Influx configuration: ${InfluxConfig.config}")
       timefluxClient <- TimefluxClient[IO](InfluxConfig.clientConfig)
       orgId          <- initOrg(timefluxClient).map(_.value)
-      _              <- logger.debug(s"Ensuring bucket '${InfluxConfig.config.projectBucket}' exists...")
-      _              <- timefluxClient.createBucketIfMissing(InfluxConfig.config.projectBucket, orgId)
+      _              <- logger.debug(s"Ensuring bucket '$bucket' exists...")
+      _              <- timefluxClient.createBucketIfMissing(bucket, orgId)
       result          = new InfluxReader(timefluxClient, orgId)
-      _              <- logger.info(s"Initialized Influx reader on bucket ${InfluxConfig.config.projectBucket}")
+      _              <- logger.info(s"Initialized Influx reader on bucket $bucket")
     yield result
 
   private def initOrg(timefluxClient: TimefluxClient[IO]): IO[OrgId] =

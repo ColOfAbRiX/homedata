@@ -127,12 +127,13 @@ val adjustedRange = missingSlots
 **Goal:** Use modern, clean Scala 3 syntax for better readability.
 
 **What to do:**
-- Use indentation-based syntax instead of braces
+- Use indentation-based syntax instead of braces for `if`, `for`, `match`
 - Use `then` keyword for `if` expressions
 - Use braceless `for` and `match` expressions
+- **Always use curly braces `{ }` for `object`, `class`, `trait`, `enum`, and `extension` definitions**
 
 ```scala
-// ✅ Correct
+// ✅ Correct - braceless for control flow
 if condition then
   doSomething()
 else
@@ -144,10 +145,35 @@ for
   z <- x + y
 yield z
 
-// ❌ Incorrect - Scala 2 style with braces
+// ✅ Correct - curly braces for type definitions
+object MyObject {
+  def foo(): Unit = ???
+}
+
+trait MyTrait {
+  def bar(): String
+}
+
+class MyClass(value: Int) {
+  def get: Int = value
+}
+
+enum Color {
+  case Red, Green, Blue
+}
+
+extension (s: String) {
+  def toUpperFirst: String = s.capitalize
+}
+
+// ❌ Incorrect - Scala 2 style with braces for control flow
 if (condition) {
   doSomething()
 }
+
+// ❌ Incorrect - braceless for type definitions
+object MyObject:
+  def foo(): Unit = ???
 ```
 
 ### 2.4 For-Comprehensions
