@@ -54,7 +54,7 @@ trait TimefluxDSL {
       retentionRules: List[RetentionRules] = List.empty,
     ): F[CreateBucketResponse] =
       timefluxClient.createBucket(
-        CreateBucketRequest(name, Some(orgID), description, retentionRules),
+        CreateBucketRequest(name, orgID, description, retentionRules),
       )
 
     /**
@@ -67,7 +67,7 @@ trait TimefluxDSL {
       retentionRules: List[RetentionRules] = List.empty,
     ): F[Option[CreateBucketResponse]] =
       timefluxClient.createBucketIfMissing(
-        CreateBucketRequest(name, Some(orgID), description, retentionRules),
+        CreateBucketRequest(name, orgID, description, retentionRules),
       )
 
     // --- Write API ---
@@ -83,7 +83,7 @@ trait TimefluxDSL {
       batchWrites: Option[Int] = None,
     ): F[Unit] =
       val fullPrecision = precision.getOrElse(TimePrecision.Milliseconds)
-      val request       = WriteRequest(bucket, Some(orgID), fullPrecision, batchWrites)
+      val request       = WriteRequest(bucket, orgID, fullPrecision, batchWrites)
       timefluxClient.writeData(request, values)
 
     /**
@@ -97,7 +97,7 @@ trait TimefluxDSL {
       batchWrites: Option[Int] = None,
     ): F[Unit] =
       val fullPrecision = precision.getOrElse(TimePrecision.Milliseconds)
-      val request       = WriteRequest(bucket, Some(orgID), fullPrecision, batchWrites)
+      val request       = WriteRequest(bucket, orgID, fullPrecision, batchWrites)
       timefluxClient.writeMeasures(request, values)
 
   }

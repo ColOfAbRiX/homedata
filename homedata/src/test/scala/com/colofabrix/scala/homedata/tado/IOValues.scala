@@ -21,7 +21,7 @@ trait IOValues {
     /** The success value contained in the monad */
     def result(timeout: FiniteDuration = 30.seconds): A =
       self
-        .unsafeRunTimed(timeout)()
+        .unsafeRunTimed(timeout)(using IORuntime.global)
         .getOrElse {
           fail("Timeout while waiting for operation to complete")
         }

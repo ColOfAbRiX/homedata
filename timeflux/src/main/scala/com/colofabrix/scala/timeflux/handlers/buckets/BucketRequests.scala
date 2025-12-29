@@ -45,7 +45,7 @@ final private[timeflux] class BucketRequestsHandler[F[_]: Async](httpClient: Cli
 
   def createBucketIfMissing(request: CreateBucketRequest): F[Option[CreateBucketResponse]] =
     logger.debug(s"Called createBucketIfMissing() with $request") >>
-    listBuckets(ListBucketRequest(Some(request.name), request.orgID))
+    listBuckets(ListBucketRequest(Some(request.name), Some(request.orgID)))
       .attempt
       .flatMap {
         case Left(TimefluxRequestError(_, msg, _, _)) if msg.contains(s"bucket \"${request.name}\" not found") =>

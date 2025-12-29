@@ -7,7 +7,7 @@ import com.colofabrix.scala.timeflux.encoding.UrlParamsEncoder
  */
 final case class WriteRequest(
   bucket: String,
-  orgID: Option[String],
+  orgID: String,
   precision: TimePrecision,
-  batchWrites: Option[Int]
+  batchWrites: Option[Int],
 ) derives UrlParamsEncoder

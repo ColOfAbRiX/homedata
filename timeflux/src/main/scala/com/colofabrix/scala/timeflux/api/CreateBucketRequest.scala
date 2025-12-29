@@ -8,7 +8,7 @@ import io.circe.derivation.*
  */
 final case class CreateBucketRequest(
   name: String,
-  orgID: Option[String],
+  orgID: String,
   description: Option[String],
   retentionRules: List[RetentionRules],
 ) derives Encoder.AsObject

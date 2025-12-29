@@ -9,7 +9,6 @@ import com.colofabrix.scala.homedata.scrape.*
 import com.colofabrix.scala.homedata.tado.*
 import com.colofabrix.scala.homedata.utils.TimeSpanPicker
 import com.colofabrix.scala.timeflux.*
-import com.colofabrix.scala.timeflux.api.QueryRequest
 import com.colofabrix.scala.timeflux.measures.TimefluxSerializable.toApiMeasureStream
 import java.time.temporal.ChronoUnit
 
@@ -25,7 +24,7 @@ object Main extends IOUnitDeclineApp {
     val (from, to) =
       TimeSpanPicker()
         .selectFrom()
-        .setDate(2023, 11, 23)
+        .setDate(2025, 11, 23)
         .selectTo()
         .now()
         .roundBoth(ChronoUnit.DAYS)
@@ -41,7 +40,7 @@ object Main extends IOUnitDeclineApp {
 
     ScrapeLog[IO](HomedataConfig.config.scrapeLog.logPath).use { scrapeLog =>
       for
-        _                  <- IO.println("HomeData - Tado and Octopus scrapers")
+        _                  <- IO.println("\nHomeData - Tado and Octopus scrapers\n")
         octoPuller         <- OctopusPuller(scrapeLog)
         gasMeasures         = octoPuller.pullGasReadings(from, to).through(toApiMeasureStream)
         electricityMeasures = octoPuller.pullElectricityReadings(from, to).through(toApiMeasureStream)
@@ -49,12 +48,11 @@ object Main extends IOUnitDeclineApp {
         tadoMeasures        = tadoPuller.pullReadings(from, to).through(toApiMeasureStream)
         writer             <- InfluxWriter()
         _                  <- writer.write(tadoMeasures, gasMeasures, electricityMeasures)
-        // Extra testing code for influx syntax
-        _ <- IO.println("HomeData - Simple statistics")
-        timefluxClient <- TimefluxClient[IO](InfluxConfig.clientConfig)
-        points         <- timefluxClient.query(QueryRequest(query, None))
-        listPoints     <- points.compile.toList
-        _              <- listPoints.traverse(IO.println)
+        _                  <- IO.println("\nHomeData - Simple statistics\n")
+        timefluxClient     <- InfluxReader()
+        points             <- timefluxClient.query(query)
+        listPoints         <- points.compile.toList
+        _                  <- listPoints.traverse(IO.println)
       yield ExitCode.Success
     }
 

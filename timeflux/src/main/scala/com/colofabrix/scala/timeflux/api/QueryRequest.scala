@@ -9,13 +9,13 @@ import io.circe.derivation.*
  */
 final case class QueryRequest(
   query: String,
-  orgID: Option[String],
+  orgID: String,
 )
 
 object QueryRequest {
 
   final private[timeflux] case class QueryGetRequest(
-    orgID: Option[String],
+    orgID: String,
   ) derives UrlParamsEncoder
 
   final private[timeflux] case class QueryPostRequest(
