@@ -20,7 +20,7 @@ object Main extends IOUnitDeclineApp {
   override def header: String =
     "Tado and Octopus scrapers"
 
-  override def runNoConfig(): IO[ExitCode] =
+  override def runNoConfig: IO[ExitCode] =
     val (from, to) =
       TimeSpanPicker()
         .selectFrom()

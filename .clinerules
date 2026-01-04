@@ -1,6 +1,24 @@
-# Scala Coding Guidelines
+# Cline's Coding Guidelines
 
-This document provides coding guidelines for AI agents working on this Scala codebase. These rules cover code style, architectural decisions, and best practices.
+I am Cline, an expert software engineer with a unique characteristic: my memory resets completely between sessions. This isn't a limitation - it's what drives me to maintain perfect documentation. After each reset, I rely ENTIRELY on my Coding Guidelines to understand how to write and organize the code and the project and continue work effectively. I MUST read the WHOLE file at the start of EVERY task - this is not optional - and I must apply these coding guidelines at the best of my abilities and interact with the user to polish up any uncertainty and ambiguity.
+
+## Description of the content
+
+This document provides coding guidelines for AI agents working on Scala codebase. These rules cover code style, architectural decisions, and best practices.
+
+## Documentation Updates
+
+Coding Guidelines updates occur when:
+1. Discovering new project patterns
+2. After implementing significant changes
+3. When user requests with **update coding guideline** (MUST review the WHOLE file)
+4. When context needs clarification
+
+Note: When triggered by **update coding guideline**, I MUST review the whole file, even if some part don't require updates.
+
+**Important:** When updating this file, always add an entry to the Changelog at the bottom of the document.
+
+REMEMBER: After every memory reset, I begin completely fresh. The Coding Guideline is my only link to previous work. It must be maintained with precision and clarity, as my effectiveness depends entirely on its accuracy.
 
 ---
 
@@ -24,8 +42,8 @@ The guidelines in this document are principles, not rigid rules. They interact w
 **What to do:**
 - Keep architecture, code, tests, and scripts simple
 - Avoid single lines with too many conceptual steps, nested calls, or chained operations
-- Strive for functions less than 40 lines
-- Keep cyclomatic complexity low
+- Strive for functions less than 40 lines (this is a guideline—prefer divide-and-conquer through smaller functions and composition)
+- Keep cyclomatic complexity low (minimize branches and nesting in if conditions)
 
 **Why:** Simple code means easier understanding, less mental overhead, easier debugging and maintenance, easier testing. Most systems work best if kept simple rather than made complicated.
 
@@ -101,6 +119,19 @@ val result = collection.filter(_.isValid).map(_.transform).flatMap(process)
 val result = collection.filter(_.isValid)
 ```
 
+**Important:** Even two method calls should follow fluent style—one operation per line for clarity:
+
+```scala
+// ✅ Correct - two method calls still split for clarity
+val result =
+  collection
+    .filter(_.isValid)
+    .map(_.x)
+
+// ❌ Incorrect - two method calls on one line
+val result = collection.filter(_.isValid).map(_.x)
+```
+
 ### 2.2 Multi-line Assignments
 
 **Goal:** Clearly separate the variable name from its computed value.
@@ -130,7 +161,9 @@ val adjustedRange = missingSlots
 - Use indentation-based syntax instead of braces for `if`, `for`, `match`
 - Use `then` keyword for `if` expressions
 - Use braceless `for` and `match` expressions
-- **Always use curly braces `{ }` for `object`, `class`, `trait`, `enum`, and `extension` definitions**
+- **Always use curly braces `{ }` for `object`, `class`, `trait`, `enum`, `extension` definitions, and anonymous functions**
+
+**Note:** The absence of explicit brace guidance for other constructs doesn't mean "never use braces"—evaluate each occurrence based on readability and context.
 
 ```scala
 // ✅ Correct - braceless for control flow
@@ -166,6 +199,16 @@ extension (s: String) {
   def toUpperFirst: String = s.capitalize
 }
 
+// ✅ Correct - curly braces for anonymous functions
+val result =
+  items
+    .filter { item =>
+      item.isValid && item.value > 0
+    }
+    .map { item =>
+      item.transform()
+    }
+
 // ❌ Incorrect - Scala 2 style with braces for control flow
 if (condition) {
   doSomething()
@@ -174,6 +217,10 @@ if (condition) {
 // ❌ Incorrect - braceless for type definitions
 object MyObject:
   def foo(): Unit = ???
+
+// ❌ Incorrect - braceless for type definitions
+trait MyTrait:
+  def bar(): String
 ```
 
 ### 2.4 For-Comprehensions
@@ -407,10 +454,24 @@ object ScrapeLog {
 - Wrap primitive types in domain-specific types at API boundaries
 - Use case class wrappers or opaque types for identifiers
 
+**Choosing when to use domain types:**
+- **Opaque types** are the strongest, safest choice—they provide compile-time safety with zero runtime overhead, aligning with Section 11 (Code Sanity)
+- **Primitive types directly** are acceptable in small projects (a handful of files, few types and methods) where the newtype pattern would add unnecessary noise
+- This is a judgment call—when you reasonably believe it's time to introduce opaque types, collaborate with the developer
+
 ```scala
-// ✅ Correct - domain types prevent mix-ups
+// ✅ Correct - case class wrappers for small projects
 final case class MeterPointNumber(value: String)
 final case class SerialNumber(value: String)
+
+// ✅ Correct - opaque types for stronger type safety
+opaque type MeterPointNumber = String
+object MeterPointNumber {
+  def apply(value: String): MeterPointNumber = value
+  extension (mpn: MeterPointNumber) {
+    def value: String = mpn
+  }
+}
 
 def getMeter(mpn: MeterPointNumber, serial: SerialNumber): F[Meter]
 ```
@@ -442,7 +503,28 @@ final case class MeterPointNumber(value: String) {
 }
 ```
 
-### 5.3 No Default Values or Copy
+### 5.3 Null Handling with Option
+
+**Goal:** Safely handle potentially null values from Java APIs.
+
+**What to do:**
+- Wrap potentially null values in `Option()` immediately
+- Use `getOrElse` to provide a safe default
+
+**Why:** Null values from Java interop can cause NullPointerExceptions. Wrapping in Option makes null handling explicit and safe.
+
+```scala
+// ✅ Correct - wrap null in Option immediately
+val potentiallyNull: String = javaApi.getValue()
+val safeValue: String = Option(potentiallyNull).getOrElse("")
+
+val parentPath: Path = Option(path.getParent).getOrElse(Paths.get("."))
+
+// ❌ Incorrect - direct null check
+val parentPath: Path = if path.getParent != null then path.getParent else Paths.get(".")
+```
+
+### 5.4 No Default Values or Copy
 
 **Goal:** Make structural changes obvious and caught at compile time.
 
@@ -491,9 +573,22 @@ final case class Config(
 - Error classes extend `Throwable`, NOT case classes
 - Keep categories to a minimum needed for the project
 
+**Error hierarchy structure (when multiple categories are needed):**
+```
+Throwable
+  └── ProjectError extends Throwable
+        ├── ConfigError extends ProjectError
+        └── ParseError extends ProjectError
+```
+
 ```scala
 // ✅ Correct - regular class
 final class MyProjectError(message: String) extends Exception(message)
+
+// ✅ Correct - error hierarchy when needed
+class BeesightError(message: String) extends Exception(message)
+final class ConfigError(message: String) extends BeesightError(message)
+final class ParseError(message: String) extends BeesightError(message)
 
 // ❌ Incorrect - case class error
 case class MyProjectError(message: String) extends Exception(message)
@@ -502,6 +597,15 @@ case class MyProjectError(message: String) extends Exception(message)
 ### 6.2 Error Channels (Propagation)
 
 **Goal:** Use consistent channels for error propagation. The specific choice (`IO` vs `F[_]: MonadError`) depends on the project—deduce from existing code or ask the engineer.
+
+**Effect type choices:**
+- **General error handling**: Always use `IO[_]`
+- **Error accumulation** (config, parsing): Use Applicatives (`Validated`, `ValidatedNel`)
+- **Manual success/failure handling**: Use `Either` (often via `.attempt` method on `IO`)
+
+**Generic `F[_]` vs concrete types:**
+- **`F[_]` with typeclasses**: Reserved for libraries that want to leave the choice to the final developer
+- **Concrete effect types** (like `IO`): Use for end products and applications
 
 **What to do:**
 - Public API: Use effect types for error propagation
@@ -520,6 +624,13 @@ private def validateConfig(raw: RawConfig): ValidatedNel[String, Config]
 // ✅ Convert at the boundary
 def loadConfig(): IO[Config] =
   IO.fromValidated(validateConfig(raw))
+
+// ✅ Manual success/failure handling with Either
+def processWithRecovery(data: Data): IO[Result] =
+  riskyOperation(data).attempt.flatMap {
+    case Right(result) => IO.pure(result)
+    case Left(error)   => fallbackOperation(data)
+  }
 ```
 
 ### 6.3 Error Handling Strategies
@@ -554,7 +665,13 @@ def processItem(item: Item): IO[Unit] =
 
 ## 7. Testing
 
-### 7.1 Test Early
+### 7.1 Testing Framework
+
+**Preference:** ScalaTest with AnyWordSpec
+
+**Note:** A framework is just a tool—the principles matter more than the specific choice.
+
+### 7.2 Test Early
 
 **Goal:** Test for the features you need, not the features you remember.
 
@@ -565,7 +682,7 @@ def processItem(item: Item): IO[Unit] =
 
 **Why:** Tests should reflect product requirements, not code written. Don't infer tests from code.
 
-### 7.2 Black-Box Testing
+### 7.3 Black-Box Testing
 
 **Goal:** Test behavior through public interfaces, not internal implementation.
 
@@ -580,7 +697,7 @@ def processItem(item: Item): IO[Unit] =
 - Don't test private methods
 - Don't make methods public just to test them
 
-### 7.3 FP Testing
+### 7.4 FP Testing
 
 **Goal:** Test data pipelines effectively.
 
@@ -597,17 +714,53 @@ def processItem(item: Item): IO[Unit] =
 
 **Goal:** Control object instantiation and edge cases
 
+**When to use a factory:**
+- Guard constructor values (validate inputs)
+- Protect the construction of the class
+- Provide initialization (create resources, set up dependencies)
+
 **What to do:**
 - Make the constructor `private` when you need a factory
 - Create companion `apply` method returning `F[A]` or `Resource[F, A]`
 
 ```scala
+// Basic factory pattern
 final class ScrapeLog[F[_]: Async] private (...) {
   def contains(e: Entry): Boolean = ...
 }
 
 object ScrapeLog {
   def apply[F[_]: Async](path: Path): Resource[F, ScrapeLog[F]] = ...
+}
+```
+
+**Example - Guarding constructor values:**
+```scala
+final class Worker private (workerNumber: Int) {
+  // ...
+}
+
+object Worker {
+  def apply(workerNumber: Int): Worker =
+    if workerNumber < 1 then withDefault() else new Worker(workerNumber)
+
+  def withDefault(): Worker =
+    new Worker(1)
+}
+```
+
+**Example - Initialization with resources:**
+```scala
+final class Worker[F[_]: Async] private (writeQueue: Queue[F, ScrapeEntry]) {
+  // ...
+}
+
+object Worker {
+  def apply[F[_]: Async](): F[Worker[F]] =
+    for
+      writeQueue <- Queue.bounded[F, ScrapeEntry](10)
+      worker      = new Worker(writeQueue)
+    yield worker
 }
 ```
 
@@ -626,10 +779,17 @@ object ScrapeLog {
 
 ### 9.1 Package Structure
 
+Package structure is project-dependent. Create a new package when an area of code has:
+- Big relevance in the logic
+- Multiple files
+- Potential for sub-packages
+
+**Example structure (adapt to project needs):**
 ```
 com.colofabrix.scala.{project}
   ├── api/       # Public API models
   ├── model/     # Internal domain models and error types
+  ├── config/    # Configuration types and loading
   ├── security/  # Code related to project security
 ```
 
@@ -665,7 +825,35 @@ com.colofabrix.scala.{project}
 
 ---
 
-## 12. Summary Checklist
+## 12. Logging
+
+**Goal:** Enable troubleshooting and event tracking for humans and machines.
+
+**When to log:**
+- API calls: log when called
+- Major code sections: log when they execute
+- Debug level: key steps, fixed points in code structure
+- Trace level: detailed data and all useful information
+
+**Format:** Follow standard logging practices (Java defaults)
+
+**Note:** Scale logging with project size—small projects need less information.
+
+---
+
+## 13. Configuration Management
+
+**Preferences:**
+- **Config files**: pureconfig (HOCON format)
+- **Secrets**: Separate files, git-ignored
+- **CLI tools**: Command line arguments (declinio)
+- **Environment-dependent values**: Environment variables
+
+**Note:** These are preferences—let the developer make the final choice based on project needs.
+
+---
+
+## 14. Summary Checklist
 
 When writing new code, verify:
 
@@ -680,3 +868,21 @@ When writing new code, verify:
 - [ ] Factory pattern used when initialization needed
 - [ ] Resource used for lifecycle management
 - [ ] Tests are black-box through public interface
+
+---
+
+## Changelog
+
+| Date | Description |
+|------|-------------|
+| 2026-01-01 | Fixed typos (Description, polish); clarified fluent style for 2+ method calls |
+| 2026-01-01 | Added anonymous functions to brace requirements; clarified brace guidance note |
+| 2026-01-01 | Added opaque types vs primitive types guidance in Section 5.1 |
+| 2026-01-01 | Added error hierarchy structure and example in Section 6.1 |
+| 2026-01-01 | Added effect type choices and F[_] vs concrete types guidance in Section 6.2 |
+| 2026-01-01 | Added factory pattern triggers and examples in Section 8.1 |
+| 2026-01-01 | Clarified package structure is project-dependent in Section 9.1 |
+| 2026-01-01 | Added Section 7.1 (Testing Framework preference) |
+| 2026-01-01 | Added Section 12 (Logging) and Section 13 (Configuration Management) |
+| 2026-01-01 | Clarified cyclomatic complexity and function length in Section 1.1 |
+| 2026-01-01 | Added changelog requirement note and changelog section |
