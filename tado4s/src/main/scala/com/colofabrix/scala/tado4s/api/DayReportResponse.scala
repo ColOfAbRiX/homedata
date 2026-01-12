@@ -160,6 +160,7 @@ object DayReportResponse {
     case object Sun           extends OutsideState(9)
     case object Foggy         extends OutsideState(10)
     case object Thunderstorm  extends OutsideState(11)
+    case object ScatteredSnow extends OutsideState(12)
 
     val values = findValues
 

@@ -94,18 +94,14 @@ final class Tado4sAuthentication[F[_]: Async] private (
         Tado4sError("Not authenticated. Call authenticate() first.").raiseError
     }
 
-  /**
-   * Wait on a gate and rethrow any errors
-   */
+  // Wait on a gate and rethrow any errors
   private def waitOnGate(gate: Gate[F]): F[AuthenticatedData[F]] =
     gate.get.flatMap {
       case Right(data) => data.pure[F]
       case Left(error) => error.raiseError
     }
 
-  /**
-   * Transition from Authenticated to Refreshing state. Uses atomic modify to ensure only one fiber becomes the leader.
-   */
+  // Transition from Authenticated to Refreshing state. Uses atomic modify to ensure only one fiber becomes the leader.
   private def transitionToRefreshing(currentData: AuthenticatedData[F]): F[Client[F]] =
     Deferred[F, Either[Throwable, AuthenticatedData[F]]].flatMap { gate =>
       atomicState.modify {
@@ -123,8 +119,7 @@ final class Tado4sAuthentication[F[_]: Async] private (
       }.flatten
     }
 
-  /**
-   * Leader performs initial authentication.
+  /* Leader performs initial authentication.
    *   - Reads file to check for stored token (exclusive - we're in Authenticating state)
    *   - Gets auth token from Tado API
    *   - Writes file with new token
@@ -152,8 +147,7 @@ final class Tado4sAuthentication[F[_]: Async] private (
       error.raiseError
     }
 
-  /**
-   * Leader performs token refresh.
+  /* Leader performs token refresh.
    *   - Makes API call to get new tokens
    *   - Writes file with new token (exclusive access)
    *   - Signals all waiters via gate
@@ -180,9 +174,7 @@ final class Tado4sAuthentication[F[_]: Async] private (
       error.raiseError
     }
 
-  /**
-   * Select the newer of two tokens based on issueTime
-   */
+  // Select the newer of two tokens based on issueTime
   private def selectNewerToken(
     storedToken: Option[TadoRefreshToken],
     initialToken: Option[TadoRefreshToken],
@@ -243,9 +235,7 @@ object Tado4sAuthentication {
       result       = new Tado4sAuthentication[F](httpClient, config, atomicState)
     yield result
 
-  /**
-   * Authentication state machine - ensures thread-safe state transitions.
-   */
+  // Authentication state machine - ensures thread-safe state transitions.
   private enum AuthState[F[_]] {
 
     case Unauthenticated()
@@ -255,18 +245,14 @@ object Tado4sAuthentication {
 
   }
 
-  /**
-   * Authenticated data - contains all tokens and the configured client. Private to Tado4sAuthentication.
-   */
+  // Authenticated data - contains all tokens and the configured client. Private to Tado4sAuthentication.
   final private case class AuthenticatedData[F[_]](
     refreshToken: TadoRefreshToken,
     authToken: TadoAuthToken,
     client: Client[F],
   )
 
-  /**
-   * Auth token with expiry tracking. Private to Tado4sAuthentication.
-   */
+  // Auth token with expiry tracking. Private to Tado4sAuthentication.
   final private case class TadoAuthToken(
     bearerToken: String,
     expiry: OffsetDateTime,
