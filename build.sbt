@@ -8,6 +8,7 @@ val catsVersion            = "2.12.0"
 val circeCoreVersion       = "0.14.10"
 val circeGenericVersion    = "0.14.10"
 val coreVersion            = "4.0.0-M8"
+val cuttlefishVersion      = "1.0.0"
 val declineVersion         = "2.4.1"
 val declinioVersion        = "1.0.0"
 val ducktapeVersion        = "0.1.11"
@@ -38,7 +39,7 @@ timeflux / Test / tpolecatScalacOptions := Set.empty
 lazy val root =
   project
     .in(file("."))
-    .aggregate(homedata, timeflux, tado4s, cuttlefish)
+    .aggregate(homedata, timeflux, tado4s)
     .settings(
       name              := "root",
       version           := "0.1.0",
@@ -51,7 +52,7 @@ lazy val root =
 lazy val homedata =
   project
     .in(file("homedata"))
-    .dependsOn(timeflux, tado4s, cuttlefish)
+    .dependsOn(timeflux, tado4s)
     .settings(
       name         := "homedata",
       version      := "0.1.0",
@@ -61,6 +62,7 @@ lazy val homedata =
         "ch.qos.logback"         % "logback-classic"    % logbackClassicVersion % Runtime,
         "co.fs2"                %% "fs2-core"           % fs2Version,
         "co.fs2"                %% "fs2-io"             % fs2Version,
+        "com.colofabrix.scala"  %% "cuttlefish"         % cuttlefishVersion,
         "com.colofabrix.scala"  %% "declinio"           % declinioVersion,
         "com.colofabrix.scala"  %% "h4sbl"              % h4sbtVersion,
         "com.github.pureconfig" %% "pureconfig-core"    % pureconfigVersion,
@@ -145,36 +147,6 @@ lazy val tado4s =
         "org.typelevel"         %% "cats-effect-std"     % catsEffectVersion,
         "org.typelevel"         %% "cats-effect"         % catsEffectVersion,
         "org.typelevel"         %% "cats-kernel"         % catsVersion,
-        "org.typelevel"         %% "log4cats-core"       % log4catsVersion,
-        "org.typelevel"         %% "log4cats-slf4j"      % log4catsVersion,
-      ),
-    )
-
-lazy val cuttlefish =
-  project
-    .in(file("cuttlefish"))
-    .dependsOn(timeflux, tado4s)
-    .settings(
-      name         := "cuttlefish",
-      version      := "0.1.0",
-      organization := "com.colofabrix.scala.cuttlefish",
-      scalaVersion := scala3Version,
-      libraryDependencies ++= List(
-        "co.fs2"                %% "fs2-io"              % fs2Version,
-        "com.colofabrix.scala"  %% "h4sbl"               % h4sbtVersion,
-        "com.github.pureconfig" %% "pureconfig-core"     % pureconfigVersion,
-        "dev.kovstas"           %% "fs2-throttler"       % fs2ThrottlerVersion,
-        "io.circe"              %% "circe-core"          % circeCoreVersion,
-        "org.http4s"            %% "http4s-circe"        % http4sClientVersion,
-        "org.http4s"            %% "http4s-client"       % http4sClientVersion,
-        "org.http4s"            %% "http4s-core"         % http4sClientVersion,
-        "org.http4s"            %% "http4s-ember-client" % http4sClientVersion,
-        "org.scalatest"         %% "scalatest"           % scalatestVersion % Test,
-        "org.typelevel"         %% "case-insensitive"    % caseInsensitiveVersion,
-        "org.typelevel"         %% "cats-core"           % catsVersion,
-        "org.typelevel"         %% "cats-effect-kernel"  % catsEffectVersion,
-        "org.typelevel"         %% "cats-effect-std"     % catsEffectVersion,
-        "org.typelevel"         %% "cats-effect"         % catsEffectVersion,
         "org.typelevel"         %% "log4cats-core"       % log4catsVersion,
         "org.typelevel"         %% "log4cats-slf4j"      % log4catsVersion,
       ),
