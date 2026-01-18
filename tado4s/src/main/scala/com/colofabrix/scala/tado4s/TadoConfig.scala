@@ -26,6 +26,7 @@ final case class TadoConfig(
   ignoreSsl: Boolean = true
 ) derives ConfigReader
 
+
 /**
  * Tado4s configuration
  */
@@ -45,7 +46,7 @@ object TadoConfig {
     ConfigSource
       .default
       .withFallback(ConfigSource.resources("secrets.conf"))
-      .at("tado")
+      .at("tado4s")
       .loadOrThrow[TadoConfig]
 
 }

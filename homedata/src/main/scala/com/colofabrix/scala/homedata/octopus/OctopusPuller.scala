@@ -8,6 +8,7 @@ import com.colofabrix.scala.cuttlefish.CuttlefishDSL
 import com.colofabrix.scala.cuttlefish.model.{ MeterPointNumber, SerialNumber, Throttle }
 import com.colofabrix.scala.homedata.scrape.{ ScrapeLog, ScrapeService }
 import com.colofabrix.scala.homedata.utils.pipes.*
+import com.colofabrix.scala.timeflux.measures.*
 import java.time.*
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
@@ -18,17 +19,15 @@ class OctopusPuller private (octopusClient: CuttlefishClient[IO], scrapeLog: Scr
   implicit private val logger: Logger[IO] =
     Slf4jLogger.getLogger[IO]
 
-  def pullGasReadings(from: OffsetDateTime, to: OffsetDateTime): fs2.Stream[IO, OctopusReading] =
+  def pullGasReadings(from: OffsetDateTime, to: OffsetDateTime): fs2.Stream[IO, Measure] =
     pullWithFilter(from, to, "gas", OctopusProduct.Gas, gasMprn, gasSerial)
-      .map { c =>
-        OctopusReading.GasReading(c.interval_start, c.consumption)
-      }
+      .map { c => OctopusReading.GasReading(c.interval_start, c.consumption) }
+      .through(TimefluxSerializable.toApiMeasureStream)
 
-  def pullElectricityReadings(from: OffsetDateTime, to: OffsetDateTime): fs2.Stream[IO, OctopusReading] =
+  def pullElectricityReadings(from: OffsetDateTime, to: OffsetDateTime): fs2.Stream[IO, Measure] =
     pullWithFilter(from, to, "electricity", OctopusProduct.Electricity, electricityMpan, electricitySerial)
-      .map { c =>
-        OctopusReading.ElectricityReading(c.interval_start, c.consumption)
-      }
+      .map { c => OctopusReading.ElectricityReading(c.interval_start, c.consumption) }
+      .through(TimefluxSerializable.toApiMeasureStream)
 
   private def pullWithFilter(
     from: OffsetDateTime,
@@ -82,12 +81,13 @@ class OctopusPuller private (octopusClient: CuttlefishClient[IO], scrapeLog: Scr
         Nil
       case head :: tail =>
         tail
-          .foldLeft(List((head, head))) { case (acc, slot) =>
-            val (currentFrom, currentTo) = acc.head
-            if slot == currentTo.plusMinutes(30) then
-              (currentFrom, slot) :: acc.tail
-            else
-              (slot, slot) :: acc
+          .foldLeft(List((head, head))) {
+            case (acc, slot) =>
+              val (currentFrom, currentTo) = acc.head
+              if slot == currentTo.plusMinutes(30) then
+                (currentFrom, slot) :: acc.tail
+              else
+                (slot, slot) :: acc
           }
           .map { (gapFrom, gapTo) =>
             (gapFrom, gapTo.plusMinutes(30))

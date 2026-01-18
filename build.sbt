@@ -1,4 +1,6 @@
 import org.typelevel.scalacoptions.ScalacOptions
+import sbtassembly.AssemblyPlugin.autoImport._
+import sbtassembly.MergeStrategy
 
 val scala3Version = "3.7.4"
 
@@ -80,6 +82,14 @@ lazy val homedata =
         "org.typelevel"         %% "log4cats-core"      % log4catsVersion,
         "org.typelevel"         %% "log4cats-slf4j"     % log4catsVersion,
       ),
+      assembly / mainClass       := Some("com.colofabrix.scala.homedata.Main"),
+      assembly / assemblyJarName := s"homedata_${version.value}_${scalaVersion.value}.jar",
+      assembly / test            := {},
+      assembly / assemblyMergeStrategy := {
+        case "META-INF/versions/9/module-info.class" => MergeStrategy.discard
+        case path if path.endsWith("secrets.conf")   => MergeStrategy.discard
+        case path                                    => (ThisBuild / assemblyMergeStrategy).value(path)
+      },
     )
 
 lazy val timeflux =
@@ -91,8 +101,7 @@ lazy val timeflux =
       organization := "com.colofabrix.scala.timeflux",
       scalaVersion := scala3Version,
       libraryDependencies ++= List(
-        "ch.qos.logback"         % "logback-classic"     % logbackClassicVersion % Runtime,
-        "co.fs2"                %% "fs2-core"            % fs2Version            % Runtime,
+        "co.fs2"                %% "fs2-core"            % fs2Version       % Runtime,
         "co.fs2"                %% "fs2-io"              % fs2Version,
         "com.colofabrix.scala"  %% "h4sbl"               % h4sbtVersion,
         "com.github.pureconfig" %% "pureconfig-core"     % pureconfigVersion,
@@ -104,7 +113,7 @@ lazy val timeflux =
         "org.http4s"            %% "http4s-client"       % http4sClientVersion,
         "org.http4s"            %% "http4s-core"         % http4sClientVersion,
         "org.http4s"            %% "http4s-ember-client" % http4sClientVersion,
-        "org.scalatest"         %% "scalatest"           % scalatestVersion      % Test,
+        "org.scalatest"         %% "scalatest"           % scalatestVersion % Test,
         "org.scodec"            %% "scodec-bits"         % scodecBitsVersion,
         "org.typelevel"         %% "case-insensitive"    % caseInsensitiveVersion,
         "org.typelevel"         %% "cats-core"           % catsVersion,
@@ -126,7 +135,6 @@ lazy val tado4s =
       organization := "com.colofabrix.scala.tado4s",
       scalaVersion := scala3Version,
       libraryDependencies ++= List(
-        "ch.qos.logback"         % "logback-classic"     % logbackClassicVersion % Runtime,
         "co.fs2"                %% "fs2-core"            % fs2Version,
         "co.fs2"                %% "fs2-io"              % fs2Version,
         "com.beachape"          %% "enumeratum-circe"    % enumeratumVersion,
@@ -134,12 +142,12 @@ lazy val tado4s =
         "com.colofabrix.scala"  %% "h4sbl"               % h4sbtVersion,
         "com.github.pureconfig" %% "pureconfig-core"     % pureconfigVersion,
         "io.circe"              %% "circe-core"          % circeCoreVersion,
-        "io.circe"              %% "circe-parser"        % circeCoreVersion      % Test,
+        "io.circe"              %% "circe-parser"        % circeCoreVersion % Test,
         "org.http4s"            %% "http4s-circe"        % http4sClientVersion,
         "org.http4s"            %% "http4s-client"       % http4sClientVersion,
         "org.http4s"            %% "http4s-core"         % http4sClientVersion,
         "org.http4s"            %% "http4s-ember-client" % http4sClientVersion,
-        "org.scalatest"         %% "scalatest"           % scalatestVersion      % Test,
+        "org.scalatest"         %% "scalatest"           % scalatestVersion % Test,
         "org.scodec"            %% "scodec-bits"         % scodecBitsVersion,
         "org.typelevel"         %% "case-insensitive"    % caseInsensitiveVersion,
         "org.typelevel"         %% "cats-core"           % catsVersion,

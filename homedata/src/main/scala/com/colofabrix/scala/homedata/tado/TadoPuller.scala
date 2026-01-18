@@ -7,6 +7,7 @@ import com.colofabrix.scala.homedata.tado.readings.*
 import com.colofabrix.scala.homedata.utils.pipes.*
 import com.colofabrix.scala.tado4s.api.HomeZoneResponse
 import com.colofabrix.scala.tado4s.Tado4sClient
+import com.colofabrix.scala.timeflux.measures.*
 import java.time.*
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
@@ -16,7 +17,7 @@ class TadoPuller private (tadoClient: Tado4sClient[IO], scrapeLog: ScrapeLog[IO]
   implicit private val logger: Logger[IO] =
     Slf4jLogger.getLogger[IO]
 
-  def pullReadings(from: OffsetDateTime, to: OffsetDateTime): fs2.Stream[IO, TadoReading] =
+  def pullReadings(from: OffsetDateTime, to: OffsetDateTime): fs2.Stream[IO, Measure] =
     fs2.Stream
       .unfold(from.toLocalDate)(generateNextDate(to))
       .flatMap(collectRoomIds)
@@ -25,6 +26,7 @@ class TadoPuller private (tadoClient: Tado4sClient[IO], scrapeLog: ScrapeLog[IO]
       .map(pullRoom)
       .parJoinUnbounded
       .onFinalize(logger.info("Completed pull of Tado data"))
+      .through(TimefluxSerializable.toApiMeasureStream)
 
   private def generateNextDate(to: OffsetDateTime)(current: LocalDate): Option[(LocalDate, LocalDate)] =
     if (current.isBefore(to.toLocalDate) || current.isEqual(to.toLocalDate)) then

@@ -1,5 +1,12 @@
 services:
 
+  homedata:
+    image: homedata:latest
+    container_name: homedata
+    restart: unless-stopped
+    environment:
+      - JAVA_OPTS=-Xms512m -Xmx1g
+
   influxdb:
     container_name: influxdb
     image: influxdb:2.7.4
