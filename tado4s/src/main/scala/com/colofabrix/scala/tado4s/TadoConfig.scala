@@ -45,7 +45,6 @@ object TadoConfig {
   val config: TadoConfig =
     ConfigSource
       .default
-      .withFallback(ConfigSource.resources("secrets.conf"))
       .at("tado4s")
       .loadOrThrow[TadoConfig]
 

@@ -26,4 +26,5 @@ TODO*
 secrets.*
 
 # Data
-docker/influxdb-data
+docker/data
+lib/

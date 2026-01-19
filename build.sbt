@@ -87,7 +87,6 @@ lazy val homedata =
       assembly / test            := {},
       assembly / assemblyMergeStrategy := {
         case "META-INF/versions/9/module-info.class" => MergeStrategy.discard
-        case path if path.endsWith("secrets.conf")   => MergeStrategy.discard
         case path                                    => (ThisBuild / assemblyMergeStrategy).value(path)
       },
     )

@@ -72,13 +72,9 @@ def main():
     print("\n" + "=" * 50)
     print("Authorization successful!")
     print("=" * 50)
-    print(f"\nAdd this to your secrets.conf (gitignored):\n")
-    print(f'tado {{')
-    print(f'  initial-refresh-token {{')
-    print(f'    token = "{token_data["refresh_token"]}"')
-    print(f'    issue-time = "{issue_time}"')
-    print(f'  }}')
-    print(f'}}')
+    print(f"\nAdd this to your environment variables:\n")
+    print(f"HOMEDATA_TADO_TOKEN=\"{token_data["refresh_token"]}\"")
+    print(f"HOMEDATA_TADO_TOKEN_ISSUE_TIME=\"{issue_time}\"")
 
 if __name__ == "__main__":
     main()

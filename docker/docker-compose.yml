@@ -4,8 +4,23 @@ services:
     image: homedata:latest
     container_name: homedata
     restart: unless-stopped
+    volumes:
+      - ./data/homedata:/root/.homedata/scrape.log
+      - ./data/tado4s/.tado4s.conf:/root/.tado4s.conf
+    env_file:
+      - secrets.env
     environment:
       - JAVA_OPTS=-Xms512m -Xmx1g
+      # - HOMEDATA_INFLUXDB_AUTH_TOKEN="..."
+      # - HOMEDATA_OCTOPUS_API_KEY="..."
+      # - HOMEDATA_OCTOPUS_ACCOUNT_NUMBER="..."
+      # - HOMEDATA_OCTOPUS_ELECTRICITY_MPAN="..."
+      # - HOMEDATA_OCTOPUS_ELECTRICITY_SERIAL="..."
+      # - HOMEDATA_OCTOPUS_GAS_MPRN="..."
+      # - HOMEDATA_OCTOPUS_GAS_SERIAL="..."
+      # - HOMEDATA_TADO_TOKEN="..."
+      # - HOMEDATA_TADO_TOKEN_ISSUE_TIME="..."
+      # - TADO4S_CLIENT_ID="..."
 
   influxdb:
     container_name: influxdb
@@ -14,16 +29,18 @@ services:
     ports:
       - "8086:8086"
     volumes:
-      - ${PWD}/influxdb:/etc/influxdb2
-      - ${PWD}/influxdb-data:/var/lib/influxdb2
+      - ./influxdb:/etc/influxdb2:ro
+      - ./data/influxdb:/var/lib/influxdb2
+    env_file:
+      - secrets.env
     environment:
-      - DOCKER_INFLUXDB_INIT_MODE=setup
-      - DOCKER_INFLUXDB_INIT_USERNAME=admin
-      - DOCKER_INFLUXDB_INIT_PASSWORD=Passw0rd
-      - DOCKER_INFLUXDB_INIT_ORG=com.colofabrix
-      - DOCKER_INFLUXDB_INIT_BUCKET=mainbucket
-      - DOCKER_INFLUXDB_INIT_RETENTION=1w
-      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=VRB6CbkkF4CcAG8dKHu56D_t8kA4IumEMI5-QazdKz0ry3vArEe3tOCSw3YvgTnHinIEicUXpEC-5rI3Zu1rjQ==
+      - DOCKER_INFLUXDB_INIT_MODE="setup"
+      - DOCKER_INFLUXDB_INIT_ORG="com.colofabrix"
+      - DOCKER_INFLUXDB_INIT_BUCKET="mainbucket"
+      - DOCKER_INFLUXDB_INIT_RETENTION="1w"
+      # - DOCKER_INFLUXDB_INIT_USERNAME="..."
+      # - DOCKER_INFLUXDB_INIT_PASSWORD="..."
+      # - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN="..."
 
   grafana:
     container_name: grafana
@@ -33,7 +50,6 @@ services:
       - '3000:3000'
     volumes:
       - ./grafana:/etc/grafana:ro
-      - grafana-storage:/var/lib/grafana
-
-volumes:
-  grafana-storage: {}
+      - ./data/grafana:/var/lib/grafana
+    env_file:
+      - secrets.env

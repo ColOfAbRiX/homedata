@@ -8,12 +8,13 @@ import scala.concurrent.duration.*
 
 final case class HomedataConfig(
   scrapeLog: ScrapeLogConfig,
+  pollTime: FiniteDuration
 ) derives ConfigReader
 
 final case class ScrapeLogConfig(
   logPath: Path,
   batchSize: Int,
-  batchWait: FiniteDuration
+  batchWait: FiniteDuration,
 ) derives ConfigReader
 
 object HomedataConfig {
@@ -21,7 +22,6 @@ object HomedataConfig {
   val config =
     ConfigSource
       .default
-      .withFallback(ConfigSource.resources("secrets.conf"))
       .loadOrThrow[HomedataConfig]
 
 }

@@ -31,7 +31,6 @@ object InfluxConfig {
   val config: InfluxConfig =
     ConfigSource
       .default
-      .withFallback(ConfigSource.resources("secrets.conf"))
       .at("influxdb")
       .loadOrThrow[InfluxConfig]
 

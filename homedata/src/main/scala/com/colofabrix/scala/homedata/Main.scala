@@ -19,10 +19,10 @@ object Main extends IOUnitDeclineApp {
   override def header: String =
     "Tado and Octopus scrapers"
 
-  import scala.concurrent.duration.*
   override def runNoConfig: IO[ExitCode] = {
-    // loop >> IO.sleep(InfluxConfig.config.timeResolution)
-    loop >> IO.sleep(5.seconds)
+    loop >>
+    IO.println(s"Sleeping ${HomedataConfig.config.pollTime}...") >>
+    IO.sleep(HomedataConfig.config.pollTime)
   }.foreverM
 
   private def loop: IO[ExitCode] =

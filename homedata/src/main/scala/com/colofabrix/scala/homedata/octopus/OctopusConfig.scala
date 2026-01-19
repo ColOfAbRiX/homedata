@@ -20,7 +20,6 @@ object OctopusConfig {
   val config =
     ConfigSource
       .default
-      .withFallback(ConfigSource.resources("secrets.conf"))
       .at("octopus")
       .loadOrThrow[OctopusConfig]
 
