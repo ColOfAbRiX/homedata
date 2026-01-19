@@ -2,20 +2,18 @@ package com.colofabrix.scala.tado4s.store
 
 import cats.effect.Sync
 import cats.implicits.given
+import com.colofabrix.scala.tado4s.TadoConfig
 import com.typesafe.config.ConfigRenderOptions
-import java.nio.file.{Files, Path, Paths}
+import java.nio.file.{Files, Path}
 import pureconfig.*
 
-/**
- * Persisted token storage for Tado4s - manages ~/.tado4s.conf
- */
 object Tado4sTokenStore {
 
   private val tokenPath: Path =
-    Paths.get(System.getProperty("user.home"), ".tado4s.conf")
+    TadoConfig.config.tokenPath
 
   /**
-   * Load the token store from ~/.tado4s.conf
+   * Load the token store
    */
   def load[F[_]: Sync](): F[Option[TadoRefreshToken]] =
     Sync[F]
@@ -29,7 +27,7 @@ object Tado4sTokenStore {
       }
 
   /**
-   * Save the refresh token to ~/.tado4s.conf
+   * Save the refresh token
    */
   def save[F[_]: Sync](token: TadoRefreshToken): F[Unit] =
     Sync[F].blocking {
@@ -41,7 +39,7 @@ object Tado4sTokenStore {
     }
 
   /**
-   * Delete the token file ~/.tado4s.conf
+   * Delete the token file
    */
   def clear[F[_]: Sync](): F[Unit] =
     Sync[F].blocking {

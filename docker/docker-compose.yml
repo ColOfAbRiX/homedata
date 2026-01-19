@@ -5,8 +5,8 @@ services:
     container_name: homedata
     restart: unless-stopped
     volumes:
-      - ./data/homedata:/root/.homedata/scrape.log
-      - ./data/tado4s/.tado4s.conf:/root/.tado4s.conf
+      - ./data/homedata:/root/.homedata/
+      - ./data/tado4s/:/root/.tado4s/
     env_file:
       - secrets.env
     environment:
