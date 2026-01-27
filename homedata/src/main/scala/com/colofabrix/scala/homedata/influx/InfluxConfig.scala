@@ -31,7 +31,7 @@ object InfluxConfig {
   val config: InfluxConfig =
     ConfigSource
       .default
-      .at("influxdb")
+      .at("homedata.influxdb")
       .loadOrThrow[InfluxConfig]
 
   val clientConfig: TimefluxClientConfig =

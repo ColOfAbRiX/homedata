@@ -20,7 +20,7 @@ object OctopusConfig {
   val config =
     ConfigSource
       .default
-      .at("octopus")
+      .at("homedata.octopus")
       .loadOrThrow[OctopusConfig]
 
   given ConfigReader[MeterPointNumber] =

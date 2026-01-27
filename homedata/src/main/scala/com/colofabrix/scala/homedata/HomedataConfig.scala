@@ -22,6 +22,7 @@ object HomedataConfig {
   val config =
     ConfigSource
       .default
+      .at("homedata")
       .loadOrThrow[HomedataConfig]
 
 }

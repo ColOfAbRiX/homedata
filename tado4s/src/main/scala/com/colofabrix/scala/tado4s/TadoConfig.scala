@@ -1,6 +1,6 @@
 package com.colofabrix.scala.tado4s
 
-import java.nio.file.{Path, Paths}
+import java.nio.file.{ Path, Paths }
 import org.http4s.Uri
 import pureconfig.*
 import pureconfig.generic.derivation.default.*
@@ -33,6 +33,12 @@ final case class TadoConfig(
  */
 object TadoConfig {
 
+  val config: TadoConfig =
+    ConfigSource
+      .default
+      .at("tado4s")
+      .loadOrThrow[TadoConfig]
+
   given ConfigReader[FiniteDuration] =
     ConfigReader.fromString:
       ConvertHelpers.optF: str =>
@@ -48,11 +54,5 @@ object TadoConfig {
       ConvertHelpers.optF: str =>
         val expanded = str.replaceFirst("^~", System.getProperty("user.home"))
         Some(Paths.get(expanded))
-
-  val config: TadoConfig =
-    ConfigSource
-      .default
-      .at("tado4s")
-      .loadOrThrow[TadoConfig]
 
 }

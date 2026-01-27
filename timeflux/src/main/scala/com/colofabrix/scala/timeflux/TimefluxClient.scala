@@ -3,22 +3,23 @@ package com.colofabrix.scala.timeflux
 import cats.effect.Async
 import cats.effect.std.AtomicCell
 import cats.implicits.given
+import com.colofabrix.scala.http4s.middleware.betterlogger.ClientLogger
 import com.colofabrix.scala.timeflux.api.*
 import com.colofabrix.scala.timeflux.config.*
 import com.colofabrix.scala.timeflux.handlers.buckets.*
 import com.colofabrix.scala.timeflux.handlers.orgs.*
 import com.colofabrix.scala.timeflux.handlers.query.*
 import com.colofabrix.scala.timeflux.handlers.write.*
-import com.colofabrix.scala.http4s.middleware.betterlogger.ClientLogger
 import com.colofabrix.scala.timeflux.measures.*
 import com.colofabrix.scala.timeflux.model.*
+import com.colofabrix.scala.timeflux.security.SSLValidationClient
 import com.colofabrix.scala.timeflux.TimefluxClient.*
 import fs2.io.net.Network
+import fs2.io.net.tls.TLSContext
 import org.http4s.*
 import org.http4s.client.Client
 import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.ember.client.EmberClientBuilder
-import scala.concurrent.duration.*
 
 /**
  * InfluxDB Client for Scala
@@ -174,29 +175,30 @@ object TimefluxClient {
     clientConfig: TimefluxClientConfig,
     maybeConfig: Option[TimefluxConfig] = None,
   ): F[TimefluxClient[F]] =
-    EmberClientBuilder
-      .default[F]
-      .withTimeout(maybeConfig.map(_.httpTimeout).getOrElse(30.seconds))
-      .build
-      .allocated
-      .flatMap {
-        case (httpClient, _) =>
-          val config = maybeConfig.getOrElse(TimefluxConfig.config)
-          TimefluxClient(config, clientConfig, httpClient)
-      }
-
-  private def apply[F[_]: Async](
-    config: TimefluxConfig,
-    clientConfig: TimefluxClientConfig,
-    httpClient: Client[F],
-  ): F[TimefluxClient[F]] =
     for
-      atomicState     <- AtomicCell[F].of(initialState[F](clientConfig))
-      loggedHttpClient = ClientLogger[F](httpClient)
-      client           = new TimefluxClient[F](loggedHttpClient, config, atomicState)
+      config       <- maybeConfig.getOrElse(TimefluxConfig.config).pure[F]
+      tlsContext   <- buildTlsContext(config)
+      httpClient   <- buildHttpClient(config, tlsContext)
+      initialState <- AtomicCell[F].of(buildInitialState[F](clientConfig))
+      client        = new TimefluxClient[F](httpClient, config, initialState)
     yield client
 
-  private def initialState[F[_]](clientConfig: TimefluxClientConfig): TimefluxClientState[F] =
+  private def buildHttpClient[F[_]: Async: Network](config: TimefluxConfig, tlsContext: TLSContext[F]): F[Client[F]] =
+    EmberClientBuilder
+      .default[F]
+      .withTimeout(config.httpTimeout)
+      .withTLSContext(tlsContext)
+      .build
+      .allocated
+      .map {
+        case (httpClient, _) => ClientLogger(SSLValidationClient(config.ignoreSsl)(httpClient))
+      }
+
+  private def buildTlsContext[F[_]: Network](config: TimefluxConfig): F[TLSContext[F]] =
+    if config.ignoreSsl then Network[F].tlsContext.insecure
+    else Network[F].tlsContext.system
+
+  private def buildInitialState[F[_]](clientConfig: TimefluxClientConfig): TimefluxClientState[F] =
     TimefluxClientState[F](
       serverUrl = Some(clientConfig.serverUrl),
       credentials = Some(TimefluxCredentials(clientConfig.authToken)),

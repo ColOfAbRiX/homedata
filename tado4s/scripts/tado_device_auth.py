@@ -73,7 +73,7 @@ def main():
     print("Authorization successful!")
     print("=" * 50)
     print(f"\nAdd this to your environment variables:\n")
-    print(f"HOMEDATA_TADO_TOKEN=\"{token_data["refresh_token"]}\"")
+    print(f"HOMEDATA_TADO_TOKEN=\"{token_data['refresh_token']}\"")
     print(f"HOMEDATA_TADO_TOKEN_ISSUE_TIME=\"{issue_time}\"")
 
 if __name__ == "__main__":

@@ -19,6 +19,7 @@ final case class TimefluxConfig(
   httpTimeout: FiniteDuration = 30.seconds,
   maxRetries: Int = 5,
   maxRetryTime: FiniteDuration = 1.minute,
+  ignoreSsl: Boolean = false,
 ) derives ConfigReader
 
 object TimefluxConfig {

@@ -56,10 +56,11 @@ lazy val homedata =
     .in(file("homedata"))
     .dependsOn(timeflux, tado4s)
     .settings(
-      name         := "homedata",
-      version      := "0.1.0",
-      organization := "com.colofabrix.scala.homedata",
-      scalaVersion := scala3Version,
+      name                 := "homedata",
+      version              := "0.1.0",
+      organization         := "com.colofabrix.scala.homedata",
+      scalaVersion         := scala3Version,
+      scalacOptions        += "-preview",
       libraryDependencies ++= List(
         "ch.qos.logback"         % "logback-classic"    % logbackClassicVersion % Runtime,
         "co.fs2"                %% "fs2-core"           % fs2Version,
@@ -82,9 +83,9 @@ lazy val homedata =
         "org.typelevel"         %% "log4cats-core"      % log4catsVersion,
         "org.typelevel"         %% "log4cats-slf4j"     % log4catsVersion,
       ),
-      assembly / mainClass       := Some("com.colofabrix.scala.homedata.Main"),
-      assembly / assemblyJarName := s"homedata_${version.value}_${scalaVersion.value}.jar",
-      assembly / test            := {},
+      assembly / mainClass             := Some("com.colofabrix.scala.homedata.Main"),
+      assembly / assemblyJarName       := s"homedata_${version.value}_${scalaVersion.value}.jar",
+      assembly / test                  := {},
       assembly / assemblyMergeStrategy := {
         case "META-INF/versions/9/module-info.class" => MergeStrategy.discard
         case path                                    => (ThisBuild / assemblyMergeStrategy).value(path)
@@ -95,10 +96,11 @@ lazy val timeflux =
   project
     .in(file("timeflux"))
     .settings(
-      name         := "timeflux",
-      version      := "0.1.0",
-      organization := "com.colofabrix.scala.timeflux",
-      scalaVersion := scala3Version,
+      name                 := "timeflux",
+      version              := "0.1.0",
+      organization         := "com.colofabrix.scala.timeflux",
+      scalaVersion         := scala3Version,
+      scalacOptions        += "-preview",
       libraryDependencies ++= List(
         "co.fs2"                %% "fs2-core"            % fs2Version       % Runtime,
         "co.fs2"                %% "fs2-io"              % fs2Version,
@@ -129,10 +131,11 @@ lazy val tado4s =
   project
     .in(file("tado4s"))
     .settings(
-      name         := "tado4s",
-      version      := "0.1.0",
-      organization := "com.colofabrix.scala.tado4s",
-      scalaVersion := scala3Version,
+      name                 := "tado4s",
+      version              := "0.1.0",
+      organization         := "com.colofabrix.scala.tado4s",
+      scalaVersion         := scala3Version,
+      scalacOptions        += "-preview",
       libraryDependencies ++= List(
         "co.fs2"                %% "fs2-core"            % fs2Version,
         "co.fs2"                %% "fs2-io"              % fs2Version,

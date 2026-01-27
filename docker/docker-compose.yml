@@ -1,16 +1,16 @@
 services:
 
   homedata:
-    image: homedata:latest
+    image: colofabrix/homedata:0.1.0
     container_name: homedata
     restart: unless-stopped
     volumes:
-      - ./data/homedata:/root/.homedata/
-      - ./data/tado4s/:/root/.tado4s/
+      - ./config/homedata/application.conf:/opt/homedata/config/application.conf:ro
+      - ./data/homedata:/opt/homedata/data
     env_file:
       - secrets.env
     environment:
-      - JAVA_OPTS=-Xms512m -Xmx1g
+      - JAVA_OPTS=-Xms512m -Xmx1g -Dconfig.file=/opt/homedata/config/application.conf -Dcats.effect.warnOnNonMainThreadDetected=false
       # - HOMEDATA_INFLUXDB_AUTH_TOKEN="..."
       # - HOMEDATA_OCTOPUS_API_KEY="..."
       # - HOMEDATA_OCTOPUS_ACCOUNT_NUMBER="..."
@@ -29,7 +29,7 @@ services:
     ports:
       - "8086:8086"
     volumes:
-      - ./influxdb:/etc/influxdb2:ro
+      - ./config/influxdb:/etc/influxdb2
       - ./data/influxdb:/var/lib/influxdb2
     env_file:
       - secrets.env
@@ -49,7 +49,7 @@ services:
     ports:
       - '3000:3000'
     volumes:
-      - ./grafana:/etc/grafana:ro
+      - ./config/grafana:/etc/grafana:ro
       - ./data/grafana:/var/lib/grafana
     env_file:
       - secrets.env

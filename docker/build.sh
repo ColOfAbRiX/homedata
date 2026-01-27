@@ -9,6 +9,7 @@ cp -r ~/.ivy2/local/com.colofabrix.scala/ lib/
 docker build \
   -f Dockerfile \
   -t colofabrix/homedata:0.1.0 \
+  $@ \
   ..
 
 rm -rf lib

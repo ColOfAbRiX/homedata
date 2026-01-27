@@ -7,6 +7,7 @@ import com.colofabrix.scala.tado4s.api.*
 import com.colofabrix.scala.tado4s.security.*
 import com.colofabrix.scala.tado4s.store.TadoRefreshToken
 import fs2.io.net.Network
+import fs2.io.net.tls.TLSContext
 import java.time.LocalDate
 import org.http4s.*
 import org.http4s.circe.CirceEntityDecoder.*
@@ -17,7 +18,6 @@ import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.Method.*
 import org.typelevel.log4cats.SelfAwareStructuredLogger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
-import scala.concurrent.duration.*
 
 /**
  * Tado Client for Scala
@@ -440,29 +440,27 @@ object Tado4sClient {
    * Creates a new instance of Tado4s client using http4s Ember Client
    */
   def apply[F[_]: Async: Network](maybeConfig: Option[TadoConfig]): F[Tado4sClient[F]] =
-    EmberClientBuilder
-      .default[F]
-      .withTimeout(maybeConfig.map(_.httpTimeout).getOrElse(30.seconds))
-      .build
-      .allocated
-      .flatMap {
-        case (httpClient, _) =>
-          val config = maybeConfig.getOrElse(TadoConfig.config)
-          buildClient(config, httpClient)
-      }
-
-  private def buildClient[F[_]: Async](config: TadoConfig, httpClient: Client[F]): F[Tado4sClient[F]] =
-    val configuredHttpClient = buildConfiguredHttpClient(config, httpClient)
     for
-      authenticator <- Tado4sAuthentication(configuredHttpClient, config)
+      config        <- maybeConfig.getOrElse(TadoConfig.config).pure[F]
+      tlsContext    <- buildTlsContext(config)
+      httpClient    <- buildHttpClient(config, tlsContext)
+      authenticator <- Tado4sAuthentication(httpClient, config)
       client         = new Tado4sClient[F](config, authenticator)
     yield client
 
-  private def buildConfiguredHttpClient[F[_]: Async](config: TadoConfig, httpClient: Client[F]): Client[F] =
-    ClientLogger {
-      SSLValidationClient(config.ignoreSsl) {
-        httpClient
+  private def buildHttpClient[F[_]: Async: Network](config: TadoConfig, tlsContext: TLSContext[F]): F[Client[F]] =
+    EmberClientBuilder
+      .default[F]
+      .withTimeout(config.httpTimeout)
+      .withTLSContext(tlsContext)
+      .build
+      .allocated
+      .map {
+        case (httpClient, _) => ClientLogger(SSLValidationClient(config.ignoreSsl)(httpClient))
       }
-    }
+
+  private def buildTlsContext[F[_]: Network](config: TadoConfig): F[TLSContext[F]] =
+    if config.ignoreSsl then Network[F].tlsContext.insecure
+    else Network[F].tlsContext.system
 
 }

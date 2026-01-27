@@ -14,7 +14,7 @@ object TadoConfig {
   val config =
     ConfigSource
       .default
-      .at("tado")
+      .at("homedata.tado")
       .loadOrThrow[TadoConfig]
 
 }
