@@ -27,6 +27,7 @@ val pureconfigVersion      = "0.17.4"
 val scalatestVersion       = "3.2.17"
 val scodecBitsVersion      = "1.1.38"
 val sttpVersion            = "4.0.0-M8"
+val timefluxVersion        = "1.0.0"
 val vaultVersion           = "3.5.0"
 
 Global / run / fork           := true
@@ -36,12 +37,11 @@ Global / tpolecatExcludeOptions        ++= Set(ScalacOptions.warnUnusedLocals)
 homedata / tpolecatExcludeOptions      ++= Set(ScalacOptions.warnUnusedImports)
 homedata / Test / tpolecatScalacOptions := Set.empty
 tado4s / Test / tpolecatScalacOptions   := Set.empty
-timeflux / Test / tpolecatScalacOptions := Set.empty
 
 lazy val root =
   project
     .in(file("."))
-    .aggregate(homedata, timeflux, tado4s)
+    .aggregate(homedata, tado4s)
     .settings(
       name              := "root",
       version           := "0.1.0",
@@ -54,7 +54,7 @@ lazy val root =
 lazy val homedata =
   project
     .in(file("homedata"))
-    .dependsOn(timeflux, tado4s)
+    .dependsOn(tado4s)
     .settings(
       name                 := "homedata",
       version              := "0.1.0",
@@ -68,6 +68,7 @@ lazy val homedata =
         "com.colofabrix.scala"  %% "cuttlefish"         % cuttlefishVersion,
         "com.colofabrix.scala"  %% "declinio"           % declinioVersion,
         "com.colofabrix.scala"  %% "h4sbl"              % h4sbtVersion,
+        "com.colofabrix.scala"  %% "timeflux"           % timefluxVersion,
         "com.github.pureconfig" %% "pureconfig-core"    % pureconfigVersion,
         "com.monovore"          %% "decline"            % declineVersion,
         "dev.kovstas"           %% "fs2-throttler"      % fs2ThrottlerVersion,
@@ -90,41 +91,6 @@ lazy val homedata =
         case "META-INF/versions/9/module-info.class" => MergeStrategy.discard
         case path                                    => (ThisBuild / assemblyMergeStrategy).value(path)
       },
-    )
-
-lazy val timeflux =
-  project
-    .in(file("timeflux"))
-    .settings(
-      name                 := "timeflux",
-      version              := "0.1.0",
-      organization         := "com.colofabrix.scala.timeflux",
-      scalaVersion         := scala3Version,
-      scalacOptions        += "-preview",
-      libraryDependencies ++= List(
-        "co.fs2"                %% "fs2-core"            % fs2Version       % Runtime,
-        "co.fs2"                %% "fs2-io"              % fs2Version,
-        "com.colofabrix.scala"  %% "h4sbl"               % h4sbtVersion,
-        "com.github.pureconfig" %% "pureconfig-core"     % pureconfigVersion,
-        "io.circe"              %% "circe-core"          % circeCoreVersion,
-        "io.github.arainko"     %% "ducktape"            % ducktapeVersion,
-        "org.gnieh"             %% "fs2-data-csv"        % fs2DataVersion,
-        "org.gnieh"             %% "fs2-data-text"       % fs2DataVersion,
-        "org.http4s"            %% "http4s-circe"        % http4sClientVersion,
-        "org.http4s"            %% "http4s-client"       % http4sClientVersion,
-        "org.http4s"            %% "http4s-core"         % http4sClientVersion,
-        "org.http4s"            %% "http4s-ember-client" % http4sClientVersion,
-        "org.scalatest"         %% "scalatest"           % scalatestVersion % Test,
-        "org.scodec"            %% "scodec-bits"         % scodecBitsVersion,
-        "org.typelevel"         %% "case-insensitive"    % caseInsensitiveVersion,
-        "org.typelevel"         %% "cats-core"           % catsVersion,
-        "org.typelevel"         %% "cats-effect-kernel"  % catsEffectVersion,
-        "org.typelevel"         %% "cats-effect-std"     % catsEffectVersion,
-        "org.typelevel"         %% "cats-effect"         % catsEffectVersion,
-        "org.typelevel"         %% "cats-kernel"         % catsVersion,
-        "org.typelevel"         %% "log4cats-core"       % log4catsVersion,
-        "org.typelevel"         %% "log4cats-slf4j"      % log4catsVersion,
-      ),
     )
 
 lazy val tado4s =
