@@ -5,11 +5,13 @@
 .idea
 .metals
 .vscode
+.scala-build
 out
 target
 
 # Files
 metals.sbt
+.cline*
 
 # File types
 *.class

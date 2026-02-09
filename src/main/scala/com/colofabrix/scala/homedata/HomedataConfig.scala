@@ -8,7 +8,7 @@ import scala.concurrent.duration.*
 
 final case class HomedataConfig(
   scrapeLog: ScrapeLogConfig,
-  pollTime: FiniteDuration
+  pollTime: FiniteDuration,
 ) derives ConfigReader
 
 final case class ScrapeLogConfig(

@@ -1,8 +1,8 @@
 package com.colofabrix.scala.homedata.utils
 
+import org.http4s.Uri
 import pureconfig.*
 import scala.concurrent.duration.*
-import org.http4s.Uri
 
 package object commongivens:
 

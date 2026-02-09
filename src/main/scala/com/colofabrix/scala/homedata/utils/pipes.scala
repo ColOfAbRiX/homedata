@@ -1,7 +1,7 @@
 package com.colofabrix.scala.homedata.utils
 
-import cats.effect.kernel.Sync
 import cats.effect.Temporal
+import cats.effect.kernel.Sync
 import dev.kovstas.fs2throttler.Throttler
 import scala.concurrent.duration.given
 

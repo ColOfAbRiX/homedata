@@ -5,8 +5,8 @@ import cats.implicits.given
 import com.colofabrix.scala.homedata.scrape.{ ScrapeLog, ScrapeService }
 import com.colofabrix.scala.homedata.tado.readings.*
 import com.colofabrix.scala.homedata.utils.pipes.*
-import com.colofabrix.scala.tado4s.api.HomeZoneResponse
 import com.colofabrix.scala.tado4s.Tado4sClient
+import com.colofabrix.scala.tado4s.api.HomeZoneResponse
 import com.colofabrix.scala.timeflux.measures.*
 import java.time.*
 import org.typelevel.log4cats.Logger

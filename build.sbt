@@ -4,51 +4,41 @@ import sbtassembly.MergeStrategy
 
 val scala3Version = "3.7.4"
 
-val catsEffectVersion      = "3.5.4"
-val catsVersion            = "2.12.0"
-val circeCoreVersion       = "0.14.10"
-val cuttlefishVersion      = "1.0.0"
-val declineVersion         = "2.4.1"
-val declinioVersion        = "1.0.0"
-val ducktapeVersion        = "0.1.11"
-val fs2ThrottlerVersion    = "1.0.12"
-val fs2Version             = "3.9.3"
-val h4sblVersion           = "1.0.0"
-val http4sClientVersion    = "0.23.24"
-val log4catsVersion        = "2.7.0"
-val logbackClassicVersion  = "1.3.4"
-val pureconfigVersion      = "0.17.4"
-val scalatestVersion       = "3.2.17"
-val tado4sVersion          = "1.0.0"
-val timefluxVersion        = "1.0.0"
+val catsEffectVersion     = "3.5.4"
+val catsVersion           = "2.12.0"
+val circeCoreVersion      = "0.14.10"
+val cuttlefishVersion     = "1.0.0"
+val declineVersion        = "2.4.1"
+val declinioVersion       = "1.0.0"
+val ducktapeVersion       = "0.1.11"
+val fs2ThrottlerVersion   = "1.0.12"
+val fs2Version            = "3.9.3"
+val h4sblVersion          = "1.0.0"
+val http4sClientVersion   = "0.23.24"
+val log4catsVersion       = "2.7.0"
+val logbackClassicVersion = "1.3.4"
+val pureconfigVersion     = "0.17.4"
+val scalatestVersion      = "3.2.17"
+val tado4sVersion         = "1.0.0"
+val timefluxVersion       = "1.0.0"
 
 Global / run / fork           := true
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
-Global / tpolecatExcludeOptions        ++= Set(ScalacOptions.warnUnusedLocals)
-homedata / tpolecatExcludeOptions      ++= Set(ScalacOptions.warnUnusedImports)
-homedata / Test / tpolecatScalacOptions := Set.empty
+Global / tpolecatExcludeOptions ++= Set(ScalacOptions.warnUnusedLocals)
+Global / tpolecatExcludeOptions ++= Set(ScalacOptions.warnUnusedImports)
+Test / tpolecatScalacOptions     := Set.empty
+
+addCommandAlias("styleApply", "; scalafix OrganizeImports; scalafmtAll")
+addCommandAlias("styleCheck", "; scalafix --check; scalafmtCheckAll")
 
 lazy val root =
   project
     .in(file("."))
-    .aggregate(homedata)
-    .settings(
-      name              := "root",
-      version           := "1.0.0",
-      organization      := "com.colofabrix.scala",
-      scalaVersion      := scala3Version,
-      semanticdbEnabled := true,
-      semanticdbVersion := scalafixSemanticdb.revision,
-    )
-
-lazy val homedata =
-  project
-    .in(file("homedata"))
     .settings(
       name                 := "homedata",
       version              := "0.1.0",
-      organization         := "com.colofabrix.scala.homedata",
+      organization         := "com.colofabrix.scala",
       scalaVersion         := scala3Version,
       scalacOptions        += "-preview",
       libraryDependencies ++= List(
@@ -75,6 +65,8 @@ lazy val homedata =
         "org.typelevel"         %% "log4cats-core"      % log4catsVersion,
         "org.typelevel"         %% "log4cats-slf4j"     % log4catsVersion,
       ),
+      semanticdbEnabled                := true,
+      semanticdbVersion                := scalafixSemanticdb.revision,
       assembly / mainClass             := Some("com.colofabrix.scala.homedata.Main"),
       assembly / assemblyJarName       := s"homedata_${version.value}_${scalaVersion.value}.jar",
       assembly / test                  := {},

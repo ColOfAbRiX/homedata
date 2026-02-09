@@ -6,8 +6,7 @@ import com.colofabrix.scala.homedata.utils.pipes.*
 import com.colofabrix.scala.timeflux.*
 import com.colofabrix.scala.timeflux.api.QueryRequest
 import com.colofabrix.scala.timeflux.measures.Measure
-import com.colofabrix.scala.timeflux.model.OrgId
-import com.colofabrix.scala.timeflux.model.ResultRow
+import com.colofabrix.scala.timeflux.model.{ OrgId, ResultRow }
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 

@@ -1,13 +1,17 @@
 package com.colofabrix.scala.homedata.utils
 
+import com.colofabrix.scala.homedata.utils.TimeSpanPicker.Selector
 import java.time.*
 import java.time.temporal.ChronoUnit
-import com.colofabrix.scala.homedata.utils.TimeSpanPicker.Selector
 
 /**
  * TimeSpanPicker makes picking time ranges easier and less painful
  */
-final class TimeSpanPicker private (private val selector: TimeSpanPicker.Selector, from: OffsetDateTime, to: OffsetDateTime) {
+final class TimeSpanPicker private (
+  private val selector: TimeSpanPicker.Selector,
+  from: OffsetDateTime,
+  to: OffsetDateTime,
+) {
 
   /**
    * Returns both From and To dates

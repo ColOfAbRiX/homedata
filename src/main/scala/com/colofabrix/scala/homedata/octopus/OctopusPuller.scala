@@ -3,9 +3,8 @@ package com.colofabrix.scala.homedata.octopus
 import cats.effect.{ IO, Resource }
 import cats.implicits.given
 import com.colofabrix.scala.cuttlefish.api.*
-import com.colofabrix.scala.cuttlefish.CuttlefishClient
-import com.colofabrix.scala.cuttlefish.CuttlefishDSL
 import com.colofabrix.scala.cuttlefish.model.{ MeterPointNumber, SerialNumber, Throttle }
+import com.colofabrix.scala.cuttlefish.{ CuttlefishClient, CuttlefishDSL }
 import com.colofabrix.scala.homedata.scrape.{ ScrapeLog, ScrapeService }
 import com.colofabrix.scala.homedata.utils.pipes.*
 import com.colofabrix.scala.timeflux.measures.*
@@ -21,12 +20,12 @@ class OctopusPuller private (octopusClient: CuttlefishClient[IO], scrapeLog: Scr
 
   def pullGasReadings(from: OffsetDateTime, to: OffsetDateTime): fs2.Stream[IO, Measure] =
     pullWithFilter(from, to, "gas", OctopusProduct.Gas, gasMprn, gasSerial)
-      .map { c => OctopusReading.GasReading(c.interval_start, c.consumption) }
+      .map(c => OctopusReading.GasReading(c.interval_start, c.consumption))
       .through(TimefluxSerializable.toApiMeasureStream)
 
   def pullElectricityReadings(from: OffsetDateTime, to: OffsetDateTime): fs2.Stream[IO, Measure] =
     pullWithFilter(from, to, "electricity", OctopusProduct.Electricity, electricityMpan, electricitySerial)
-      .map { c => OctopusReading.ElectricityReading(c.interval_start, c.consumption) }
+      .map(c => OctopusReading.ElectricityReading(c.interval_start, c.consumption))
       .through(TimefluxSerializable.toApiMeasureStream)
 
   private def pullWithFilter(
