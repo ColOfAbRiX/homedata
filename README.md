@@ -1,6 +1,8 @@
 # HomeData
 
-Personal data scraper for home energy and heating data. Pulls consumption data from Octopus Energy (gas & electricity) and Tado (heating/temperature) and stores it in InfluxDB for visualization with Grafana.
+Personal data scraper for home energy and heating data. Pulls consumption data from Octopus Energy
+(gas & electricity) and Tado (heating/temperature) and stores it in InfluxDB for visualization with
+Grafana.
 
 ## Behavior
 
@@ -15,7 +17,7 @@ A scrape log file tracks what has already been fetched to avoid duplicate reques
 ## Project Structure
 
 ```
-houseData/
+homedata/
 ├── src/main/                  # Main application source
 ├── docker/
 │   ├── docker-compose.yml     # Full stack (homedata + InfluxDB + Grafana)
@@ -32,15 +34,42 @@ houseData/
 
 Configuration is in `src/main/resources/reference.conf` (defaults) or override with `application.conf`.
 
-| Setting                    | Default                | Description                 |
-|----------------------------|------------------------|-----------------------------|
-| `poll-time`                | 15 minutes             | Interval between data pulls |
-| `scrape-log.log-path`      | ~/.homedata/scrape.log | Tracks fetched data         |
-| `influxdb.server-url`      | http://localhost:8086  | InfluxDB endpoint           |
-| `influxdb.org-name`        | homedata               | InfluxDB organization       |
-| `influxdb.project-bucket`  | home_data              | InfluxDB bucket             |
-| `octopus.requests-per-sec` | 4                      | Rate limit for Octopus API  |
-| `tado.requests-per-sec`    | 12                     | Rate limit for Tado API     |
+### General Settings
+
+| Setting                    | Default                | Description                    |
+|----------------------------|------------------------|--------------------------------|
+| `poll-time`                | 15 minutes             | Interval between data pulls    |
+
+### Scrape Log Settings
+
+| Setting                    | Default                | Description                    |
+|----------------------------|------------------------|--------------------------------|
+| `scrape-log.log-path`      | ~/.homedata/scrape.log | Tracks fetched data            |
+| `scrape-log.batch-size`    | 100                    | Batch size for log writes      |
+| `scrape-log.batch-wait`    | 250 milliseconds       | Wait time between batches      |
+
+### InfluxDB Settings
+
+| Setting                      | Default               | Description                    |
+|------------------------------|-----------------------|--------------------------------|
+| `influxdb.server-url`        | http://localhost:8086 | InfluxDB endpoint              |
+| `influxdb.org-name`          | homedata              | InfluxDB organization          |
+| `influxdb.project-bucket`    | home_data             | InfluxDB bucket                |
+| `influxdb.time-resolution`   | 15 minutes            | Data time resolution           |
+| `influxdb.batch-writes`      | 250                   | Batch size for writes          |
+
+### Octopus Energy Settings
+
+| Setting                      | Default | Description                    |
+|------------------------------|---------|--------------------------------|
+| `octopus.requests-per-sec`   | 4       | Rate limit for Octopus API     |
+| `octopus.page-size`          | 100     | Page size for API requests     |
+
+### Tado Settings
+
+| Setting                      | Default | Description                    |
+|------------------------------|---------|--------------------------------|
+| `tado.requests-per-sec`      | 12      | Rate limit for Tado API        |
 
 ## Environment Variables
 
@@ -59,7 +88,7 @@ Required secrets (set via environment or `docker/secrets.env`):
 
 **Tado:**
 - `HOMEDATA_TADO_TOKEN` - Initial refresh token
-- `HOMEDATA_TADO_TOKEN_ISSUE_TIME` - Token issue timestamp
+- `HOMEDATA_TADO_TOKEN_ISSUE_TIME` - Token issue timestamp (ISO 8601 format)
 
 ## Running Locally
 
@@ -70,7 +99,7 @@ export HOMEDATA_OCTOPUS_API_KEY="..."
 # ... (set all required variables)
 
 # Run with sbt
-sbt "homedata/run"
+sbt run
 ```
 
 ## Running with Docker
