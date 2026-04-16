@@ -12,7 +12,7 @@ import java.time.*
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 
-class OctopusPuller private (octopusClient: CuttlefishClient[IO], scrapeLog: ScrapeLog[IO]) extends CuttlefishDSL {
+final class OctopusPuller private (octopusClient: CuttlefishClient[IO], scrapeLog: ScrapeLog[IO]) extends CuttlefishDSL {
   import com.colofabrix.scala.homedata.octopus.OctopusConfig.config.*
 
   implicit private val logger: Logger[IO] =
@@ -22,11 +22,13 @@ class OctopusPuller private (octopusClient: CuttlefishClient[IO], scrapeLog: Scr
     pullWithFilter(from, to, "gas", OctopusProduct.Gas, gasMprn, gasSerial)
       .map(c => OctopusReading.GasReading(c.interval_start, c.consumption))
       .through(TimefluxSerializable.toApiMeasureStream)
+      .onFinalize(logger.info("Completed pull of Octopus Gas"))
 
   def pullElectricityReadings(from: OffsetDateTime, to: OffsetDateTime): fs2.Stream[IO, Measure] =
     pullWithFilter(from, to, "electricity", OctopusProduct.Electricity, electricityMpan, electricitySerial)
       .map(c => OctopusReading.ElectricityReading(c.interval_start, c.consumption))
       .through(TimefluxSerializable.toApiMeasureStream)
+      .onFinalize(logger.info("Completed pull of Octopus Electricity"))
 
   private def pullWithFilter(
     from: OffsetDateTime,

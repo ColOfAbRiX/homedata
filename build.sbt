@@ -2,7 +2,7 @@ import org.typelevel.scalacoptions.ScalacOptions
 import sbtassembly.AssemblyPlugin.autoImport._
 import sbtassembly.MergeStrategy
 
-val scala3Version = "3.7.4"
+val scala3Version = "3.8.3"
 
 val catsEffectVersion     = "3.5.4"
 val catsVersion           = "2.12.0"
@@ -19,7 +19,7 @@ val log4catsVersion       = "2.7.0"
 val logbackClassicVersion = "1.3.4"
 val pureconfigVersion     = "0.17.4"
 val scalatestVersion      = "3.2.17"
-val tado4sVersion         = "1.0.0"
+val tado4sVersion         = "1.0.1"
 val timefluxVersion       = "1.0.0"
 
 Global / run / fork           := true

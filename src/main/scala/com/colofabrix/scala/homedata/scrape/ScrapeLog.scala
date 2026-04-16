@@ -40,7 +40,8 @@ final class ScrapeLog[F[_]: Async] private (
     val entry = ScrapeEntry(service, timestamp.withOffsetSameInstant(ZoneOffset.UTC), entityId)
     if !contains(entry) then
       logger.trace(s"Queueing Scrape Log entry ${entry}") >>
-      writeQueue.offer(entry)
+      Async[F].unit
+      // writeQueue.offer(entry)
     else
       Async[F].unit
 

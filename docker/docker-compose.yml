@@ -1,16 +1,19 @@
 services:
 
   homedata:
-    image: colofabrix/homedata:1.0.0
+    image: colofabrix/homedata:0.1.0
     container_name: homedata
-    restart: unless-stopped
+    restart: 'no'
     volumes:
       - ./config/homedata/application.conf:/opt/homedata/config/application.conf:ro
       - ./data/homedata:/opt/homedata/data
+    depends_on:
+      influxdb:
+        condition: service_healthy
     env_file:
       - secrets.env
     environment:
-      - JAVA_OPTS=-Xms512m -Xmx1g -Dconfig.file=/opt/homedata/config/application.conf -Dcats.effect.warnOnNonMainThreadDetected=false
+      - JAVA_OPTS=-Xms512m -Xmx1g -Dlogging.com.colofabrix.scala=TRACE -Dconfig.file=/opt/homedata/config/application.conf -Dcats.effect.warnOnNonMainThreadDetected=false
       # - HOMEDATA_INFLUXDB_AUTH_TOKEN="..."
       # - HOMEDATA_OCTOPUS_API_KEY="..."
       # - HOMEDATA_OCTOPUS_ACCOUNT_NUMBER="..."
@@ -26,6 +29,11 @@ services:
     container_name: influxdb
     image: influxdb:2.7.4
     restart: 'no'
+    healthcheck:
+        test: ["CMD", "curl", "-f", "-s", "--connect-timeout", "10", "http://localhost:8086"]
+        interval: 15s
+        timeout: 15s
+        retries: 8
     ports:
       - "8086:8086"
     volumes:
@@ -46,6 +54,8 @@ services:
     container_name: grafana
     image: grafana/grafana-oss:10.2.3
     restart: 'no'
+    profiles:
+      - donotstart
     ports:
       - '3000:3000'
     volumes:

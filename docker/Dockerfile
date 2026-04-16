@@ -1,37 +1,37 @@
 # #  BUILD STAGE  # #
 
-FROM sbtscala/scala-sbt:eclipse-temurin-25.0.1_8_1.12.0_3.7.4 AS builder
+ARG SCALA_VERSION=3.8.3
+ARG HOMEDATA_VERSION=0.1.0
+ARG SBT_VERSION=1.12.9
+ARG JDK_VERSION=25.0.1_8
 
-WORKDIR /tmp
+FROM sbtscala/scala-sbt:eclipse-temurin-${JDK_VERSION}_${SBT_VERSION}_${SCALA_VERSION} AS builder
 
-# Copy build definition first (cache dependencies)
+WORKDIR /tmp/project-build
+
+# Copy build definition and cache dependencies
 COPY project ./project
 COPY build.sbt .
-
-# To account for the fact that I haven't yet published some libraries
-RUN mkdir -p /root/.ivy2/local
-COPY docker/lib/ /root/.ivy2/local/
-RUN find /root/.ivy2/local -type d -exec chmod 755 {} \; \
- && find /root/.ivy2/local -type f -exec chmod 644 {} \;
-
 RUN sbt update
 
-# Copy sources
-COPY homedata ./homedata
-COPY tado4s ./tado4s
-COPY timeflux ./timeflux
-
-# Build the fat jar
-RUN sbt homedata/assembly
+# Copy sources and build the fat jar
+COPY src ./src
+RUN sbt assembly
 
 # #  RUNTIME STAGE  # #
 
-FROM eclipse-temurin:25-jre AS jre
+ARG JDK_VERSION
+
+FROM eclipse-temurin:${JDK_VERSION}-jre AS jre
+
+ARG SCALA_VERSION
+ARG SBT_VERSION
+ARG HOMEDATA_VERSION
 
 WORKDIR /opt/homedata
 
 COPY --from=builder \
-    /tmp/homedata/target/scala-3.7.4/homedata_0.1.0_3.7.4.jar \
+    /tmp/project-build/target/scala-${SCALA_VERSION}/homedata_${HOMEDATA_VERSION}_${SCALA_VERSION}.jar \
     homedata.jar
 
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /opt/homedata/homedata.jar"]

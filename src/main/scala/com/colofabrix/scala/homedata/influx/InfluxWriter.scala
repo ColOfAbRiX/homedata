@@ -8,7 +8,7 @@ import com.colofabrix.scala.timeflux.model.OrgId
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 
-class InfluxWriter(timefluxClient: TimefluxClient[IO], orgId: String) extends TimefluxDSL {
+final class InfluxWriter(timefluxClient: TimefluxClient[IO], orgId: String) extends TimefluxDSL {
 
   implicit private val logger: Logger[IO] =
     Slf4jLogger.getLogger[IO]
