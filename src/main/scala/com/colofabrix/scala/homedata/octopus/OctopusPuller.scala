@@ -2,9 +2,10 @@ package com.colofabrix.scala.homedata.octopus
 
 import cats.effect.{ IO, Resource }
 import cats.implicits.given
-import com.colofabrix.scala.cuttlefish.api.*
-import com.colofabrix.scala.cuttlefish.model.{ MeterPointNumber, SerialNumber, Throttle }
 import com.colofabrix.scala.cuttlefish.{ CuttlefishClient, CuttlefishDSL }
+import com.colofabrix.scala.cuttlefish.api.*
+import com.colofabrix.scala.cuttlefish.model.*
+import com.colofabrix.scala.homedata.octopus.OctopusConfig.config.*
 import com.colofabrix.scala.homedata.scrape.{ ScrapeLog, ScrapeService }
 import com.colofabrix.scala.homedata.utils.pipes.*
 import com.colofabrix.scala.timeflux.measures.*
@@ -12,8 +13,8 @@ import java.time.*
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 
-final class OctopusPuller private (octopusClient: CuttlefishClient[IO], scrapeLog: ScrapeLog[IO]) extends CuttlefishDSL {
-  import com.colofabrix.scala.homedata.octopus.OctopusConfig.config.*
+final class OctopusPuller private (octopusClient: CuttlefishClient[IO], scrapeLog: ScrapeLog[IO])
+  extends CuttlefishDSL {
 
   implicit private val logger: Logger[IO] =
     Slf4jLogger.getLogger[IO]

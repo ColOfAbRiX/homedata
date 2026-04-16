@@ -35,7 +35,7 @@ object Main extends IOUnitDeclineApp {
     val (from, to) =
       TimeSpanPicker()
         .selectFrom()
-        .setDate(2026, 1, 30)
+        .setDate(2025, 11, 23)
         .selectTo()
         .now()
         .roundBoth(ChronoUnit.DAYS)
@@ -47,12 +47,12 @@ object Main extends IOUnitDeclineApp {
           _                  <- IO.println("\nHomeData - Tado and Octopus scrapers\n")
           octoPuller         <- OctopusPuller(scrapeLog)
           gasMeasures         = octoPuller.pullGasReadings(from, to)
-          // electricityMeasures = octoPuller.pullElectricityReadings(from, to)
-          // tadoPuller         <- TadoPuller(scrapeLog)
-          // tadoMeasures        = tadoPuller.pullReadings(from, to)
-          // writer             <- InfluxWriter()
-          // _                  <- writer.write(tadoMeasures, gasMeasures, electricityMeasures)
-          // _                  <- electricityMeasures.compile.drain
+          electricityMeasures = octoPuller.pullElectricityReadings(from, to)
+          tadoPuller         <- TadoPuller(scrapeLog)
+          tadoMeasures        = tadoPuller.pullReadings(from, to)
+          writer             <- InfluxWriter()
+          _                  <- writer.write(tadoMeasures, gasMeasures, electricityMeasures)
+          _                  <- electricityMeasures.compile.drain
           _                  <- gasMeasures.compile.drain
           _                  <- IO.println("\nHomeData - Scraping complited")
           _                  <- IO.println(s"Sleeping ${HomedataConfig.config.pollTime}...")
