@@ -1,10 +1,12 @@
 package com.colofabrix.scala.homedata.utils
 
+import java.time.OffsetDateTime
 import org.http4s.Uri
 import pureconfig.*
 import scala.concurrent.duration.*
+import scala.util.Try
 
-package object commongivens:
+package object commongivens {
 
   given ConfigReader[FiniteDuration] =
     ConfigReader.fromString:
@@ -15,3 +17,10 @@ package object commongivens:
     ConfigReader.fromString:
       ConvertHelpers.tryF: str =>
         Uri.fromString(str).toTry
+
+  given ConfigReader[OffsetDateTime] =
+    ConfigReader.fromString:
+      ConvertHelpers.tryF: str =>
+        Try(OffsetDateTime.parse(str))
+
+}
