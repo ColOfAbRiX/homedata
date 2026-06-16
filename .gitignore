@@ -4,9 +4,11 @@
 .history
 .idea
 .metals
-.vscode
+.roo
 .scala-build
+.vscode
 out
+plans
 target
 
 # Files

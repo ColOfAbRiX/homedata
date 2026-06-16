@@ -3,6 +3,7 @@ package com.colofabrix.scala.homedata
 import cats.effect.*
 import cats.syntax.all.*
 import ch.qos.logback.classic.{ Level, LoggerContext }
+import com.colofabrix.scala.cuttlefish.CuttlefishClient
 import com.colofabrix.scala.declinio.*
 import com.colofabrix.scala.homedata.influx.*
 import com.colofabrix.scala.homedata.octopus.*
@@ -49,23 +50,23 @@ object Main extends IOUnitDeclineApp {
       }
 
   private def runScraping(): IO[ExitCode] =
-    val from = HomedataConfig.config.scrapeFromDate
-    val to   = HomedataConfig.config.scrapeToDate.getOrElse(OffsetDateTime.now())
-
-    ScrapeLog[IO](HomedataConfig.config.scrapeLog.logPath)
-      .use { scrapeLog =>
+    HomedataServices
+      .make()
+      .use { deps =>
         for
-          _ <- "\nHomeData - Tado and Octopus scrapers\n".stdout
-          octoPuller         <- OctopusPuller(scrapeLog)
+          _                  <- "\nHomeData - Tado and Octopus scrapers\n".stdout
+          from                = HomedataConfig.config.scrapeFromDate
+          to                  = HomedataConfig.config.scrapeToDate.getOrElse(OffsetDateTime.now())
+          octoPuller         <- OctopusPuller(deps.cuttlefishClient, deps.scrapeLog)
           gasMeasures         = octoPuller.pullGasReadings(from, to)
           electricityMeasures = octoPuller.pullElectricityReadings(from, to)
-          tadoPuller         <- TadoPuller(scrapeLog)
+          tadoPuller         <- TadoPuller(deps.tadoClient, deps.scrapeLog)
           tadoMeasures        = tadoPuller.pullReadings(from, to)
-          writer             <- InfluxWriter()
+          writer             <- InfluxWriter(deps.timefluxClient)
           _                  <- writer.write(tadoMeasures, gasMeasures, electricityMeasures)
           _                  <- electricityMeasures.compile.drain
           _                  <- gasMeasures.compile.drain
-          _ <- "\nHomeData - Scraping completed".stdout
+          _                  <- "\nHomeData - Scraping completed".stdout
         yield ExitCode.Success
       }
 

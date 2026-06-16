@@ -1,6 +1,6 @@
 package com.colofabrix.scala.homedata
 
-import com.colofabrix.scala.cuttlefish.model.*
+import com.colofabrix.scala.cuttlefish.models.*
 import com.colofabrix.scala.homedata.utils.commongivens.given
 import java.nio.file.Path
 import java.time.OffsetDateTime

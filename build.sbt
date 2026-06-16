@@ -2,25 +2,24 @@ import org.typelevel.scalacoptions.ScalacOptions
 import sbtassembly.AssemblyPlugin.autoImport._
 import sbtassembly.MergeStrategy
 
-val scala3Version = "3.8.3"
+val scala3Version = "3.8.4"
 
-val catsEffectVersion     = "3.5.4"
-val catsVersion           = "2.12.0"
-val circeCoreVersion      = "0.14.10"
-val cuttlefishVersion     = "1.0.0"
-val declineVersion        = "2.4.1"
-val declinioVersion       = "1.0.0"
-val ducktapeVersion       = "0.1.11"
-val fs2ThrottlerVersion   = "1.0.12"
-val fs2Version            = "3.9.3"
-val h4sblVersion          = "1.0.0"
-val http4sClientVersion   = "0.23.24"
-val log4catsVersion       = "2.7.0"
-val logbackClassicVersion = "1.3.4"
-val pureconfigVersion     = "0.17.4"
-val scalatestVersion      = "3.2.17"
-val tado4sVersion         = "1.0.1"
-val timefluxVersion       = "1.0.0"
+val catsEffectVersion     = "3.6.1"
+val catsVersion           = "2.13.0"
+val circeCoreVersion      = "0.14.13"
+val cuttlefishVersion     = "2.0.0"
+val declineVersion        = "2.5.0"
+val declinioVersion       = "2.0.0"
+val fs2ThrottlerVersion   = "1.0.14"
+val fs2Version            = "3.12.0"
+val h4sblVersion          = "1.1.0"
+val http4sClientVersion   = "0.23.30"
+val log4catsVersion       = "2.7.1"
+val logbackClassicVersion = "1.5.18"
+val pureconfigVersion     = "0.17.9"
+val scalatestVersion      = "3.2.19"
+val tado4sVersion         = "2.0.0"
+val timefluxVersion       = "2.0.0"
 
 Global / run / fork           := true
 Global / onChangedBuildSource := ReloadOnSourceChanges
@@ -29,8 +28,14 @@ Global / tpolecatExcludeOptions ++= Set(ScalacOptions.warnUnusedLocals)
 Global / tpolecatExcludeOptions ++= Set(ScalacOptions.warnUnusedImports)
 Test / tpolecatScalacOptions     := Set.empty
 
-addCommandAlias("styleApply", "; scalafix OrganizeImports; scalafmtAll")
-addCommandAlias("styleCheck", "; scalafix --check; scalafmtCheckAll")
+addCommandAlias(
+  "styleApply",
+  "; set ThisBuild / scalacOptions += \"-Wunused:all\"; scalafixEnable; scalafixAll; session clear; scalafmtAll",
+)
+addCommandAlias(
+  "styleCheck",
+  "; set ThisBuild / scalacOptions += \"-Wunused:all\"; scalafixEnable; scalafixAll --check; session clear; scalafmtCheckAll",
+)
 
 lazy val root =
   project
@@ -54,7 +59,6 @@ lazy val root =
         "com.monovore"          %% "decline"            % declineVersion,
         "dev.kovstas"           %% "fs2-throttler"      % fs2ThrottlerVersion,
         "io.circe"              %% "circe-parser"       % circeCoreVersion      % Test,
-        "io.github.arainko"     %% "ducktape"           % ducktapeVersion,
         "org.http4s"            %% "http4s-core"        % http4sClientVersion,
         "org.scalatest"         %% "scalatest"          % scalatestVersion      % Test,
         "org.typelevel"         %% "cats-core"          % catsVersion,

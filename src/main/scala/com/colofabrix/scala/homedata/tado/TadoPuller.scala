@@ -69,11 +69,10 @@ object TadoPuller {
   implicit private val logger: Logger[IO] =
     Slf4jLogger.getLogger[IO]
 
-  def apply(scrapeLog: ScrapeLog[IO]): IO[TadoPuller] =
+  def apply(tadoClient: Tado4sClient[IO], scrapeLog: ScrapeLog[IO]): IO[TadoPuller] =
     for
       _           <- logger.info("Initializing Tado puller...")
       _           <- logger.debug(s"Tado configuration: ${TadoConfig.config}")
-      tadoClient  <- Tado4sClient[IO](None)
       _           <- tadoClient.authenticate(TadoConfig.config.initialRefreshToken)
       account     <- tadoClient.getAccountInfo()
       homeId       = account.homes.head.id

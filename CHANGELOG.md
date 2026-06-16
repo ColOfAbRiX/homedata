@@ -20,4 +20,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Docker Compose configuration for full stack deployment
 - PureConfig-based configuration with environment variable support
 
-[0.1.0]: https://github.com/ColOfAbRiX/homedata/releases/tag/v0.1.0
+[0.1.0]: https://github.com/ColOfAbRiX/homedata/releases/tag/0.1.0

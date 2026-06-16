@@ -81,7 +81,7 @@ object ScrapeLog {
   private val LinePattern =
     """^(\w+),(.+?),(.+)$""".r
 
-  def apply[F[_]: Async](path: Path): Resource[F, ScrapeLog[F]] =
+  def make[F[_]: Async](path: Path): Resource[F, ScrapeLog[F]] =
     val absPath = expandPath(path)
     for
       _          <- Resource.eval(ensureDirectoryExists(absPath))

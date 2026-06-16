@@ -44,11 +44,10 @@ object InfluxWriter extends TimefluxDSL {
   private lazy val orgName =
     InfluxConfig.config.orgName.value
 
-  def apply(): IO[InfluxWriter] =
+  def apply(timefluxClient: TimefluxClient[IO]): IO[InfluxWriter] =
     for
       _              <- logger.info("Initializing Influx writer...")
-      _              <- logger.debug(s"Influx configuration: ${InfluxConfig.config}")
-      timefluxClient <- TimefluxClient[IO](InfluxConfig.clientConfig)
+      _              <- logger.debug(s"Influx writer configuration: ${InfluxConfig.config}")
       orgId          <- initOrg(timefluxClient).map(_.value)
       _              <- logger.debug(s"Ensuring bucket '${InfluxConfig.config.projectBucket}' exists...")
       _              <- timefluxClient.createBucketIfMissing(InfluxConfig.config.projectBucket, orgId)

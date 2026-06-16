@@ -1,18 +1,19 @@
 package com.colofabrix.scala.homedata.octopus
 
-import com.colofabrix.scala.cuttlefish.model.*
+import cats.syntax.*
+import com.colofabrix.scala.cuttlefish.models.*
 import pureconfig.*
 import pureconfig.generic.derivation.default.*
 
 final case class OctopusConfig(
   accountNumber: String,
   apiKey: String,
-  electricityMpan: MeterPointNumber,
-  electricitySerial: SerialNumber,
-  gasMprn: MeterPointNumber,
-  gasSerial: SerialNumber,
+  electricityMpan: Mpan,
+  electricitySerial: MeterSerial,
+  gasMprn: Mprn,
+  gasSerial: MeterSerial,
   requestsPerSec: Double,
-  pageSize: Int,
+  pageSize: PageSize,
 ) derives ConfigReader
 
 object OctopusConfig {
@@ -23,12 +24,23 @@ object OctopusConfig {
       .at("homedata.octopus")
       .loadOrThrow[OctopusConfig]
 
-  given ConfigReader[MeterPointNumber] =
-    ConfigReader.fromString: str =>
-      Right(MeterPointNumber(str))
+  given ConfigReader[Mpan] =
+    ConfigReader.fromStringOpt: str =>
+      Mpan.refined[Either[Throwable, *]](str).toOption
 
-  given ConfigReader[SerialNumber] =
-    ConfigReader.fromString: str =>
-      Right(SerialNumber(str))
+  given ConfigReader[Mprn] =
+    ConfigReader.fromStringOpt: str =>
+      Mprn.refined[Either[Throwable, *]](str).toOption
+
+  given ConfigReader[MeterSerial] =
+    ConfigReader.fromStringOpt: str =>
+      MeterSerial.refined[Either[Throwable, *]](str).toOption
+
+  given ConfigReader[PageSize] =
+    ConfigReader.fromStringOpt: str =>
+      for {
+        int  <- str.toIntOption
+        page <- PageSize.refined[Either[Throwable, *]](int).toOption
+      } yield page
 
 }

@@ -1,7 +1,7 @@
 package com.colofabrix.scala.homedata.influx
 
 import cats.effect.IO
-import com.colofabrix.scala.homedata.utils.FS2Logging.*
+import com.colofabrix.scala.homedata.utils.fs2logging.*
 import com.colofabrix.scala.homedata.utils.pipes.*
 import com.colofabrix.scala.timeflux.*
 import com.colofabrix.scala.timeflux.api.QueryRequest
@@ -34,16 +34,14 @@ object InfluxReader extends TimefluxDSL {
   private lazy val bucket =
     InfluxConfig.config.projectBucket
 
-  def apply(): IO[InfluxReader] =
+  def apply(timefluxClient: TimefluxClient[IO]): IO[InfluxReader] =
     for
-      _              <- logger.info("Initializing Influx reader...")
-      _              <- logger.debug(s"Influx configuration: ${InfluxConfig.config}")
-      timefluxClient <- TimefluxClient[IO](InfluxConfig.clientConfig)
-      orgId          <- initOrg(timefluxClient).map(_.value)
-      _              <- logger.debug(s"Ensuring bucket '$bucket' exists...")
-      _              <- timefluxClient.createBucketIfMissing(bucket, orgId)
-      result          = new InfluxReader(timefluxClient, orgId)
-      _              <- logger.info(s"Initialized Influx reader on bucket $bucket")
+      _     <- logger.info("Initializing Influx reader...")
+      orgId <- initOrg(timefluxClient).map(_.value)
+      _     <- logger.debug(s"Ensuring bucket '$bucket' exists...")
+      _     <- timefluxClient.createBucketIfMissing(bucket, orgId)
+      result = new InfluxReader(timefluxClient, orgId)
+      _     <- logger.info(s"Initialized Influx reader on bucket $bucket")
     yield result
 
   private def initOrg(timefluxClient: TimefluxClient[IO]): IO[OrgId] =

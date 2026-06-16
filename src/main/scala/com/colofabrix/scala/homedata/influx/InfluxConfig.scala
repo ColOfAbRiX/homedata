@@ -3,7 +3,6 @@ package com.colofabrix.scala.homedata.influx
 import com.colofabrix.scala.homedata.utils.commongivens.given
 import com.colofabrix.scala.timeflux.config.TimefluxClientConfig
 import com.colofabrix.scala.timeflux.model.*
-import io.github.arainko.ducktape.*
 import org.http4s.Uri
 import pureconfig.*
 import pureconfig.generic.derivation.default.*

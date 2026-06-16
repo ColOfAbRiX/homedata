@@ -2,7 +2,7 @@ package com.colofabrix.scala.homedata.utils
 
 import org.typelevel.log4cats.Logger
 
-object FS2Logging {
+object fs2logging {
 
   extension [F[_]](self: fs2.Stream.type)(using logger: Logger[F]) {
 

@@ -3,11 +3,11 @@ package com.colofabrix.scala.homedata.octopus
 import cats.effect.{ IO, Resource }
 import cats.implicits.given
 import com.colofabrix.scala.cuttlefish.{ CuttlefishClient, CuttlefishDSL }
-import com.colofabrix.scala.cuttlefish.api.*
-import com.colofabrix.scala.cuttlefish.model.*
+import com.colofabrix.scala.cuttlefish.models.*
 import com.colofabrix.scala.homedata.octopus.OctopusConfig.config.*
 import com.colofabrix.scala.homedata.scrape.{ ScrapeLog, ScrapeService }
 import com.colofabrix.scala.homedata.utils.pipes.*
+import com.colofabrix.scala.homedata.utils.fs2logging.*
 import com.colofabrix.scala.timeflux.measures.*
 import java.time.*
 import org.typelevel.log4cats.Logger
@@ -16,56 +16,80 @@ import org.typelevel.log4cats.slf4j.Slf4jLogger
 final class OctopusPuller private (octopusClient: CuttlefishClient[IO], scrapeLog: ScrapeLog[IO])
   extends CuttlefishDSL {
 
+  private enum OctopusProduct(val value: String) {
+    case Electricity extends OctopusProduct("electricity")
+    case Gas         extends OctopusProduct("gas")
+  }
+
   implicit private val logger: Logger[IO] =
     Slf4jLogger.getLogger[IO]
 
   def pullGasReadings(from: OffsetDateTime, to: OffsetDateTime): fs2.Stream[IO, Measure] =
-    pullWithFilter(from, to, "gas", OctopusProduct.Gas, gasMprn, gasSerial)
-      .map(c => OctopusReading.GasReading(c.interval_start, c.consumption))
+    pullWithFilter(from, to, OctopusProduct.Gas)
+      .map { c =>
+        OctopusReading.GasReading(c.intervalStart, c.consumption.value)
+      }
       .through(TimefluxSerializable.toApiMeasureStream)
-      .onFinalize(logger.info("Completed pull of Octopus Gas"))
+      .onFinalize {
+        logger.info("Completed pull of Octopus Gas")
+      }
 
   def pullElectricityReadings(from: OffsetDateTime, to: OffsetDateTime): fs2.Stream[IO, Measure] =
-    pullWithFilter(from, to, "electricity", OctopusProduct.Electricity, electricityMpan, electricitySerial)
-      .map(c => OctopusReading.ElectricityReading(c.interval_start, c.consumption))
+    pullWithFilter(from, to, OctopusProduct.Electricity)
+      .map { c =>
+        OctopusReading.ElectricityReading(c.intervalStart, c.consumption.value)
+      }
       .through(TimefluxSerializable.toApiMeasureStream)
-      .onFinalize(logger.info("Completed pull of Octopus Electricity"))
+      .onFinalize {
+        logger.info("Completed pull of Octopus Electricity")
+      }
 
   private def pullWithFilter(
     from: OffsetDateTime,
     to: OffsetDateTime,
-    meterType: String,
     product: OctopusProduct,
-    meterPointNumber: MeterPointNumber,
-    serial: SerialNumber,
-  ): fs2.Stream[IO, ConsumptionResults] =
+  ): fs2.Stream[IO, MeterConsumption] =
     val missingSlots =
       generateTimeSlots(from, to).filterNot { slot =>
-        scrapeLog.contains(ScrapeService.Octopus, slot, meterType)
+        scrapeLog.contains(ScrapeService.Octopus, slot, product.value)
       }
 
     val gaps = groupContiguousSlots(missingSlots)
 
-    fs2.Stream.exec(logger.info(s"Pulling Octopus $meterType data from=$from to=$to")) ++
+    fs2.Stream.info(s"Pulling Octopus ${product.value} data from=$from to=$to") ++
     fs2.Stream
       .emits(gaps)
       .flatMap { (gapFrom, gapTo) =>
         val request =
-          MeterConsumptionRequest(
-            product = product,
-            meterPointNumber = meterPointNumber,
-            serial = serial,
-            from = Some(gapFrom),
-            to = Some(gapTo),
-            pageSize = Some(OctopusConfig.config.pageSize),
-            page = Some(1),
-            orderBy = None,
-          )
+          product match {
+            case OctopusProduct.Gas =>
+              GasMeterConsumptionRequest(
+                mprn = OctopusConfig.config.gasMprn,
+                serial = OctopusConfig.config.gasSerial,
+                fromDate = ???, // Option[OffsetDateTime],
+                toDate = ???,   // Option[OffsetDateTime],
+                pageSize = Some(OctopusConfig.config.pageSize),
+                groupBy = None,
+                orderBy = None,
+                pageNumber = None,
+              )
+            case OctopusProduct.Electricity =>
+              ElectricityMeterConsumptionRequest(
+                mpan = OctopusConfig.config.electricityMpan,
+                serial = OctopusConfig.electricitySerial,
+                fromDate = ???, // Option[OffsetDateTime],
+                toDate = ???,   // Option[OffsetDateTime],
+                pageSize = Some(OctopusConfig.config.pageSize),
+                groupBy = None,
+                orderBy = None,
+                pageNumber = None,
+              )
+          }
 
-        fs2.Stream.exec(logger.debug(s"Pulling Octopus $meterType data from=$gapFrom to=$gapTo")) ++
+        fs2.Stream.debug(s"Pulling Octopus ${product.value} data from=$gapFrom to=$gapTo") ++
         streamReadings(request).evalTap { result =>
-          if result.interval_start.isBefore(OffsetDateTime.now()) then
-            scrapeLog.logEntry(ScrapeService.Octopus, result.interval_start, meterType)
+          if result.intervalStart.isBefore(OffsetDateTime.now()) then
+            scrapeLog.logEntry(ScrapeService.Octopus, result.intervalStart, product.value)
           else
             IO.unit
         }
@@ -96,7 +120,7 @@ final class OctopusPuller private (octopusClient: CuttlefishClient[IO], scrapeLo
           }
           .reverse
 
-  private def streamReadings(request: MeterConsumptionRequest): fs2.Stream[IO, ConsumptionResults] =
+  private def streamReadings(request: MeterConsumptionRequest): fs2.Stream[IO, MeterConsumption] =
     fs2.Stream
       .unfoldLoopEval(request) { pageRequest =>
         octopusClient.meterConsumption(pageRequest)
@@ -120,14 +144,13 @@ object OctopusPuller {
   implicit private val logger: Logger[IO] =
     Slf4jLogger.getLogger[IO]
 
-  def apply(scrapeLog: ScrapeLog[IO]): IO[OctopusPuller] =
+  def apply(cuttlefishClient: CuttlefishClient[IO], scrapeLog: ScrapeLog[IO]): IO[OctopusPuller] =
     for
-      _             <- logger.info(s"Initializing Octopus puller...")
-      _             <- logger.debug(s"Octopus configuration: ${OctopusConfig.config}")
-      octopusClient <- CuttlefishClient[IO]()
-      _             <- octopusClient.login(OctopusConfig.config.apiKey)
-      result         = new OctopusPuller(octopusClient, scrapeLog)
-      _             <- logger.info(s"Initialized Octopus puller")
+      _     <- logger.info(s"Initializing Octopus puller...")
+      _     <- logger.debug(s"Cuttlefish configuration: ${OctopusConfig.config}")
+      _     <- cuttlefishClient.setApiKey(OctopusConfig.config.apiKey)
+      result = new OctopusPuller(cuttlefishClient, scrapeLog)
+      _     <- logger.info(s"Initialized Octopus puller")
     yield result
 
 }
