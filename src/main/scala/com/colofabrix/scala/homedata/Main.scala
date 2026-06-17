@@ -63,7 +63,7 @@ object Main extends IOUnitDeclineApp {
             electricityMeasures = octoPuller.pullElectricityReadings(from, to)
             tadoPuller         <- TadoPuller(tadoClient, scrapeLog)
             tadoMeasures        = tadoPuller.pullReadings(from, to)
-            writer             <- InfluxWriter(timefluxClient)
+            writer             <- InfluxWriter(timefluxClient, scrapeLog)
             _                  <- writer.write(tadoMeasures, gasMeasures, electricityMeasures)
             _                  <- gasMeasures.compile.drain
             _                  <- "\nHomeData - Scraping completed".stdout

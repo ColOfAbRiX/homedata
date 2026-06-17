@@ -42,7 +42,7 @@ lazy val root =
     .in(file("."))
     .settings(
       name                 := "homedata",
-      version              := "0.1.0",
+      version              := "0.2.0",
       organization         := "com.colofabrix.scala",
       scalaVersion         := scala3Version,
       scalacOptions        += "-preview",

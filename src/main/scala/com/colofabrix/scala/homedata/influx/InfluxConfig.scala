@@ -14,6 +14,7 @@ final case class InfluxConfig(
   projectBucket: String,
   timeResolution: FiniteDuration,
   batchWrites: Int,
+  batchTimeout: FiniteDuration,
 ) derives ConfigReader
 
 object InfluxConfig {

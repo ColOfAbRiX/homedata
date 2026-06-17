@@ -4,7 +4,7 @@ set -euo pipefail
 REPO_ROOT="$(git rev-parse --show-toplevel 2> /dev/null || readlink -e .)"
 
 SCALA_VERSION=3.8.3
-HOMEDATA_VERSION=0.1.0
+HOMEDATA_VERSION=0.2.0
 SBT_VERSION=1.12.9
 JDK_VERSION=25.0.1_8
 

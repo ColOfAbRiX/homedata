@@ -24,4 +24,23 @@ object fs2logging {
 
   }
 
+  extension [F[_], A](self: fs2.Stream[F, A])(using logger: Logger[F]) {
+
+    def trace(message: A => String): fs2.Stream[F, A] =
+      self.evalTap[F, Unit](x => logger.trace(message(x)))
+
+    def debug(message: A => String): fs2.Stream[F, A] =
+      self.evalTap[F, Unit](x => logger.debug(message(x)))
+
+    def info(message: A => String): fs2.Stream[F, A] =
+      self.evalTap[F, Unit](x => logger.info(message(x)))
+
+    def warn(message: A => String): fs2.Stream[F, A] =
+      self.evalTap[F, Unit](x => logger.warn(message(x)))
+
+    def error(message: A => String): fs2.Stream[F, A] =
+      self.evalTap[F, Unit](x => logger.error(message(x)))
+
+  }
+
 }

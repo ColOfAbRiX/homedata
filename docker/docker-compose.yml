@@ -1,7 +1,7 @@
 services:
 
   homedata:
-    image: colofabrix/homedata:0.1.0
+    image: colofabrix/homedata:0.2.0
     container_name: homedata
     restart: 'no'
     volumes:
