@@ -5,7 +5,6 @@ import com.colofabrix.scala.timeflux.config.TimefluxClientConfig
 import com.colofabrix.scala.timeflux.model.*
 import org.http4s.Uri
 import pureconfig.*
-import pureconfig.generic.derivation.default.*
 import scala.concurrent.duration.*
 
 final case class InfluxConfig(

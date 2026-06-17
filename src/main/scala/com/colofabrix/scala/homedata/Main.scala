@@ -38,7 +38,7 @@ object Main extends IOUnitDeclineApp {
     runScraping()
       .flatMap { result =>
         HomedataConfig.config.pollTime match {
-          case Some(pollTime) if result != ExitCode.Success =>
+          case Some(_) if result != ExitCode.Success =>
             result.pure
           case Some(pollTime) =>
             s"Sleeping $pollTime...".stdout >>
@@ -52,22 +52,22 @@ object Main extends IOUnitDeclineApp {
   private def runScraping(): IO[ExitCode] =
     HomedataServices
       .make()
-      .use { deps =>
-        for
-          _                  <- "\nHomeData - Tado and Octopus scrapers\n".stdout
-          from                = HomedataConfig.config.scrapeFromDate
-          to                  = HomedataConfig.config.scrapeToDate.getOrElse(OffsetDateTime.now())
-          octoPuller         <- OctopusPuller(deps.cuttlefishClient, deps.scrapeLog)
-          gasMeasures         = octoPuller.pullGasReadings(from, to)
-          electricityMeasures = octoPuller.pullElectricityReadings(from, to)
-          tadoPuller         <- TadoPuller(deps.tadoClient, deps.scrapeLog)
-          tadoMeasures        = tadoPuller.pullReadings(from, to)
-          writer             <- InfluxWriter(deps.timefluxClient)
-          _                  <- writer.write(tadoMeasures, gasMeasures, electricityMeasures)
-          _                  <- electricityMeasures.compile.drain
-          _                  <- gasMeasures.compile.drain
-          _                  <- "\nHomeData - Scraping completed".stdout
-        yield ExitCode.Success
+      .use {
+        case HomedataServices(scrapeLog, cuttlefishClient, timefluxClient, tadoClient) =>
+          for
+            _                  <- "\nHomeData - Tado and Octopus scrapers\n".stdout
+            from                = HomedataConfig.config.scrapeFromDate
+            to                  = HomedataConfig.config.scrapeToDate.getOrElse(OffsetDateTime.now())
+            octoPuller         <- OctopusPuller(cuttlefishClient, scrapeLog)
+            gasMeasures         = octoPuller.pullGasReadings(from, to)
+            electricityMeasures = octoPuller.pullElectricityReadings(from, to)
+            tadoPuller         <- TadoPuller(tadoClient, scrapeLog)
+            tadoMeasures        = tadoPuller.pullReadings(from, to)
+            writer             <- InfluxWriter(timefluxClient)
+            _                  <- writer.write(tadoMeasures, gasMeasures, electricityMeasures)
+            _                  <- gasMeasures.compile.drain
+            _                  <- "\nHomeData - Scraping completed".stdout
+          yield ExitCode.Success
       }
 
   private def configureLogging(): IO[Unit] =

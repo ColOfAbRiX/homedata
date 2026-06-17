@@ -1,6 +1,7 @@
 package com.colofabrix.scala.homedata.utils
 
 import org.typelevel.log4cats.Logger
+import cats.effect.kernel.Sync
 
 object fs2logging {
 

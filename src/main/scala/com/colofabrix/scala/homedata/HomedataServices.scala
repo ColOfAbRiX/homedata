@@ -26,6 +26,7 @@ object HomedataServices {
 
   def make(): Resource[IO, HomedataServices] =
     for {
+      _                <- Resource.eval(logger.info("Initializing HomeData services..."))
       scrapeLog        <- ScrapeLog.make[IO](HomedataConfig.config.scrapeLog.logPath)
       cuttlefishClient <- CuttlefishClient.make[IO]()
       timefluxClient   <- TimefluxClient.make[IO](InfluxConfig.clientConfig)

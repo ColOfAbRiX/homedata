@@ -3,7 +3,6 @@ package com.colofabrix.scala.homedata.octopus
 import cats.syntax.*
 import com.colofabrix.scala.cuttlefish.models.*
 import pureconfig.*
-import pureconfig.generic.derivation.default.*
 
 final case class OctopusConfig(
   accountNumber: String,
