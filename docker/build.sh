@@ -3,12 +3,27 @@ set -euo pipefail
 
 REPO_ROOT="$(git rev-parse --show-toplevel 2> /dev/null || readlink -e .)"
 
-SCALA_VERSION=3.8.3
-HOMEDATA_VERSION=0.2.0
-SBT_VERSION=1.12.9
 JDK_VERSION=25.0.1_8
 
-docker build \
+SCALA_VERSION="$(sed -nre "s/val scala3Version = \"(.*)\"/\1/p" "$REPO_ROOT/build.sbt")"
+if [[ -z "$SCALA_VERSION" ]]; then
+  echo "SCALA_VERSION not set"
+  exit 1
+fi
+
+HOMEDATA_VERSION="$(sed -nre "s/^\s+version\s+\:= \"(.*)\",/\1/p" "$REPO_ROOT/build.sbt")"
+if [[ -z "$HOMEDATA_VERSION" ]]; then
+  echo "HOMEDATA_VERSION not set"
+  exit 1
+fi
+
+SBT_VERSION="$(sed -nre "s/sbt.version=(.*)/\1/p" "$REPO_ROOT/project/build.properties")"
+if [[ -z "$SBT_VERSION" ]]; then
+  echo "SBT_VERSION not set"
+  exit 1
+fi
+
+echo docker build \
   -f Dockerfile \
   -t colofabrix/homedata:${HOMEDATA_VERSION} \
   --build-arg JDK_VERSION=${JDK_VERSION} \
@@ -17,5 +32,3 @@ docker build \
   --build-arg SCALA_VERSION=${SCALA_VERSION} \
   $@ \
   "$REPO_ROOT"
-
-rm -rf lib

@@ -61,10 +61,11 @@ object Main extends IOUnitDeclineApp {
             octoPuller         <- OctopusPuller(cuttlefishClient, scrapeLog)
             gasMeasures         = octoPuller.pullGasReadings(from, to)
             electricityMeasures = octoPuller.pullElectricityReadings(from, to)
-            tadoPuller         <- TadoPuller(tadoClient, scrapeLog)
-            tadoMeasures        = tadoPuller.pullReadings(from, to)
+            // tadoPuller         <- TadoPuller(tadoClient, scrapeLog)
+            // tadoMeasures        = tadoPuller.pullReadings(from, to)
             writer             <- InfluxWriter(timefluxClient, scrapeLog)
-            _                  <- writer.write(tadoMeasures, gasMeasures, electricityMeasures)
+            // _                  <- writer.write(tadoMeasures, gasMeasures, electricityMeasures)
+            _                  <- writer.write(gasMeasures, electricityMeasures)
             _                  <- gasMeasures.compile.drain
             _                  <- "\nHomeData - Scraping completed".stdout
           yield ExitCode.Success
