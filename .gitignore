@@ -23,6 +23,10 @@ metals.sbt
 *.iws
 *.log
 
+# Generated files
+docker/.env
+.ivy2-local
+
 # Temporary files
 TODO*
 

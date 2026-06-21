@@ -1,8 +1,11 @@
+name: homedata-cluster
+version: 1.0.0
+
 services:
 
   homedata:
-    image: colofabrix/homedata:0.2.0
-    container_name: homedata
+    image: "colofabrix/homedata:${HOMEDATA_VERSION:?HOMEDATA_VERSION is not set}"
+    container_name: "homedata-${HOMEDATA_VERSION}"
     restart: 'no'
     volumes:
       - ./config/homedata/application.conf:/opt/homedata/config/application.conf:ro
@@ -26,7 +29,7 @@ services:
       # - TADO4S_CLIENT_ID="..."
 
   influxdb:
-    container_name: influxdb
+    container_name: "influxdb-hd${HOMEDATA_VERSION}"
     image: influxdb:2.7.4
     restart: 'no'
     healthcheck:
@@ -51,7 +54,7 @@ services:
       # - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN="..."
 
   grafana:
-    container_name: grafana
+    container_name: "grafana-hd${HOMEDATA_VERSION}"
     image: grafana/grafana-oss:10.2.3
     restart: 'no'
     profiles:

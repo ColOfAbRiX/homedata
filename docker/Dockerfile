@@ -3,11 +3,14 @@
 ARG SCALA_VERSION=3.8.3
 ARG HOMEDATA_VERSION=0.2.0
 ARG SBT_VERSION=1.12.9
-ARG JDK_VERSION=25.0.1_8
+ARG JDK_VERSION=25.0.3_9
 
 FROM sbtscala/scala-sbt:eclipse-temurin-${JDK_VERSION}_${SBT_VERSION}_${SCALA_VERSION} AS builder
 
 WORKDIR /tmp/project-build
+
+# Copy optional local ivy2 cache (empty directory if --local-cache not used)
+COPY .ivy2-local /root/.ivy2/local
 
 # Copy build definition and cache dependencies
 COPY project ./project

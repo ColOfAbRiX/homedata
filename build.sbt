@@ -75,6 +75,7 @@ lazy val root =
       assembly / assemblyJarName       := s"homedata_${version.value}_${scalaVersion.value}.jar",
       assembly / test                  := {},
       assembly / assemblyMergeStrategy := {
+        case "module-info.class"                     => MergeStrategy.discard
         case "META-INF/versions/9/module-info.class" => MergeStrategy.discard
         case path                                    => (ThisBuild / assemblyMergeStrategy).value(path)
       },

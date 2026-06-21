@@ -28,11 +28,8 @@ object HomedataServices {
     for {
       _                <- Resource.eval(logger.info("Initializing HomeData services..."))
       scrapeLog        <- ScrapeLog.make[IO](HomedataConfig.config.scrapeLog.logPath)
-      _                <- Resource.eval(logger.debug("Creating CuttlefishClient..."))
       cuttlefishClient <- CuttlefishClient.make[IO]()
-      _                <- Resource.eval(logger.debug("Creating TimefluxClient..."))
       timefluxClient   <- TimefluxClient.make[IO](InfluxConfig.clientConfig)
-      _                <- Resource.eval(logger.debug("Creating Tado4sClient..."))
       tadoClient       <- Tado4sClient.make[IO]()
       resources         = HomedataServices(scrapeLog, cuttlefishClient, timefluxClient, tadoClient)
     } yield resources
