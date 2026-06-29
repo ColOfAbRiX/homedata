@@ -4,6 +4,7 @@
 .history
 .idea
 .metals
+.playwright-mcp
 .roo
 .scala-build
 .vscode
